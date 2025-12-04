@@ -1,10 +1,11 @@
 // src/appwrite/components/SaveButton.tsx
 'use client';
 import React, { useState, useEffect, CSSProperties } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { PresentationService } from '../presentation-service';
 import { account, AppwriteUser } from '../client';
+import { setPresentationId } from '../../store/editorSlice';
 
 // Стили в виде объектов
 const styles: { [key: string]: CSSProperties } = {
@@ -41,7 +42,8 @@ export default function SaveButton() {
   const [lastSave, setLastSave] = useState<Date | null>(null);
   const [user, setUser] = useState<AppwriteUser | null>(null);
   const presentation = useSelector((state: RootState) => state.editor.presentation);
-  const presentationId = useSelector((state: RootState) => state.editor.presentationId); // ← ДОБАВЛЕНО
+  const presentationId = useSelector((state: RootState) => state.editor.presentationId);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     addStylesToDocument();
@@ -59,19 +61,29 @@ export default function SaveButton() {
 
     setSaving(true);
     try {
-      await PresentationService.savePresentation(
+      const result = await PresentationService.savePresentation(
         presentation,
         user.$id,
         user.name || user.email,
-        presentationId // ← ПЕРЕДАЕМ ID
+        presentationId
       );
 
+      // ВАЖНО: Сохраняем ID презентации в Redux store
+      if (result.id) {
+        dispatch(setPresentationId(result.id));
+        console.log('✅ ID презентации сохранен в store:', result.id);
+      }
+
       setLastSave(new Date());
-      alert('✅ Презентация сохранена!');
-    } catch (error: unknown) {
+      alert('✅ Презентация успешно сохранена!');
+    } catch (error: any) {
       console.error('❌ Ошибка сохранения:', error);
-      const err = error as Error;
-      alert(`❌ Не удалось сохранить презентацию: ${err.message || 'Неизвестная ошибка'}`);
+
+      if (error.message?.includes('longer than')) {
+        alert('❌ Ошибка: Презентация слишком большая. Попробуйте удалить некоторые элементы.');
+      } else {
+        alert(`❌ Не удалось сохранить презентацию: ${error.message || 'Неизвестная ошибка'}`);
+      }
     } finally {
       setSaving(false);
     }

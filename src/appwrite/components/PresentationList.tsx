@@ -4,7 +4,11 @@ import React, { useState, useEffect, CSSProperties } from 'react';
 import { PresentationService, StoredPresentation } from '../presentation-service';
 import { account, AppwriteUser } from '../client';
 import { useDispatch } from 'react-redux';
-import { loadDemoPresentation, setPresentationId } from '../../store/editorSlice';
+import {
+  loadDemoPresentation,
+  createNewPresentation,
+  setPresentationId,
+} from '../../store/editorSlice';
 
 // Стили в виде объектов
 const styles: { [key: string]: CSSProperties } = {
@@ -54,25 +58,34 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       .catch(() => setUser(null));
   }, []);
 
-  useEffect(() => {
+  const loadPresentations = async () => {
     if (!user) return;
 
-    const loadPresentations = async () => {
-      setLoading(true);
-      try {
-        const userPresentations = await PresentationService.getUserPresentations(user.$id);
-        setPresentations(userPresentations);
-      } catch (error) {
-        console.error('Ошибка загрузки:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    try {
+      const userPresentations = await PresentationService.getUserPresentations(user.$id);
+      setPresentations(userPresentations);
+      console.log('✅ Презентации загружены:', userPresentations.length);
+    } catch (error) {
+      console.error('Ошибка загрузки:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadPresentations();
+  useEffect(() => {
+    if (user) {
+      loadPresentations();
+    }
   }, [user]);
 
   const handleCreateNew = () => {
+    // Сбрасываем ID текущей презентации
+    dispatch(setPresentationId(''));
+
+    // Создаем новую пустую презентацию через Redux
+    dispatch(createNewPresentation());
+
     alert('Создана новая пустая презентация');
 
     if (onSelect) {
@@ -81,6 +94,9 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   };
 
   const handleLoadDemo = () => {
+    // Сбрасываем ID текущей презентации
+    dispatch(setPresentationId(''));
+
     dispatch(loadDemoPresentation());
 
     if (onSelect) {
@@ -89,11 +105,22 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   };
 
   const handleLoadPresentation = (presentation: StoredPresentation) => {
-    alert(`Загружаем презентацию: "${presentation.title || 'Без названия'}"`);
+    // Устанавливаем ID загружаемой презентации
+    dispatch(setPresentationId(presentation.id || presentation.$id));
+
+    // TODO: Здесь нужно загрузить саму презентацию в редактор
+    // Нужно создать action для загрузки существующей презентации
+    alert(
+      `Загружаем презентацию: "${presentation.title || 'Без названия'}"\n\nПРИМЕЧАНИЕ: Нужно реализовать загрузку данных презентации`
+    );
 
     if (onSelect) {
       onSelect();
     }
+  };
+
+  const handleRefresh = () => {
+    loadPresentations();
   };
 
   if (!user) {
@@ -116,6 +143,20 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       >
         <h2 style={{ margin: 0 }}>Мои презентации</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={handleRefresh}
+            style={{
+              padding: '10px 20px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+            }}
+          >
+            ⟳ Обновить
+          </button>
           <button
             onClick={handleCreateNew}
             style={{
@@ -212,7 +253,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
           >
             {presentations.map((pres) => (
               <div
-                key={pres.id}
+                key={pres.id || pres.$id}
                 onClick={() => handleLoadPresentation(pres)}
                 style={{
                   background: 'white',
@@ -284,22 +325,38 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
             }}
           >
             <p style={{ marginBottom: '15px', color: '#64748b' }}>
-              Хотите посмотреть пример презентации?
+              Всего презентаций: {presentations.length}
             </p>
-            <button
-              onClick={handleLoadDemo}
-              style={{
-                padding: '10px 20px',
-                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600',
-              }}
-            >
-              📁 Загрузить демо-презентацию
-            </button>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button
+                onClick={handleCreateNew}
+                style={{
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                + Создать новую презентацию
+              </button>
+              <button
+                onClick={handleLoadDemo}
+                style={{
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                📁 Загрузить демо-презентацию
+              </button>
+            </div>
           </div>
         </>
       )}

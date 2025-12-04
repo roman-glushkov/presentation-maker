@@ -1,6 +1,8 @@
 // src/appwrite/presentation-service.ts
 import { databases, DATABASE_ID, COLLECTION_ID, ID } from './client';
+import { Query } from 'appwrite'; // ← Импорт Query напрямую из appwrite!
 import { Presentation } from '../store/types/presentation';
+import { Slide } from '../store/types/slide'; // Добавьте этот импорт если есть
 
 export interface SavedPresentation extends Presentation {
   id?: string;
@@ -29,34 +31,45 @@ export class PresentationService {
     presentation: Presentation,
     userId: string,
     userName: string,
-    presentationId?: string // ← ДОБАВЛЕН ОПЦИОНАЛЬНЫЙ ПАРАМЕТР
+    presentationId?: string
   ): Promise<StoredPresentation> {
     try {
-      console.log('Saving presentation:', {
-        hasId: !!presentationId,
-        title: presentation.title,
-        slidesCount: presentation.slides?.length,
-        userId,
-        userName,
+      console.log('=== СОХРАНЕНИЕ ПРЕЗЕНТАЦИИ ===');
+      console.log('User ID:', userId);
+      console.log('User Name:', userName);
+      console.log('Presentation ID:', presentationId || 'НОВАЯ');
+      console.log('Title:', presentation.title);
+      console.log('Slides count:', presentation.slides?.length || 0);
+
+      // Сериализуем массивы/объекты в строки для хранения в String поле
+      const slidesJson = JSON.stringify(presentation.slides || []);
+      const selectedSlideIdsJson = JSON.stringify(presentation.selectedSlideIds || []);
+
+      console.log('Размер данных:', {
+        slidesLength: slidesJson.length,
+        selectedSlideIdsLength: selectedSlideIdsJson.length,
+        total: slidesJson.length + selectedSlideIdsJson.length,
       });
 
-      const data: SavedPresentation = {
+      const data: Record<string, unknown> = {
         title: presentation.title || 'Без названия',
-        slides: presentation.slides || [],
+        slides: slidesJson,
         currentSlideId: presentation.currentSlideId || '',
-        selectedSlideIds: presentation.selectedSlideIds || [],
-        ownerId: userId,
+        selectedSlideIds: selectedSlideIdsJson,
+        ownerId: userId, // ← ОЧЕНЬ ВАЖНО: сохраняем userId
         ownerName: userName,
         updatedAt: new Date().toISOString(),
       };
 
-      // Добавляем ID если есть
-      if (presentationId) {
-        data.id = presentationId;
-      }
+      console.log('Данные для сохранения:', {
+        title: data.title,
+        ownerId: data.ownerId,
+        ownerName: data.ownerName,
+      });
 
       if (presentationId) {
         // Обновляем существующую
+        console.log('🔄 Обновляем существующую презентацию:', presentationId);
         const result = await databases.updateDocument(
           DATABASE_ID,
           COLLECTION_ID,
@@ -65,56 +78,88 @@ export class PresentationService {
         );
 
         console.log('✅ Презентация обновлена:', result.$id);
-        return {
-          ...(result as unknown as StoredPresentation),
-          id: result.$id,
-          title: data.title,
-          slides: data.slides,
-          currentSlideId: data.currentSlideId,
-          selectedSlideIds: data.selectedSlideIds,
-          ownerId: data.ownerId,
-          ownerName: data.ownerName,
-        };
+        return this.mapToStoredPresentation(result, data);
       } else {
         // Создаем новую
-        const result = await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
-          ...data,
-          createdAt: new Date().toISOString(),
-        });
+        const docId = ID.unique();
+        console.log('🆕 Создаем новую презентацию с ID:', docId);
+
+        data.createdAt = new Date().toISOString();
+
+        const result = await databases.createDocument(DATABASE_ID, COLLECTION_ID, docId, data);
 
         console.log('✅ Новая презентация создана:', result.$id);
-        return {
-          ...(result as unknown as StoredPresentation),
-          id: result.$id,
-          title: data.title,
-          slides: data.slides,
-          currentSlideId: data.currentSlideId,
-          selectedSlideIds: data.selectedSlideIds,
-          ownerId: data.ownerId,
-          ownerName: data.ownerName,
-        };
+        return this.mapToStoredPresentation(result, data);
       }
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       console.error('❌ Ошибка сохранения презентации:', {
-        error,
-        message: error.message,
-        code: error.code,
-        type: error.type,
+        message: err.message,
+        name: err.name,
+        stack: err.stack,
       });
       throw error;
     }
   }
 
-  // Получить все презентации пользователя
+  // В presentation-service.ts, измените getUserPresentations:
+  // presentation-service.ts - метод getUserPresentations
   static async getUserPresentations(userId: string): Promise<StoredPresentation[]> {
     try {
+      console.log('🔍 Ищем презентации пользователя:', userId);
+      console.log('🔍 DATABASE_ID:', DATABASE_ID);
+      console.log('🔍 COLLECTION_ID:', COLLECTION_ID);
+
+      // ПРАВИЛЬНЫЙ способ фильтрации для Appwrite v10+
       const result = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-        `ownerId=${userId}`,
+        Query.equal('ownerId', userId), // ← Теперь Query доступен!
       ]);
 
-      // Преобразуем в формат, который понимает редактор
-      return result.documents.map((doc) => {
-        const docData = doc as unknown as Record<string, any>;
+      console.log(`✅ Найдено презентаций пользователя: ${result.documents.length}`);
+
+      // Если 0 - покажем диагностику
+      if (result.documents.length === 0) {
+        console.log('⚠️ У пользователя нет сохраненных презентаций');
+
+        // Покажем все презентации для диагностики
+        const allDocs = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+        console.log(`Всего в БД: ${allDocs.documents.length} презентаций`);
+
+        const otherDocs = allDocs.documents.filter((d) => (d as any).ownerId !== userId);
+
+        if (otherDocs.length > 0) {
+          console.log('📊 Другие презентации в БД:');
+          otherDocs.slice(0, 3).forEach((d) => {
+            const data = d as any;
+            console.log(`- "${data.title}" (owner: ${data.ownerName}, id: ${data.ownerId})`);
+          });
+        }
+
+        return [];
+      }
+
+      // Преобразуем найденные документы
+      const presentations = result.documents.map((doc) => {
+        const docData = doc as any;
+
+        // Десериализуем slides
+        let slides: Slide[] = [];
+        try {
+          slides = docData.slides ? JSON.parse(docData.slides) : [];
+        } catch (e) {
+          console.error('Ошибка парсинга slides:', e);
+          slides = [];
+        }
+
+        // Десериализуем selectedSlideIds
+        let selectedSlideIds: string[] = [];
+        try {
+          selectedSlideIds = docData.selectedSlideIds ? JSON.parse(docData.selectedSlideIds) : [];
+        } catch (e) {
+          console.error('Ошибка парсинга selectedSlideIds:', e);
+          selectedSlideIds = [];
+        }
+
         return {
           $id: doc.$id,
           $createdAt: doc.$createdAt,
@@ -124,17 +169,24 @@ export class PresentationService {
           $databaseId: doc.$databaseId,
           id: doc.$id,
           title: docData.title || 'Без названия',
-          slides: docData.slides || [],
+          slides: slides,
           currentSlideId: docData.currentSlideId || '',
-          selectedSlideIds: docData.selectedSlideIds || [],
+          selectedSlideIds: selectedSlideIds,
           ownerId: docData.ownerId || '',
           ownerName: docData.ownerName || '',
           updatedAt: docData.updatedAt || '',
           createdAt: docData.createdAt || '',
         } as StoredPresentation;
       });
+
+      console.log(`🎯 Возвращаем ${presentations.length} презентаций пользователя`);
+      return presentations;
     } catch (error) {
-      console.error('❌ Ошибка загрузки презентаций:', error);
+      const err = error as Error;
+      console.error('❌ Ошибка загрузки презентаций:', {
+        message: err.message,
+        userId: userId,
+      });
       return [];
     }
   }
@@ -144,7 +196,27 @@ export class PresentationService {
     try {
       const doc = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
 
-      const docData = doc as unknown as Record<string, any>;
+      const docData = doc as any;
+
+      // Десериализуем данные
+      let slides: Slide[] = [];
+      try {
+        slides = docData.slides ? JSON.parse(docData.slides) : [];
+      } catch (e) {
+        const err = e as Error;
+        console.error('❌ Ошибка парсинга slides:', err.message);
+        slides = [];
+      }
+
+      let selectedSlideIds: string[] = [];
+      try {
+        selectedSlideIds = docData.selectedSlideIds ? JSON.parse(docData.selectedSlideIds) : [];
+      } catch (e) {
+        const err = e as Error;
+        console.error('❌ Ошибка парсинга selectedSlideIds:', err.message);
+        selectedSlideIds = [];
+      }
+
       return {
         $id: doc.$id,
         $createdAt: doc.$createdAt,
@@ -154,18 +226,61 @@ export class PresentationService {
         $databaseId: doc.$databaseId,
         id: doc.$id,
         title: docData.title || 'Без названия',
-        slides: docData.slides || [],
+        slides: slides,
         currentSlideId: docData.currentSlideId || '',
-        selectedSlideIds: docData.selectedSlideIds || [],
+        selectedSlideIds: selectedSlideIds,
         ownerId: docData.ownerId || '',
         ownerName: docData.ownerName || '',
         updatedAt: docData.updatedAt || '',
         createdAt: docData.createdAt || '',
       } as StoredPresentation;
     } catch (error) {
-      console.error('❌ Ошибка загрузки презентации:', error);
+      const err = error as Error;
+      console.error('❌ Ошибка загрузки презентации:', err.message);
       throw error;
     }
+  }
+
+  // Вспомогательный метод для преобразования
+  private static mapToStoredPresentation(doc: any, data: any): StoredPresentation {
+    // Десериализуем строки обратно в массивы
+    let slides: Slide[] = [];
+    let selectedSlideIds: string[] = [];
+
+    try {
+      slides = typeof data.slides === 'string' ? JSON.parse(data.slides) : data.slides || [];
+    } catch (e) {
+      console.error('Ошибка парсинга slides в mapToStoredPresentation:', e);
+      slides = [];
+    }
+
+    try {
+      selectedSlideIds =
+        typeof data.selectedSlideIds === 'string'
+          ? JSON.parse(data.selectedSlideIds)
+          : data.selectedSlideIds || [];
+    } catch (e) {
+      console.error('Ошибка парсинга selectedSlideIds в mapToStoredPresentation:', e);
+      selectedSlideIds = [];
+    }
+
+    return {
+      $id: doc.$id,
+      $createdAt: doc.$createdAt,
+      $updatedAt: doc.$updatedAt,
+      $permissions: doc.$permissions,
+      $collectionId: doc.$collectionId,
+      $databaseId: doc.$databaseId,
+      id: doc.$id,
+      title: data.title as string,
+      slides: slides, // Теперь это массив, а не строка
+      currentSlideId: data.currentSlideId as string,
+      selectedSlideIds: selectedSlideIds, // Теперь это массив, а не строка
+      ownerId: data.ownerId as string,
+      ownerName: data.ownerName as string,
+      updatedAt: data.updatedAt as string,
+      createdAt: data.createdAt as string,
+    };
   }
 
   // Удалить презентацию
@@ -173,12 +288,13 @@ export class PresentationService {
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
     } catch (error) {
-      console.error('❌ Ошибка удаления презентации:', error);
+      const err = error as Error;
+      console.error('❌ Ошибка удаления презентации:', err.message);
       throw error;
     }
   }
 
-  // Создать новую пустую презентацию
+  // Создать новую пустую презентацию (клиентская функция)
   static createEmptyPresentation(title = 'Новая презентация'): Presentation {
     const slideId = `slide-${Date.now()}`;
     return {

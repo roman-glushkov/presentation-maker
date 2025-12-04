@@ -181,7 +181,7 @@ export const editorSlice = createSlice({
       state.selectedElementIds = [];
     },
 
-    setPresentationId(state, action: PayloadAction<string>) {
+    setPresentationId(state, action: PayloadAction<string | undefined>) {
       state.presentationId = action.payload;
     },
 
@@ -275,42 +275,55 @@ export const editorSlice = createSlice({
       );
     },
 
+    // В editorSlice.ts, найдите action addImageWithUrl и измените сигнатуру:
     addImageWithUrl(
       state,
-      action: PayloadAction<{
-        url: string;
-        width: number;
-        height: number;
-      }>
+      action: PayloadAction<
+        | string
+        | {
+            url: string;
+            width: number;
+            height: number;
+          }
+      >
     ) {
       pushToPast(state, 'editor/addImageWithUrl');
       const slide = state.presentation.slides.find((s) => s.id === state.selectedSlideId);
       if (!slide) return;
 
-      // Рассчитываем размеры контейнера с сохранением пропорций
-      const maxWidth = 400; // максимальная ширина
-      const maxHeight = 300; // максимальная высота
-      const aspectRatio = action.payload.width / action.payload.height;
+      // Обрабатываем оба варианта: строку или объект с размерами
+      const imageData = action.payload;
+      const imageUrl = typeof imageData === 'string' ? imageData : imageData.url;
 
-      let containerWidth = action.payload.width;
-      let containerHeight = action.payload.height;
+      let containerWidth = 300;
+      let containerHeight = 200;
 
-      // Ограничиваем максимальные размеры с сохранением пропорций
-      if (containerWidth > maxWidth) {
-        containerWidth = maxWidth;
-        containerHeight = maxWidth / aspectRatio;
-      }
+      // Если переданы размеры, используем их с сохранением пропорций
+      if (typeof imageData !== 'string' && imageData.width && imageData.height) {
+        const maxWidth = 400;
+        const maxHeight = 300;
+        const aspectRatio = imageData.width / imageData.height;
 
-      if (containerHeight > maxHeight) {
-        containerHeight = maxHeight;
-        containerWidth = maxHeight * aspectRatio;
+        containerWidth = imageData.width;
+        containerHeight = imageData.height;
+
+        // Ограничиваем максимальные размеры с сохранением пропорций
+        if (containerWidth > maxWidth) {
+          containerWidth = maxWidth;
+          containerHeight = maxWidth / aspectRatio;
+        }
+
+        if (containerHeight > maxHeight) {
+          containerHeight = maxHeight;
+          containerWidth = maxHeight * aspectRatio;
+        }
       }
 
       const imageElement = {
         ...temp.createImageElement(),
-        src: action.payload.url,
+        src: imageUrl,
         id: `image-${Date.now()}`,
-        // Устанавливаем размеры контейнера с пропорциями изображения
+        // Устанавливаем размеры контейнера
         position: {
           x: 100,
           y: 100,
@@ -344,6 +357,15 @@ export const editorSlice = createSlice({
       state.selectedSlideId = `slide-${Date.now()}`;
       state.selectedSlideIds = [`slide-${Date.now()}`];
       state.selectedElementIds = [];
+    },
+
+    loadExistingPresentation(state, action: PayloadAction<Presentation>) {
+      pushToPast(state, 'editor/loadExistingPresentation');
+      state.presentation = clonePresentation(action.payload);
+      state.selectedSlideId = action.payload.slides[0]?.id || '';
+      state.selectedSlideIds = action.payload.slides[0] ? [action.payload.slides[0].id] : [];
+      state.selectedElementIds = [];
+      // Не сбрасываем presentationId - он должен быть установлен отдельно
     },
 
     handleAction(state, action: PayloadAction<string>) {
@@ -635,6 +657,7 @@ export const {
   undo,
   redo,
   createNewPresentation,
+  loadExistingPresentation,
 } = editorSlice.actions;
 
 export default editorSlice.reducer;

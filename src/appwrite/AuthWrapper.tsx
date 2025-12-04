@@ -5,6 +5,8 @@ import Login from './Login';
 import Register from './Register';
 import PresentationList from './components/PresentationList';
 import { useAutoSave } from './useAutoSave';
+import { useDispatch } from 'react-redux';
+import { setPresentationId } from '../store/editorSlice';
 
 interface AuthWrapperProps {
   children: ReactNode;
@@ -18,6 +20,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   const [currentPresentationId, setCurrentPresentationId] = useState<string | null>(null);
 
   const { isSaving, lastSaved } = useAutoSave();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     checkAuth();
@@ -48,6 +51,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     setUser(null);
     setPage('login');
     setCurrentPresentationId(null);
+    dispatch(setPresentationId(''));
   };
 
   const handleAuthSuccess = () => {
@@ -113,7 +117,11 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         ) : null}
 
         <button
-          onClick={() => setCurrentPresentationId(null)}
+          onClick={() => {
+            setCurrentPresentationId(null);
+            // Сбрасываем ID текущей презентации при возврате к списку
+            dispatch(setPresentationId(undefined));
+          }}
           style={{
             padding: '6px 16px',
             background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
