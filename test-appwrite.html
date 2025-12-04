@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <body>
+    <h2>Test Appwrite Connection</h2>
+    <div id="status">Ready...</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@21.5.0"></script>
+    <script>
+      const client = new window.Appwrite.Client()
+        .setEndpoint('https://cloud.appwrite.io/v1')
+        .setProject('692ff05a000563f40376');
+
+      const account = new window.Appwrite.Account(client);
+
+      async function test() {
+        const status = document.getElementById('status');
+        status.innerHTML = 'Начинаем тест...';
+
+        try {
+          // 1. Пробуем зарегистрировать тестового пользователя
+          const testEmail = 'test' + Date.now() + '@test.com';
+          const testPassword = 'test12345';
+
+          status.innerHTML += '<br>Регистрируем пользователя...';
+
+          try {
+            await account.create(window.Appwrite.ID.unique(), testEmail, testPassword, 'Test User');
+            status.innerHTML += `<br>✅ Регистрация успешна: ${testEmail}`;
+          } catch (regError) {
+            status.innerHTML += `<br>❌ Ошибка регистрации: ${regError.message}`;
+            return;
+          }
+
+          // 2. Пробуем войти
+          status.innerHTML += '<br>Входим...';
+          try {
+            await account.createEmailPasswordSession(testEmail, testPassword);
+            status.innerHTML += '<br>✅ Вход успешен';
+          } catch (loginError) {
+            status.innerHTML += `<br>❌ Ошибка входа: ${loginError.message}`;
+            return;
+          }
+
+          // 3. Проверяем текущего пользователя
+          status.innerHTML += '<br>Проверяем сессию...';
+          try {
+            const user = await account.get();
+            status.innerHTML += `<br>✅ Пользователь: ${user.name} (${user.email})`;
+          } catch (userError) {
+            status.innerHTML += `<br>❌ Ошибка получения пользователя: ${userError.message}`;
+          }
+
+          // 4. Выходим
+          status.innerHTML += '<br>Выходим...';
+          try {
+            await account.deleteSession('current');
+            status.innerHTML += '<br>✅ Выход успешен';
+          } catch (logoutError) {
+            status.innerHTML += `<br>❌ Ошибка выхода: ${logoutError.message}`;
+          }
+        } catch (error) {
+          status.innerHTML = `❌ Общая ошибка: ${error.message}`;
+        }
+      }
+
+      // Запускаем тест через 1 секунду
+      setTimeout(test, 1000);
+    </script>
+  </body>
+</html>

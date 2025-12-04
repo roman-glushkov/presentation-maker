@@ -22,6 +22,7 @@ export interface EditorSnapshot {
 
 export interface EditorState {
   presentation: Presentation;
+  presentationId?: string;
   selectedSlideId: string;
   selectedSlideIds: string[];
   selectedElementIds: string[];
@@ -40,6 +41,7 @@ export interface EditorState {
 
 const initialState: EditorState = {
   presentation: initialPresentation,
+  presentationId: undefined,
   selectedSlideId: 'slide1',
   selectedSlideIds: ['slide1'],
   selectedElementIds: [],
@@ -179,12 +181,17 @@ export const editorSlice = createSlice({
       state.selectedElementIds = [];
     },
 
+    setPresentationId(state, action: PayloadAction<string>) {
+      state.presentationId = action.payload;
+    },
+
     // ----------------------
     // PRESENTATION MUTATIONS (history-aware)
     // ----------------------
     loadDemoPresentation(state) {
       pushToPast(state, 'editor/loadDemoPresentation');
       state.presentation = clonePresentation(demoPresentation);
+      state.presentationId = undefined;
       state.selectedSlideId = demoPresentation.slides[0]?.id || '';
       state.selectedSlideIds = demoPresentation.slides[0] ? [demoPresentation.slides[0].id] : [];
       state.selectedElementIds = [];
@@ -268,20 +275,75 @@ export const editorSlice = createSlice({
       );
     },
 
-    addImageWithUrl(state, action: PayloadAction<string>) {
+    addImageWithUrl(
+      state,
+      action: PayloadAction<{
+        url: string;
+        width: number;
+        height: number;
+      }>
+    ) {
       pushToPast(state, 'editor/addImageWithUrl');
       const slide = state.presentation.slides.find((s) => s.id === state.selectedSlideId);
       if (!slide) return;
 
+      // Рассчитываем размеры контейнера с сохранением пропорций
+      const maxWidth = 400; // максимальная ширина
+      const maxHeight = 300; // максимальная высота
+      const aspectRatio = action.payload.width / action.payload.height;
+
+      let containerWidth = action.payload.width;
+      let containerHeight = action.payload.height;
+
+      // Ограничиваем максимальные размеры с сохранением пропорций
+      if (containerWidth > maxWidth) {
+        containerWidth = maxWidth;
+        containerHeight = maxWidth / aspectRatio;
+      }
+
+      if (containerHeight > maxHeight) {
+        containerHeight = maxHeight;
+        containerWidth = maxHeight * aspectRatio;
+      }
+
       const imageElement = {
         ...temp.createImageElement(),
-        src: action.payload,
+        src: action.payload.url,
         id: `image-${Date.now()}`,
+        // Устанавливаем размеры контейнера с пропорциями изображения
+        position: {
+          x: 100,
+          y: 100,
+        },
+        size: {
+          width: containerWidth,
+          height: containerHeight,
+        },
       };
 
       state.presentation.slides = state.presentation.slides.map((s) =>
         s.id === slide.id ? func.addImage(s, imageElement) : s
       );
+    },
+
+    createNewPresentation(state) {
+      pushToPast(state, 'editor/createNewPresentation');
+      state.presentation = {
+        title: 'Новая презентация',
+        slides: [
+          {
+            id: `slide-${Date.now()}`,
+            background: { type: 'none' },
+            elements: [],
+          },
+        ],
+        currentSlideId: `slide-${Date.now()}`,
+        selectedSlideIds: [`slide-${Date.now()}`],
+      };
+      state.presentationId = undefined;
+      state.selectedSlideId = `slide-${Date.now()}`;
+      state.selectedSlideIds = [`slide-${Date.now()}`];
+      state.selectedElementIds = [];
     },
 
     handleAction(state, action: PayloadAction<string>) {
@@ -559,6 +621,7 @@ export const {
   addToSelection,
   removeFromSelection,
   clearSelection,
+  setPresentationId,
   updateSlide,
   updateTextContent,
   addSlide,
@@ -571,6 +634,7 @@ export const {
   addImageWithUrl,
   undo,
   redo,
+  createNewPresentation,
 } = editorSlice.actions;
 
 export default editorSlice.reducer;

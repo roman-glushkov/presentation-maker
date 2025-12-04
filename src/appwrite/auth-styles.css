@@ -1,0 +1,925 @@
+/* auth-presentation.css */
+/* Стили для презентейшн-тематики - SlideCraft */
+
+:root {
+  /* Основные цвета в стиле "презентаций" */
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --slide-blue: #2563eb;
+  --slide-purple: #7c3aed;
+  --slide-indigo: #4f46e5;
+  --slide-gray: #f8fafc;
+  --slide-dark: #1e293b;
+  --slide-light: #94a3b8;
+  --slide-border: #e2e8f0;
+  --slide-error: #ef4444;
+  --slide-success: #10b981;
+  --slide-warning: #f59e0b;
+
+  /* Тени для презентационного эффекта */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Анимации */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Анимации для презентационного эффекта */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Базовые стили для страниц авторизации в стиле SlideCraft */
+.presentation-body {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #e2e8f0, #cbd5e1);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  min-height: 100vh;
+  color: var(--slide-dark);
+  overflow-x: hidden;
+}
+
+/* Контейнер с эффектом слайда */
+.presentation-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  animation: slideIn 0.8s ease-out;
+}
+
+/* Навигация в стиле презентаций */
+.presentation-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  margin-bottom: 40px;
+  position: relative;
+  animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.presentation-logo {
+  font-size: 32px;
+  font-weight: 800;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+  position: relative;
+  display: inline-block;
+}
+
+.presentation-logo::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.presentation-logo:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.presentation-tagline {
+  font-size: 14px;
+  color: var(--slide-light);
+  font-weight: 500;
+  margin-left: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.presentation-nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.presentation-nav-link {
+  color: var(--slide-dark);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+}
+
+.presentation-nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary-gradient);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  z-index: -1;
+}
+
+.presentation-nav-link:hover::before {
+  opacity: 0.1;
+}
+
+.presentation-nav-link.active {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.presentation-nav-link.active::before {
+  opacity: 1;
+}
+
+/* Основной контейнер авторизации с эффектом слайда */
+.presentation-auth-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  min-height: 600px;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-2xl);
+  position: relative;
+  animation: slideUp 0.8s ease-out;
+}
+
+/* Эффект "слайд-презентации" сбоку */
+.presentation-sidebar {
+  padding: 60px 40px;
+  background: var(--primary-gradient);
+  position: relative;
+  overflow: hidden;
+  animation: slideLeft 0.8s ease-out;
+}
+
+.presentation-sidebar::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.presentation-sidebar::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -20%;
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.presentation-side-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 16px;
+  line-height: 1.2;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.presentation-side-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 40px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
+}
+
+/* Особенности в стиле презентаций */
+.presentation-features {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: 50px;
+  position: relative;
+  z-index: 2;
+}
+
+.presentation-feature {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.presentation-feature-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all var(--transition-normal);
+}
+
+.presentation-feature:hover .presentation-feature-icon {
+  transform: scale(1.1) rotate(5deg);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.presentation-feature-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.presentation-feature-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 6px;
+}
+
+.presentation-feature-content p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+/* Карточка авторизации в стиле "слайда" */
+.presentation-auth-card {
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: slideRight 0.8s ease-out;
+}
+
+.presentation-auth-header {
+  margin-bottom: 40px;
+}
+
+.presentation-auth-title {
+  font-size: 40px;
+  font-weight: 800;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.presentation-auth-subtitle {
+  font-size: 18px;
+  color: var(--slide-light);
+  font-weight: 500;
+}
+
+/* Форма в стиле презентаций */
+.presentation-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.presentation-form-group {
+  position: relative;
+}
+
+.presentation-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--slide-dark);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.presentation-form-input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 2px solid var(--slide-border);
+  background: var(--slide-gray);
+  transition: all var(--transition-normal);
+  color: var(--slide-dark);
+  font-family: 'Inter', sans-serif;
+  max-width: 100%; /* ← Добавьте это */
+  box-sizing: border-box; /* ← Это должно быть уже есть, но проверьте */
+}
+
+.presentation-form-input:focus {
+  outline: none;
+  border-color: var(--slide-indigo);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  transform: translateY(-2px);
+}
+
+.presentation-form-input::placeholder {
+  color: var(--slide-light);
+  opacity: 0.7;
+}
+
+.presentation-input-hint {
+  font-size: 12px;
+  color: var(--slide-light);
+  margin-top: 6px;
+  margin-left: 4px;
+}
+
+/* Кнопка в стиле презентации */
+.presentation-auth-button {
+  width: 100%;
+  padding: 18px;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+}
+
+.presentation-auth-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s;
+}
+
+.presentation-auth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.presentation-auth-button:hover::before {
+  left: 100%;
+}
+
+.presentation-auth-button:active {
+  transform: translateY(0);
+}
+
+.presentation-auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.presentation-button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.presentation-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ошибки в стиле презентаций */
+.presentation-error {
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: var(--slide-error);
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+  animation: slideIn 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.presentation-error::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--slide-error);
+}
+
+/* Ссылки в стиле презентаций */
+.presentation-link-text {
+  text-align: center;
+  margin-top: 32px;
+  color: var(--slide-light);
+  font-size: 15px;
+}
+
+.presentation-link {
+  color: var(--slide-indigo);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  position: relative;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.presentation-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: var(--slide-indigo);
+  transform: scaleX(0);
+  transition: transform var(--transition-fast);
+}
+
+.presentation-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Социальные кнопки в стиле презентаций */
+.presentation-social-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.presentation-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  border: 2px solid var(--slide-border);
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.presentation-social-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--slide-gray);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.presentation-social-btn:hover::before {
+  opacity: 0.1;
+}
+
+.presentation-social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.presentation-social-icon {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Разделитель в стиле презентаций */
+.presentation-divider {
+  display: flex;
+  align-items: center;
+  margin: 32px 0;
+  color: var(--slide-light);
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+}
+
+.presentation-divider::before,
+.presentation-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--slide-border), transparent);
+}
+
+.presentation-divider::before {
+  margin-right: 20px;
+  background: linear-gradient(90deg, transparent, var(--slide-border));
+}
+
+.presentation-divider::after {
+  margin-left: 20px;
+  background: linear-gradient(90deg, var(--slide-border), transparent);
+}
+
+/* Элементы загрузки в стиле презентаций */
+.presentation-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--primary-gradient);
+  animation: gradientShift 10s ease infinite;
+}
+
+.presentation-loading-content {
+  text-align: center;
+  color: white;
+  animation: slideUp 0.6s ease-out;
+}
+
+.presentation-loading-logo {
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+.presentation-loading-dots {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.presentation-loading-dot {
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.presentation-loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.presentation-loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.presentation-loading-text {
+  font-size: 18px;
+  font-weight: 500;
+  opacity: 0.9;
+  letter-spacing: 1px;
+}
+
+/* Панель пользователя в стиле презентаций */
+.presentation-user-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: white;
+  padding: 12px 20px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideDown 0.6s ease-out;
+}
+
+.presentation-user-badge {
+  padding: 6px 12px;
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-md);
+}
+
+.presentation-logout-button {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.5px;
+}
+
+.presentation-logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.presentation-logout-button:active {
+  transform: translateY(0);
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .presentation-auth-container {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .presentation-sidebar {
+    display: none;
+  }
+
+  .presentation-auth-card {
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .presentation-navbar {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .presentation-nav-links {
+    gap: 20px;
+  }
+
+  .presentation-auth-title {
+    font-size: 32px;
+  }
+
+  .presentation-auth-card {
+    padding: 40px 24px;
+  }
+
+  .presentation-user-panel {
+    top: 10px;
+    right: 10px;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .presentation-container {
+    padding: 12px;
+  }
+
+  .presentation-auth-card {
+    padding: 32px 20px;
+  }
+
+  .presentation-auth-title {
+    font-size: 28px;
+  }
+
+  .presentation-form-input {
+    padding: 14px 16px;
+  }
+}
+
+/* Дополнительные стили для регистрации */
+
+.presentation-agreement {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--slide-border);
+}
+
+.presentation-agreement-text {
+  font-size: 12px;
+  color: var(--slide-light);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.presentation-agreement-text .presentation-link {
+  font-size: 12px;
+  margin: 0 4px;
+}
+
+/* Эффект для социальных кнопок */
+.presentation-social-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Плейсхолдер для имени */
+.presentation-form-input::placeholder {
+  color: var(--slide-light);
+  opacity: 0.6;
+}
+
+/* Кастомные подсказки для полей ввода */
+.presentation-form-group:focus-within .presentation-input-hint {
+  color: var(--slide-indigo);
+  font-weight: 500;
+}
+
+/* Эффект при успешной валидации */
+.presentation-form-input:valid:not(:placeholder-shown) {
+  border-color: var(--slide-success);
+}
+
+/* Эффект при ошибке */
+.presentation-form-input:invalid:not(:focus):not(:placeholder-shown) {
+  border-color: var(--slide-error);
+}
+
+/* Анимация появления формы */
+@keyframes formSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.presentation-auth-form {
+  animation: formSlideIn 0.5s ease-out;
+}
+
+/* Адаптивность для регистрации */
+@media (max-width: 768px) {
+  .presentation-agreement-text {
+    font-size: 11px;
+  }
+
+  .presentation-social-auth {
+    gap: 8px;
+  }
+
+  .presentation-social-btn {
+    padding: 14px 12px;
+    font-size: 14px;
+  }
+}
