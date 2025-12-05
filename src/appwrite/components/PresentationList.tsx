@@ -8,9 +8,10 @@ import {
   loadDemoPresentation,
   createNewPresentation,
   setPresentationId,
+  loadExistingPresentation,
 } from '../../store/editorSlice';
+import { Presentation } from '../../store/types/presentation';
 
-// Стили в виде объектов
 const styles: { [key: string]: CSSProperties } = {
   loadingSpinner: {
     width: '40px',
@@ -21,9 +22,26 @@ const styles: { [key: string]: CSSProperties } = {
     animation: 'spin 1s linear infinite',
     margin: '0 auto 20px',
   },
+  errorBox: {
+    background: '#fee2e2',
+    border: '1px solid #ef4444',
+    borderRadius: '8px',
+    padding: '15px',
+    marginBottom: '20px',
+    color: '#991b1b',
+  },
+  retryButton: {
+    background: '#ef4444',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    marginTop: '10px',
+    fontWeight: '600',
+  },
 };
 
-// Добавляем стили в документ
 const addStylesToDocument = () => {
   if (typeof document === 'undefined') return;
 
@@ -45,6 +63,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AppwriteUser | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -62,12 +81,18 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
     if (!user) return;
 
     setLoading(true);
+    setError(null);
     try {
       const userPresentations = await PresentationService.getUserPresentations(user.$id);
       setPresentations(userPresentations);
       console.log('✅ Презентации загружены:', userPresentations.length);
-    } catch (error) {
+
+      if (userPresentations.length === 0) {
+        console.log('⚠️ У пользователя нет валидных презентаций');
+      }
+    } catch (error: any) {
       console.error('Ошибка загрузки:', error);
+      setError(`Ошибка загрузки презентаций: ${error.message || 'Неизвестная ошибка'}`);
     } finally {
       setLoading(false);
     }
@@ -80,42 +105,69 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   }, [user]);
 
   const handleCreateNew = () => {
-    // Сбрасываем ID текущей презентации
     dispatch(setPresentationId(''));
-
-    // Создаем новую пустую презентацию через Redux
     dispatch(createNewPresentation());
-
-    alert('Создана новая пустая презентация');
-
+    console.log('Создана новая пустая презентация');
     if (onSelect) {
       onSelect();
     }
   };
 
   const handleLoadDemo = () => {
-    // Сбрасываем ID текущей презентации
     dispatch(setPresentationId(''));
-
     dispatch(loadDemoPresentation());
-
     if (onSelect) {
       onSelect();
     }
   };
 
-  const handleLoadPresentation = (presentation: StoredPresentation) => {
-    // Устанавливаем ID загружаемой презентации
-    dispatch(setPresentationId(presentation.id || presentation.$id));
+  const handleLoadPresentation = async (presentation: StoredPresentation) => {
+    try {
+      console.log(`🔄 Загружаем презентацию: "${presentation.title}"`);
 
-    // TODO: Здесь нужно загрузить саму презентацию в редактор
-    // Нужно создать action для загрузки существующей презентации
-    alert(
-      `Загружаем презентацию: "${presentation.title || 'Без названия'}"\n\nПРИМЕЧАНИЕ: Нужно реализовать загрузку данных презентации`
-    );
+      // Загружаем презентацию с валидацией
+      const fullPresentation = await PresentationService.getPresentation(
+        presentation.id || presentation.$id
+      );
 
-    if (onSelect) {
-      onSelect();
+      // Устанавливаем ID презентации в Redux
+      dispatch(setPresentationId(fullPresentation.id || fullPresentation.$id));
+
+      // Подготавливаем данные презентации для редактора
+      const presentationForEditor: Presentation = {
+        title: fullPresentation.title || 'Без названия',
+        slides: fullPresentation.slides || [],
+        currentSlideId: fullPresentation.currentSlideId || fullPresentation.slides?.[0]?.id || '',
+        selectedSlideIds:
+          fullPresentation.selectedSlideIds ||
+          (fullPresentation.slides?.[0]?.id ? [fullPresentation.slides[0].id] : []),
+      };
+
+      // Загружаем презентацию в редактор
+      dispatch(loadExistingPresentation(presentationForEditor));
+
+      console.log(`✅ Презентация "${fullPresentation.title}" успешно загружена в редактор`);
+      console.log('Текущий слайд ID:', presentationForEditor.currentSlideId);
+
+      // Переходим в редактор
+      if (onSelect) {
+        onSelect();
+      }
+    } catch (error: any) {
+      console.error('❌ Ошибка загрузки презентации:', error);
+
+      // Специальная обработка ошибок валидации
+      if (error.message && error.message.includes('Данные презентации повреждены')) {
+        alert(
+          `❌ Ошибка загрузки презентации:\n\n${error.message}\n\nЭта презентация содержит поврежденные данные. Пожалуйста, выберите другую презентацию или создайте новую.`
+        );
+      } else if (error.message && error.message.includes('Невалидная структура')) {
+        alert(
+          `❌ Ошибка загрузки:\n\n${error.message}\n\nДанные презентации имеют неверный формат.`
+        );
+      } else {
+        alert(`Не удалось загрузить презентацию: ${error.message || 'Неизвестная ошибка'}`);
+      }
     }
   };
 
@@ -188,10 +240,19 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
         </div>
       </div>
 
+      {error && (
+        <div style={styles.errorBox}>
+          <strong>Ошибка:</strong> {error}
+          <button onClick={handleRefresh} style={styles.retryButton}>
+            Повторить попытку
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div style={{ textAlign: 'center' as const, padding: '40px' }}>
           <div style={styles.loadingSpinner} />
-          <p>Загрузка...</p>
+          <p>Загрузка презентаций с проверкой данных...</p>
         </div>
       ) : presentations.length === 0 ? (
         <div
@@ -204,7 +265,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
           }}
         >
           <div style={{ fontSize: '48px', marginBottom: '20px' }}>📁</div>
-          <h3 style={{ marginBottom: '10px' }}>У вас пока нет презентаций</h3>
+          <h3 style={{ marginBottom: '10px' }}>У вас пока нет валидных презентаций</h3>
           <p style={{ color: '#64748b', marginBottom: '20px' }}>
             Создайте первую презентацию и она появится здесь
           </p>
@@ -243,6 +304,13 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
         </div>
       ) : (
         <>
+          <div style={{ marginBottom: '15px', color: '#64748b', fontSize: '14px' }}>
+            Загружено валидных презентаций: {presentations.length}
+            <span style={{ marginLeft: '10px', color: '#94a3b8', fontSize: '12px' }}>
+              (Некорректные презентации автоматически отфильтрованы)
+            </span>
+          </div>
+
           <div
             style={{
               display: 'grid',
@@ -263,6 +331,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                  position: 'relative',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)';
@@ -273,6 +342,23 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
                 }}
               >
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: '#10b981',
+                    color: 'white',
+                    fontSize: '10px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontWeight: '600',
+                  }}
+                  title="Эта презентация прошла проверку валидации"
+                >
+                  ✅ Валидна
+                </div>
+
                 <h3
                   style={{
                     margin: '0 0 10px 0',
@@ -281,6 +367,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap' as const,
+                    paddingRight: '50px',
                   }}
                 >
                   {pres.title || 'Без названия'}
@@ -325,7 +412,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
             }}
           >
             <p style={{ marginBottom: '15px', color: '#64748b' }}>
-              Всего презентаций: {presentations.length}
+              Всего валидных презентаций: {presentations.length}
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
