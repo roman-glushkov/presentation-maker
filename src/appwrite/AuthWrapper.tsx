@@ -1,12 +1,13 @@
-// src/appwrite/AuthWrapper.tsx
 import React, { useState, useEffect, ReactNode } from 'react';
 import { account, AppwriteUser } from './client';
 import Login from './Login';
 import Register from './Register';
 import PresentationList from './components/PresentationList';
 import { useAutoSave } from './useAutoSave';
-import { useDispatch } from 'react-redux';
-import { setPresentationId } from '../store/editorSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setPresentationId, undo, redo } from '../store/editorSlice';
+import type { RootState } from '../store/index';
+import './AuthWrapper.css';
 
 interface AuthWrapperProps {
   children: ReactNode;
@@ -19,8 +20,11 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   const [page, setPage] = useState<'login' | 'register' | 'presentations'>('login');
   const [currentPresentationId, setCurrentPresentationId] = useState<string | null>(null);
 
-  const { isSaving, lastSaved } = useAutoSave();
+  const { isSaving, saveNow } = useAutoSave();
   const dispatch = useDispatch();
+
+  const canUndo = useSelector((state: RootState) => state.editor.history.past.length > 0);
+  const canRedo = useSelector((state: RootState) => state.editor.history.future.length > 0);
 
   useEffect(() => {
     checkAuth();
@@ -41,25 +45,23 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await account.deleteSession('current');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-    setIsAuthenticated(false);
-    setUser(null);
-    setPage('login');
+  const handleSelectPresentation = () => {
+    setCurrentPresentationId('current');
+  };
+
+  const handleReturnToList = () => {
     setCurrentPresentationId(null);
     dispatch(setPresentationId(''));
   };
 
-  const handleAuthSuccess = () => {
-    checkAuth();
-  };
-
-  const handleSelectPresentation = () => {
-    setCurrentPresentationId('current');
+  const handleSaveClick = async () => {
+    if (saveNow) {
+      try {
+        await saveNow();
+      } catch (error) {
+        console.error('Ошибка сохранения:', error);
+      }
+    }
   };
 
   if (!authChecked) {
@@ -80,65 +82,63 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
   if (!isAuthenticated) {
     return page === 'login' ? (
-      <Login onSuccess={handleAuthSuccess} switchToRegister={() => setPage('register')} />
+      <Login onSuccess={checkAuth} switchToRegister={() => setPage('register')} />
     ) : (
-      <Register onSuccess={handleAuthSuccess} switchToLogin={() => setPage('login')} />
+      <Register onSuccess={checkAuth} switchToLogin={() => setPage('login')} />
     );
   }
 
   if (!currentPresentationId) {
     return (
       <div className="presentation-body">
-        <div className="presentation-user-panel">
-          <div className="presentation-user-badge">
-            {user?.name || user?.email || 'Презентатор'}
-          </div>
-          <button onClick={handleLogout} className="presentation-logout-button">
-            Выйти
-          </button>
-        </div>
-
         <PresentationList onSelect={handleSelectPresentation} />
       </div>
     );
   }
 
   return (
-    <div className="presentation-body">
-      <div className="presentation-user-panel">
-        <div className="presentation-user-badge">{user?.name || user?.email || 'Презентатор'}</div>
+    <div className="presentation-body" style={{ paddingTop: '60px' }}>
+      <div className="presentation-toolbar">
+        <div className="toolbar-left">
+          <button onClick={handleReturnToList} className="toolbar-button" title="Мои презентации">
+            <span className="toolbar-icon">📁</span>
+          </button>
 
-        {isSaving ? (
-          <div style={{ color: '#f59e0b', marginRight: '10px' }}>💾 Сохранение...</div>
-        ) : lastSaved ? (
-          <div style={{ color: '#10b981', marginRight: '10px', fontSize: '14px' }}>
-            💾 Сохранено: {lastSaved.toLocaleTimeString()}
-          </div>
-        ) : null}
+          <button
+            onClick={handleSaveClick}
+            className="toolbar-button"
+            title="Сохранить"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <span className="saving-spinner"></span>
+            ) : (
+              <span className="toolbar-icon">💾</span>
+            )}
+          </button>
 
-        <button
-          onClick={() => {
-            setCurrentPresentationId(null);
-            // Сбрасываем ID текущей презентации при возврате к списку
-            dispatch(setPresentationId(undefined));
-          }}
-          style={{
-            padding: '6px 16px',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            marginRight: '10px',
-          }}
-        >
-          📁 Мои презентации
-        </button>
+          <div className="toolbar-separator"></div>
 
-        <button onClick={handleLogout} className="presentation-logout-button">
-          Выйти
-        </button>
+          <button
+            onClick={() => dispatch(undo())}
+            className="toolbar-button"
+            title="Отменить (Ctrl+Z)"
+            disabled={!canUndo}
+            style={{ opacity: canUndo ? 1 : 0.5 }}
+          >
+            <span className="toolbar-icon">↶</span>
+          </button>
+
+          <button
+            onClick={() => dispatch(redo())}
+            className="toolbar-button"
+            title="Вернуть (Ctrl+Y)"
+            disabled={!canRedo}
+            style={{ opacity: canRedo ? 1 : 0.5 }}
+          >
+            <span className="toolbar-icon">↷</span>
+          </button>
+        </div>
       </div>
 
       {children}

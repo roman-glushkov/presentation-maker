@@ -10,7 +10,7 @@ export interface ToolbarState {
 }
 
 const initialState: ToolbarState = {
-  activeGroup: 'slides',
+  activeGroup: 'main',
   activeTextOption: null,
   showTemplates: false,
   showTextColorPicker: false,

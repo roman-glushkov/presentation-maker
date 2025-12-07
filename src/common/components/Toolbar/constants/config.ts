@@ -1,4 +1,5 @@
-export type GroupKey = 'slides' | 'text' | 'elements' | 'design';
+// constants/config.ts
+export type GroupKey = 'main' | 'insert' | 'design' | 'transitions' | 'view';
 
 export interface GroupButton {
   label: string;
@@ -6,14 +7,12 @@ export interface GroupButton {
 }
 
 export const GROUPS: Record<GroupKey, GroupButton[]> = {
-  slides: [
+  main: [
     { label: '➕ Слайд', action: 'ADD_SLIDE' },
-    { label: '🗑️ Удалить', action: 'REMOVE_SLIDE' },
-    { label: '📄 Дублировать ❌', action: 'DUPLICATE_SLIDE' },
-    { label: '✨ Переходы ❌', action: 'SLIDE_TRANSITIONS' },
-  ],
-  text: [
-    { label: '📝 Текст', action: 'ADD_TEXT' },
+
+    // Разделитель (визуальный)
+    { label: '|', action: 'SEPARATOR' },
+
     { label: '🔠 Размер', action: 'TEXT_SIZE' },
     { label: '🎨 Шрифт ❌', action: 'TEXT_FONT' },
     { label: '↔️ Выравнивание', action: 'TEXT_ALIGN' },
@@ -21,33 +20,49 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '𝐁 Жирный', action: 'TEXT_BOLD' },
     { label: '𝑰 Курсив', action: 'TEXT_ITALIC' },
     { label: 'U Подчеркнутый', action: 'TEXT_UNDERLINE' },
-  ],
-  elements: [
-    { label: '🖼️ Картинка', action: 'ADD_IMAGE' },
-    { label: '❌ Удалить', action: 'REMOVE_ELEMENT' },
-    { label: '🔄 Поворот ❌', action: 'ROTATE_ELEMENT' },
-    { label: '📑 Дублировать ❌', action: 'DUPLICATE_ELEMENT' },
-    { label: '🌫️ Прозрачность ❌', action: 'ELEMENT_OPACITY' },
-    { label: '📌 Группировка ❌', action: 'GROUP_ELEMENTS' },
-    { label: '🖼️ Передний план ❌', action: 'BRING_TO_FRONT' },
-    { label: '🖼️ Задний план ❌', action: 'SEND_TO_BACK' },
-  ],
-  design: [
+
+    { label: '|', action: 'SEPARATOR' },
+
     { label: '🎨 Фон', action: 'SLIDE_BACKGROUND' },
     { label: '🖍️ Цвет текста', action: 'TEXT_COLOR' },
     { label: '🧱 Заливка фигуры', action: 'SHAPE_FILL' },
-    { label: '📐 Сетка ❌', action: 'SHOW_GRID' },
-    { label: '✨ Анимации ❌', action: 'ADD_ANIMATION' },
+
+    { label: '|', action: 'SEPARATOR' },
+  ],
+  insert: [
+    { label: '📝 Текст', action: 'ADD_TEXT' },
+    { label: '🖼️ Картинка', action: 'ADD_IMAGE' },
+    { label: '🔗 По ссылке', action: 'ADD_IMAGE_FROM_URL' },
+    { label: '📊 Диаграмма ❌', action: 'ADD_CHART' },
+    { label: '🔗 Ссылка ❌', action: 'ADD_LINK' },
+  ],
+  design: [
     { label: '🎭 Тема ❌', action: 'CHANGE_THEME' },
-    { label: '🔲 Тень/границы ❌', action: 'ELEMENT_STYLE' },
     { label: '🌈 Градиенты ❌', action: 'APPLY_GRADIENT' },
+    { label: '🔲 Тень/границы ❌', action: 'ELEMENT_STYLE' },
     { label: '🖼️ Фильтры ❌', action: 'IMAGE_FILTERS' },
+    { label: '📐 Сетка ❌', action: 'SHOW_GRID' },
+  ],
+  transitions: [
+    { label: '✨ Переходы ❌', action: 'SLIDE_TRANSITIONS' },
+    { label: '✨ Анимации ❌', action: 'ADD_ANIMATION' },
+    { label: '⏱️ Тайминг ❌', action: 'ANIMATION_TIMING' },
+    { label: '🎬 Предпросмотр ❌', action: 'PREVIEW_ANIMATIONS' },
+  ],
+  view: [
+    { label: '🔲 Разметка ❌', action: 'SHOW_LAYOUT' },
+    { label: '📐 Направляющие ❌', action: 'SHOW_GUIDES' },
+    { label: '🎯 Привязка ❌', action: 'ENABLE_SNAP' },
+    { label: '📏 Линейки ❌', action: 'SHOW_RULERS' },
+    { label: '👁️ Скрытые ❌', action: 'SHOW_HIDDEN' },
+    { label: '🔍 Масштаб ❌', action: 'ZOOM' },
   ],
 };
 
 export const TAB_TITLES: { key: GroupKey; name: string }[] = [
-  { key: 'slides', name: 'Слайды' },
-  { key: 'text', name: 'Текст' },
-  { key: 'elements', name: 'Элементы' },
+  { key: 'main', name: 'Главная' },
+  { key: 'insert', name: 'Вставка' },
   { key: 'design', name: 'Дизайн' },
+  { key: 'transitions', name: 'Переходы' },
+  { key: 'view', name: 'Вид' },
 ];

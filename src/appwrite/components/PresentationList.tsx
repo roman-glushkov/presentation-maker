@@ -11,6 +11,7 @@ import {
   loadExistingPresentation,
 } from '../../store/editorSlice';
 import { Presentation } from '../../store/types/presentation';
+import NewPresentationModal from './NewPresentationModal';
 
 const styles: { [key: string]: CSSProperties } = {
   loadingSpinner: {
@@ -64,7 +65,13 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AppwriteUser | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showNewPresentationModal, setShowNewPresentationModal] = useState(false);
+  const [creatingNew, setCreatingNew] = useState(false);
   const dispatch = useDispatch();
+
+  // Константы для отступов (чтобы совпадали)
+  const GRID_GAP = '20px'; // Расстояние между карточками презентаций
+  const CARD_WIDTH = '300px'; // Ширина карточки презентации
 
   useEffect(() => {
     addStylesToDocument();
@@ -105,11 +112,42 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   }, [user]);
 
   const handleCreateNew = () => {
-    dispatch(setPresentationId(''));
-    dispatch(createNewPresentation());
-    console.log('Создана новая пустая презентация');
-    if (onSelect) {
-      onSelect();
+    setShowNewPresentationModal(true);
+  };
+
+  const handleCreatePresentation = async (title: string) => {
+    if (!user) return;
+
+    setCreatingNew(true);
+    try {
+      // Создаем новую пустую презентацию
+      const newPresentation = PresentationService.createEmptyPresentation(title);
+
+      // Сохраняем ее в БД с уникальным ID
+      const savedPresentation = await PresentationService.savePresentation(
+        newPresentation,
+        user.$id,
+        user.name || user.email
+      );
+
+      // Устанавливаем ID в Redux store
+      dispatch(setPresentationId(savedPresentation.id || savedPresentation.$id));
+
+      // Загружаем созданную презентацию в редактор
+      dispatch(loadExistingPresentation(newPresentation));
+
+      console.log(`✅ Новая презентация создана: "${title}"`);
+
+      // Переходим в редактор
+      if (onSelect) {
+        onSelect();
+      }
+    } catch (error: any) {
+      console.error('❌ Ошибка создания презентации:', error);
+      alert(`Не удалось создать презентацию: ${error.message || 'Неизвестная ошибка'}`);
+    } finally {
+      setCreatingNew(false);
+      setShowNewPresentationModal(false);
     }
   };
 
@@ -118,6 +156,16 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
     dispatch(loadDemoPresentation());
     if (onSelect) {
       onSelect();
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession('current');
+      window.location.reload(); // Перезагружаем страницу для сброса состояния
+    } catch (error) {
+      console.error('Ошибка выхода:', error);
+      alert('Ошибка при выходе из системы');
     }
   };
 
@@ -194,48 +242,126 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
         }}
       >
         <h2 style={{ margin: 0 }}>Мои презентации</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={handleRefresh}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <span
             style={{
-              padding: '10px 20px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              fontSize: '14px',
+              color: '#64748b',
+              marginRight: '10px',
+            }}
+          >
+            {user?.name || user?.email}
+          </span>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: '8px 16px',
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               cursor: 'pointer',
               fontWeight: '600',
+              fontSize: '14px',
             }}
+            title="Выйти из аккаунта"
           >
-            ⟳ Обновить
+            Выйти
           </button>
+        </div>
+      </div>
+
+      {/* Кнопки созданы в сетке, которая совпадает с сеткой презентаций */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(auto-fill, minmax(${CARD_WIDTH}, 1fr))`,
+          gap: GRID_GAP,
+          marginBottom: '30px',
+        }}
+      >
+        {/* Первая кнопка - Создать новую */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <button
             onClick={handleCreateNew}
             style={{
-              padding: '10px 20px',
+              width: '100%',
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '12px',
               cursor: 'pointer',
               fontWeight: '600',
+              fontSize: '16px',
+              display: 'flex',
+              flexDirection: 'row', // ← ИЗМЕНИТЬ НА row
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              padding: '12px 20px', // ← УМЕНЬШИТЬ padding
+              transition: 'all 0.3s ease',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              height: '40px', // ← ЯВНО ЗАДАЁМ ВЫСОТУ
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+            }}
+            disabled={creatingNew}
           >
-            + Новая презентация
+            <span>{creatingNew ? 'Создание...' : 'Создать новую'}</span>
           </button>
+        </div>
+
+        {/* Вторая кнопка - Демо-презентация */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <button
             onClick={handleLoadDemo}
             style={{
-              padding: '10px 20px',
+              width: '100%',
               background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '12px',
               cursor: 'pointer',
               fontWeight: '600',
+              fontSize: '16px',
+              display: 'flex',
+              flexDirection: 'row', // ← ИЗМЕНИТЬ НА row
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              padding: '12px 20px', // ← УМЕНЬШИТЬ padding
+              transition: 'all 0.3s ease',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              height: '40px', // ← ЯВНО ЗАДАЁМ ВЫСОТУ
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
             }}
           >
-            📁 Демо-презентация
+            <span>Демо-презентация</span>
           </button>
         </div>
       </div>
@@ -252,200 +378,129 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       {loading ? (
         <div style={{ textAlign: 'center' as const, padding: '40px' }}>
           <div style={styles.loadingSpinner} />
-          <p>Загрузка презентаций с проверкой данных...</p>
-        </div>
-      ) : presentations.length === 0 ? (
-        <div
-          style={{
-            textAlign: 'center' as const,
-            padding: '60px 20px',
-            background: '#f8fafc',
-            borderRadius: '12px',
-            border: '2px dashed #e2e8f0',
-          }}
-        >
-          <div style={{ fontSize: '48px', marginBottom: '20px' }}>📁</div>
-          <h3 style={{ marginBottom: '10px' }}>У вас пока нет валидных презентаций</h3>
-          <p style={{ color: '#64748b', marginBottom: '20px' }}>
-            Создайте первую презентацию и она появится здесь
-          </p>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-            <button
-              onClick={handleCreateNew}
-              style={{
-                padding: '12px 24px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '16px',
-              }}
-            >
-              Создать новую
-            </button>
-            <button
-              onClick={handleLoadDemo}
-              style={{
-                padding: '12px 24px',
-                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '16px',
-              }}
-            >
-              Посмотреть демо
-            </button>
-          </div>
+          <p>Загрузка презентаций...</p>
         </div>
       ) : (
-        <>
-          <div style={{ marginBottom: '15px', color: '#64748b', fontSize: '14px' }}>
-            Загружено валидных презентаций: {presentations.length}
-            <span style={{ marginLeft: '10px', color: '#94a3b8', fontSize: '12px' }}>
-              (Некорректные презентации автоматически отфильтрованы)
-            </span>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '20px',
-              marginBottom: '40px',
-            }}
-          >
-            {presentations.map((pres) => (
-              <div
-                key={pres.id || pres.$id}
-                onClick={() => handleLoadPresentation(pres)}
-                style={{
-                  background: 'white',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '20px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                  position: 'relative',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: '#10b981',
-                    color: 'white',
-                    fontSize: '10px',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontWeight: '600',
-                  }}
-                  title="Эта презентация прошла проверку валидации"
-                >
-                  ✅ Валидна
-                </div>
-
-                <h3
-                  style={{
-                    margin: '0 0 10px 0',
-                    fontSize: '18px',
-                    color: '#1e293b',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap' as const,
-                    paddingRight: '50px',
-                  }}
-                >
-                  {pres.title || 'Без названия'}
-                </h3>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    color: '#64748b',
-                    fontSize: '14px',
-                    marginBottom: '15px',
-                  }}
-                >
-                  <span>📊 {(pres.slides || []).length} слайдов</span>
-                  <span>👤 {pres.ownerName || user.name || user.email}</span>
-                </div>
-
-                <div
-                  style={{
-                    fontSize: '12px',
-                    color: '#94a3b8',
-                    borderTop: '1px solid #f1f5f9',
-                    paddingTop: '10px',
-                  }}
-                >
-                  Обновлено:{' '}
-                  {pres.updatedAt
-                    ? new Date(pres.updatedAt).toLocaleDateString('ru-RU')
-                    : 'Нет данных'}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              textAlign: 'center' as const,
-              padding: '20px',
-              background: '#f8fafc',
-              borderRadius: '12px',
-            }}
-          >
-            <p style={{ marginBottom: '15px', color: '#64748b' }}>
-              Всего валидных презентаций: {presentations.length}
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button
-                onClick={handleCreateNew}
-                style={{
-                  padding: '10px 20px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                }}
-              >
-                + Создать новую презентацию
-              </button>
-              <button
-                onClick={handleLoadDemo}
-                style={{
-                  padding: '10px 20px',
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                }}
-              >
-                📁 Загрузить демо-презентацию
-              </button>
+        presentations.length > 0 && (
+          <>
+            <div style={{ marginBottom: '15px', color: '#64748b', fontSize: '14px' }}>
+              Загружено презентаций: {presentations.length}
             </div>
-          </div>
-        </>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(auto-fill, minmax(${CARD_WIDTH}, 1fr))`,
+                gap: GRID_GAP,
+              }}
+            >
+              {presentations.map((pres) => (
+                <div
+                  key={pres.id || pres.$id}
+                  onClick={() => handleLoadPresentation(pres)}
+                  style={{
+                    background: 'white',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                    position: 'relative',
+                    minHeight: '140px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      background: '#10b981',
+                      color: 'white',
+                      fontSize: '10px',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      fontWeight: '600',
+                    }}
+                    title="Эта презентация прошла проверку валидации"
+                  >
+                    ✅
+                  </div>
+
+                  <div>
+                    <h3
+                      style={{
+                        margin: '0 0 10px 0',
+                        fontSize: '18px',
+                        color: '#1e293b',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap' as const,
+                        paddingRight: '50px',
+                      }}
+                    >
+                      {pres.title || 'Без названия'}
+                    </h3>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        color: '#64748b',
+                        fontSize: '14px',
+                      }}
+                    >
+                      <span>📊 {(pres.slides || []).length} слайдов</span>
+                      <span>👤 {pres.ownerName || user.name || user.email}</span>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: '#94a3b8',
+                      borderTop: '1px solid #f1f5f9',
+                      paddingTop: '10px',
+                      marginTop: '10px',
+                    }}
+                  >
+                    Обновлено:{' '}
+                    {pres.updatedAt
+                      ? new Date(pres.updatedAt).toLocaleString('ru-RU', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })
+                      : 'Нет данных'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )
+      )}
+
+      {showNewPresentationModal && (
+        <NewPresentationModal
+          isOpen={showNewPresentationModal}
+          onClose={() => setShowNewPresentationModal(false)}
+          onCreate={handleCreatePresentation}
+          onCancel={() => setShowNewPresentationModal(false)}
+        />
       )}
     </div>
   );

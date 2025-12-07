@@ -1,0 +1,154 @@
+/* Стили для лоадера */
+.presentation-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.presentation-loading-content {
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.presentation-loading-logo {
+  font-size: 36px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.presentation-loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.presentation-loading-dot {
+  width: 12px;
+  height: 12px;
+  background: #667eea;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.presentation-loading-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.presentation-loading-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.presentation-loading-text {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Стили для тулбара */
+.presentation-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  font-size: 16px;
+}
+
+.toolbar-button:hover:not(:disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+}
+
+.toolbar-button:disabled {
+  cursor: not-allowed;
+}
+
+.toolbar-button:active:not(:disabled) {
+  background: #dee2e6;
+  transform: translateY(0);
+}
+
+.toolbar-icon {
+  font-size: 18px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background: #dee2e6;
+  margin: 0 8px;
+}
+
+.saving-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 123, 255, 0.3);
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Общие стили */
+.presentation-body {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}

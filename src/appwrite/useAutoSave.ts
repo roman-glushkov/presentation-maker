@@ -7,7 +7,7 @@ import { account, AppwriteUser } from './client';
 
 export function useAutoSave(intervalMs = 15000) {
   const presentation = useSelector((state: RootState) => state.editor.presentation);
-  const presentationId = useSelector((state: RootState) => state.editor.presentationId); // ← ДОБАВЛЕНО
+  const presentationId = useSelector((state: RootState) => state.editor.presentationId);
   const lastSaveRef = useRef<number>(Date.now());
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -28,34 +28,43 @@ export function useAutoSave(intervalMs = 15000) {
   const savePresentation = useCallback(async () => {
     if (!user || isSaving) return;
 
-    // Не сохраняем, если прошло меньше 5 секунд с последнего сохранения
-    if (Date.now() - lastSaveRef.current < 5000) {
+    // Не сохраняем, если нет presentationId (новая презентация еще не сохранена)
+    if (!presentationId) {
+      console.log('⚠️ Пропускаем сохранение: презентация еще не сохранена');
+      alert('Пожалуйста, сначала создайте презентацию');
+      return;
+    }
+
+    // Не сохраняем, если прошло меньше 2 секунд с последнего сохранения
+    if (Date.now() - lastSaveRef.current < 2000) {
+      console.log('⚠️ Слишком частое сохранение, пропускаем');
       return;
     }
 
     setIsSaving(true);
 
     try {
-      await PresentationService.savePresentation(
+      const result = await PresentationService.savePresentation(
         presentation,
         user.$id,
         user.name || user.email,
-        presentationId // ← ПЕРЕДАЕМ ID
+        presentationId
       );
 
       lastSaveRef.current = Date.now();
       setLastSaved(new Date());
-      console.log('✅ Презентация сохранена');
+      console.log('✅ Презентация сохранена:', result.id);
     } catch (error) {
-      console.error('❌ Ошибка автосохранения:', error);
+      console.error('❌ Ошибка сохранения:', error);
+      alert('Ошибка при сохранении презентации. Проверьте консоль для подробностей.');
     } finally {
       setIsSaving(false);
     }
-  }, [presentation, user, isSaving, presentationId]); // ← ДОБАВЛЕН presentationId
+  }, [presentation, user, isSaving, presentationId]);
 
   // Настраиваем автосохранение
   useEffect(() => {
-    if (!user) return;
+    if (!user || !presentationId) return;
 
     const scheduleSave = () => {
       if (saveTimeoutRef.current) {
@@ -71,7 +80,7 @@ export function useAutoSave(intervalMs = 15000) {
 
     // Сохраняем при закрытии страницы
     const handleBeforeUnload = () => {
-      if (!isSaving) {
+      if (!isSaving && presentationId) {
         savePresentation();
       }
     };
@@ -84,11 +93,11 @@ export function useAutoSave(intervalMs = 15000) {
       }
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [presentation, user, intervalMs, savePresentation, isSaving]);
+  }, [presentation, user, intervalMs, savePresentation, isSaving, presentationId]);
 
   return {
     isSaving,
     lastSaved,
-    saveNow: savePresentation,
+    saveNow: savePresentation, // Экспортируем функцию для ручного сохранения
   };
 }
