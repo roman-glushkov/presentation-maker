@@ -1,3 +1,4 @@
+// SlidesPanel/parts/Row.tsx
 import React from 'react';
 import { Slide } from '../../../../store/types/presentation';
 import { Preview } from './Preview';
@@ -33,9 +34,19 @@ export function SlideRow({
       onDragStart={onDragStart}
       onDragEnter={onDragEnter}
       onDragEnd={onDragEnd}
+      style={{
+        cursor: 'pointer', // Добавляем курсор-указатель
+        padding: '4px',
+        margin: '4px 0',
+        borderRadius: '4px',
+        backgroundColor: selected ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+        transition: 'background-color 0.2s',
+      }}
     >
-      <SlideNumber number={index + 1} />
-      <Preview slide={slide} scale={0.25} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <SlideNumber number={index + 1} />
+        <Preview slide={slide} scale={0.25} />
+      </div>
     </div>
   );
 }

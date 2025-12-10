@@ -3,7 +3,8 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { PresentationService, StoredPresentation } from '../presentation-service';
 import { account, AppwriteUser } from '../client';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store';
 import {
   loadDemoPresentation,
   createNewPresentation,
@@ -69,9 +70,12 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   const [creatingNew, setCreatingNew] = useState(false);
   const dispatch = useDispatch();
 
-  // Константы для отступов (чтобы совпадали)
-  const GRID_GAP = '20px'; // Расстояние между карточками презентаций
-  const CARD_WIDTH = '300px'; // Ширина карточки презентации
+  // Получаем текущую презентацию из Redux
+  const currentPresentation = useSelector((state: RootState) => state.editor.presentation);
+
+  // Константы для отступов
+  const GRID_GAP = '20px';
+  const CARD_WIDTH = '300px';
 
   useEffect(() => {
     addStylesToDocument();
@@ -116,35 +120,73 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   };
 
   const handleCreatePresentation = async (title: string) => {
-    if (!user) return;
-
-    setCreatingNew(true);
     try {
-      // Создаем новую пустую презентацию
-      const newPresentation = PresentationService.createEmptyPresentation(title);
+      console.log('🆕 Создаем новую презентацию с названием:', title);
+      setCreatingNew(true);
 
-      // Сохраняем ее в БД с уникальным ID
+      // 1. Создаем новую презентацию в Redux
+      dispatch(createNewPresentation());
+
+      // Даем время Redux обновиться
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // 2. Обновляем заголовок в локальной копии
+      const presentationToSave = {
+        ...currentPresentation,
+        title: title || 'Новая презентация',
+      };
+
+      // 3. Получаем пользователя
+      const currentUser = await account.get<AppwriteUser>();
+
+      console.log('Сохраняем данные:', {
+        title: presentationToSave.title,
+        slidesCount: presentationToSave.slides?.length || 0,
+        userId: currentUser.$id,
+        userName: currentUser.name,
+      });
+
+      // 4. Сохраняем в Appwrite
       const savedPresentation = await PresentationService.savePresentation(
-        newPresentation,
-        user.$id,
-        user.name || user.email
+        presentationToSave,
+        currentUser.$id,
+        currentUser.name || currentUser.email
       );
 
-      // Устанавливаем ID в Redux store
-      dispatch(setPresentationId(savedPresentation.id || savedPresentation.$id));
+      console.log('✅ Презентация сохранена в Appwrite:', savedPresentation.$id);
 
-      // Загружаем созданную презентацию в редактор
-      dispatch(loadExistingPresentation(newPresentation));
+      // 5. Загружаем сохраненную презентацию в Redux
+      const loadedPresentation = await PresentationService.getPresentation(savedPresentation.$id);
 
-      console.log(`✅ Новая презентация создана: "${title}"`);
+      // Подготавливаем данные для редактора
+      const presentationForEditor: Presentation = {
+        title: loadedPresentation.title || 'Без названия',
+        slides: loadedPresentation.slides || [],
+        currentSlideId:
+          loadedPresentation.currentSlideId || loadedPresentation.slides?.[0]?.id || '',
+        selectedSlideIds:
+          loadedPresentation.selectedSlideIds ||
+          (loadedPresentation.slides?.[0]?.id ? [loadedPresentation.slides[0].id] : []),
+      };
 
-      // Переходим в редактор
+      // 6. Обновляем Redux
+      dispatch(loadExistingPresentation(presentationForEditor));
+      dispatch(setPresentationId(savedPresentation.$id));
+
+      console.log('🎯 PresentationId установлен:', savedPresentation.$id);
+      console.log('Созданная презентация:', {
+        title: presentationForEditor.title,
+        slidesCount: presentationForEditor.slides?.length,
+        hasElements: presentationForEditor.slides?.[0]?.elements?.length || 0,
+      });
+
+      // 7. Переходим к редактированию
       if (onSelect) {
         onSelect();
       }
     } catch (error: any) {
       console.error('❌ Ошибка создания презентации:', error);
-      alert(`Не удалось создать презентацию: ${error.message || 'Неизвестная ошибка'}`);
+      alert(`Ошибка создания презентации: ${error.message || 'Неизвестная ошибка'}`);
     } finally {
       setCreatingNew(false);
       setShowNewPresentationModal(false);
@@ -152,7 +194,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   };
 
   const handleLoadDemo = () => {
-    dispatch(setPresentationId(''));
+    dispatch(setPresentationId('demo'));
     dispatch(loadDemoPresentation());
     if (onSelect) {
       onSelect();
@@ -162,7 +204,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   const handleLogout = async () => {
     try {
       await account.deleteSession('current');
-      window.location.reload(); // Перезагружаем страницу для сброса состояния
+      window.location.reload();
     } catch (error) {
       console.error('Ошибка выхода:', error);
       alert('Ошибка при выходе из системы');
@@ -178,9 +220,6 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
         presentation.id || presentation.$id
       );
 
-      // Устанавливаем ID презентации в Redux
-      dispatch(setPresentationId(fullPresentation.id || fullPresentation.$id));
-
       // Подготавливаем данные презентации для редактора
       const presentationForEditor: Presentation = {
         title: fullPresentation.title || 'Без названия',
@@ -191,11 +230,16 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
           (fullPresentation.slides?.[0]?.id ? [fullPresentation.slides[0].id] : []),
       };
 
-      // Загружаем презентацию в редактор
+      // Обновляем Redux
+      dispatch(setPresentationId(fullPresentation.id || fullPresentation.$id));
       dispatch(loadExistingPresentation(presentationForEditor));
 
-      console.log(`✅ Презентация "${fullPresentation.title}" успешно загружена в редактор`);
-      console.log('Текущий слайд ID:', presentationForEditor.currentSlideId);
+      console.log(`✅ Презентация "${fullPresentation.title}" успешно загружена`);
+      console.log('Данные:', {
+        title: presentationForEditor.title,
+        slidesCount: presentationForEditor.slides?.length,
+        currentSlideId: presentationForEditor.currentSlideId,
+      });
 
       // Переходим в редактор
       if (onSelect) {
@@ -204,10 +248,9 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
     } catch (error: any) {
       console.error('❌ Ошибка загрузки презентации:', error);
 
-      // Специальная обработка ошибок валидации
       if (error.message && error.message.includes('Данные презентации повреждены')) {
         alert(
-          `❌ Ошибка загрузки презентации:\n\n${error.message}\n\nЭта презентация содержит поврежденные данные. Пожалуйста, выберите другую презентацию или создайте новую.`
+          `❌ Ошибка загрузки презентации:\n\n${error.message}\n\nЭта презентация содержит поврежденные данные.`
         );
       } else if (error.message && error.message.includes('Невалидная структура')) {
         alert(
@@ -271,7 +314,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
         </div>
       </div>
 
-      {/* Кнопки созданы в сетке, которая совпадает с сеткой презентаций */}
+      {/* Кнопки созданы в сетке */}
       <div
         style={{
           display: 'grid',
@@ -280,7 +323,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
           marginBottom: '30px',
         }}
       >
-        {/* Первая кнопка - Создать новую */}
+        {/* Кнопка - Создать новую */}
         <div
           style={{
             display: 'flex',
@@ -300,14 +343,14 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
               fontWeight: '600',
               fontSize: '16px',
               display: 'flex',
-              flexDirection: 'row', // ← ИЗМЕНИТЬ НА row
+              flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
-              padding: '12px 20px', // ← УМЕНЬШИТЬ padding
+              padding: '12px 20px',
               transition: 'all 0.3s ease',
               boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              height: '40px', // ← ЯВНО ЗАДАЁМ ВЫСОТУ
+              height: '40px',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';
@@ -323,7 +366,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
           </button>
         </div>
 
-        {/* Вторая кнопка - Демо-презентация */}
+        {/* Кнопка - Демо-презентация */}
         <div
           style={{
             display: 'flex',
@@ -343,14 +386,14 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
               fontWeight: '600',
               fontSize: '16px',
               display: 'flex',
-              flexDirection: 'row', // ← ИЗМЕНИТЬ НА row
+              flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
-              padding: '12px 20px', // ← УМЕНЬШИТЬ padding
+              padding: '12px 20px',
               transition: 'all 0.3s ease',
               boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              height: '40px', // ← ЯВНО ЗАДАЁМ ВЫСОТУ
+              height: '40px',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';

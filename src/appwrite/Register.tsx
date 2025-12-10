@@ -115,15 +115,45 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
         <div className="presentation-auth-container">
           {/* Боковая панель с преимуществами */}
           <div className="presentation-sidebar">
-            <h2 className="presentation-side-title">
-              Начните создавать презентации нового поколения
-            </h2>
+            <h2 className="presentation-side-title">Присоединяйтесь к SlideCraft</h2>
             <p className="presentation-side-subtitle">
-              Присоединяйтесь к сообществу профессионалов, которые уже создали более 100,000
-              презентаций
+              Начните создавать презентации с помощью нашего конструктора
             </p>
 
             <div className="presentation-features">
+              <div className="presentation-feature">
+                <div className="presentation-feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </div>
+                <div className="presentation-feature-content">
+                  <h3>Текстовые и графические элементы</h3>
+                  <p>
+                    Добавляйте текст, изображения, фигуры и настраивайте их оформление с помощью
+                    интуитивных инструментов
+                  </p>
+                </div>
+              </div>
+
+              <div className="presentation-feature">
+                <div className="presentation-feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 6h18"></path>
+                    <path d="M3 12h18"></path>
+                    <path d="M3 18h18"></path>
+                  </svg>
+                </div>
+                <div className="presentation-feature-content">
+                  <h3>Гибкое редактирование слайдов</h3>
+                  <p>
+                    Изменяйте размер, положение и стиль элементов, перетаскивайте их мышью и
+                    настраивайте визуальное оформление
+                  </p>
+                </div>
+              </div>
+
               <div className="presentation-feature">
                 <div className="presentation-feature-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -133,45 +163,27 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                   </svg>
                 </div>
                 <div className="presentation-feature-content">
-                  <h3>Умные шаблоны</h3>
-                  <p>Адаптируются под ваш контент автоматически</p>
+                  <h3>Управление несколькими слайдами</h3>
+                  <p>
+                    Создавайте, удаляйте, дублируйте и переупорядочивайте слайды для
+                    структурированной презентации
+                  </p>
                 </div>
               </div>
 
               <div className="presentation-feature">
                 <div className="presentation-feature-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
                   </svg>
                 </div>
                 <div className="presentation-feature-content">
-                  <h3>ИИ-аналитика</h3>
-                  <p>Анализ структуры и рекомендации по улучшению</p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Без рекламы</h3>
-                  <p>Полностью чистый интерфейс для максимальной концентрации</p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Экспорт в любом формате</h3>
-                  <p>PDF, PowerPoint, Keynote, Google Slides и даже видео</p>
+                  <h3>Сохранение и загрузка проектов</h3>
+                  <p>
+                    Храните презентации в облаке, возвращайтесь к ним позже и делитесь с коллегами
+                  </p>
                 </div>
               </div>
             </div>
@@ -180,15 +192,17 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
           {/* Форма регистрации */}
           <div className="presentation-auth-card">
             <div className="presentation-auth-header">
-              <h1 className="presentation-auth-title">Создайте аккаунт</h1>
-              <p className="presentation-auth-subtitle">Начните создавать презентации за минуты</p>
+              <h1 className="presentation-auth-title">Создайте аккаунт в SlideCraft</h1>
+              <p className="presentation-auth-subtitle">
+                Получите доступ ко всем возможностям конструктора презентаций
+              </p>
             </div>
 
             <form onSubmit={register} className="presentation-auth-form">
               {error && <div className="presentation-error">{error}</div>}
 
               <div className="presentation-form-group">
-                <label className="presentation-form-label">Ваше имя</label>
+                <label className="presentation-form-label">Как вас зовут?</label>
                 <input
                   className="presentation-form-input"
                   type="text"
@@ -200,11 +214,11 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                   pattern=".{2,}"
                   title="Минимум 2 символа"
                 />
-                <div className="presentation-input-hint">Как к вам обращаться</div>
+                <div className="presentation-input-hint">Используйте ваше настоящее имя</div>
               </div>
 
               <div className="presentation-form-group">
-                <label className="presentation-form-label">Рабочий Email</label>
+                <label className="presentation-form-label">Ваш рабочий Email</label>
                 <input
                   className="presentation-form-input"
                   type="email"
@@ -218,12 +232,12 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                   autoComplete="email"
                 />
                 <div className="presentation-input-hint">
-                  Используйте рабочий email для лучших возможностей
+                  На этот email будут приходить уведомления о ваших презентациях
                 </div>
               </div>
 
               <div className="presentation-form-group">
-                <label className="presentation-form-label">Пароль</label>
+                <label className="presentation-form-label">Создайте надежный пароль</label>
                 <input
                   className="presentation-form-input"
                   type="password"
@@ -237,7 +251,7 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                   title="Минимум 8 символов"
                 />
                 <div className="presentation-input-hint">
-                  Минимум 8 символов, используйте буквы и цифры
+                  Минимум 8 символов, используйте буквы и цифры для безопасности
                 </div>
               </div>
 
@@ -248,7 +262,7 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                     <span>Создаём аккаунт...</span>
                   </div>
                 ) : (
-                  'Создать аккаунт'
+                  'Начать создавать презентации'
                 )}
               </button>
             </form>
@@ -267,7 +281,7 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
 
             <div className="presentation-agreement">
               <p className="presentation-agreement-text">
-                Нажимая "Создать аккаунт", вы соглашаетесь с
+                Нажимая "Начать создавать презентации", вы соглашаетесь с
                 <a href="#" className="presentation-link">
                   {' '}
                   Условиями использования

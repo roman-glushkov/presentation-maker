@@ -36,7 +36,6 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
     setLoading(true);
 
     try {
-      // Убираем generic тип <AppwriteSession>
       const session = await account.createEmailPasswordSession(email.trim(), password);
       console.log('Сессия создана:', session);
       onSuccess();
@@ -83,12 +82,39 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
         <div className="presentation-auth-container">
           {/* Боковая панель с преимуществами */}
           <div className="presentation-sidebar">
-            <h2 className="presentation-side-title">Создавайте презентации, которые запомнятся</h2>
-            <p className="presentation-side-subtitle">
-              Профессиональные шаблоны, умные анимации и коллаборация в реальном времени
-            </p>
+            <h2 className="presentation-side-title">Войдите в SlideCraft</h2>
+            <p className="presentation-side-subtitle">Продолжите работу над вашими презентациями</p>
 
             <div className="presentation-features">
+              <div className="presentation-feature">
+                <div className="presentation-feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                  </svg>
+                </div>
+                <div className="presentation-feature-content">
+                  <h3>Простой конструктор презентаций</h3>
+                  <p>Создавайте слайды с текстом и изображениями, настраивайте цвета и шрифты</p>
+                </div>
+              </div>
+
+              <div className="presentation-feature">
+                <div className="presentation-feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <div className="presentation-feature-content">
+                  <h3>Управление слайдами</h3>
+                  <p>
+                    Добавляйте, удаляйте и переупорядочивайте слайды, настраивайте фон каждого
+                    слайда
+                  </p>
+                </div>
+              </div>
+
               <div className="presentation-feature">
                 <div className="presentation-feature-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -96,35 +122,11 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
                   </svg>
                 </div>
                 <div className="presentation-feature-content">
-                  <h3>Более 100+ шаблонов</h3>
-                  <p>Профессиональные макеты для любых целей</p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>ИИ-помощник</h3>
-                  <p>Автоматическое создание контента и дизайна</p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 010 7.75"></path>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Командная работа</h3>
-                  <p>Редактируйте презентации вместе с коллегами</p>
+                  <h3>Быстрое редактирование</h3>
+                  <p>
+                    Изменяйте размер и положение элементов, копируйте стили и настраивайте
+                    выравнивание
+                  </p>
                 </div>
               </div>
             </div>
@@ -133,15 +135,17 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
           {/* Форма входа */}
           <div className="presentation-auth-card">
             <div className="presentation-auth-header">
-              <h1 className="presentation-auth-title">Войдите в SlideCraft</h1>
-              <p className="presentation-auth-subtitle">Продолжите создавать шедевры</p>
+              <h1 className="presentation-auth-title">Добро пожаловать в SlideCraft</h1>
+              <p className="presentation-auth-subtitle">
+                Войдите, чтобы продолжить создание впечатляющих презентаций
+              </p>
             </div>
 
             <form onSubmit={login} className="presentation-auth-form">
               {error && <div className="presentation-error">{error}</div>}
 
               <div className="presentation-form-group">
-                <label className="presentation-form-label">Email</label>
+                <label className="presentation-form-label">Ваш email</label>
                 <input
                   className="presentation-form-input"
                   type="email"
@@ -154,11 +158,13 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
                   title="Введите корректный email"
                   autoComplete="email"
                 />
-                <div className="presentation-input-hint">Используйте рабочий email</div>
+                <div className="presentation-input-hint">
+                  Email, который вы использовали при регистрации
+                </div>
               </div>
 
               <div className="presentation-form-group">
-                <label className="presentation-form-label">Пароль</label>
+                <label className="presentation-form-label">Ваш пароль</label>
                 <input
                   className="presentation-form-input"
                   type="password"
@@ -172,7 +178,7 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
                   title="Минимум 8 символов"
                   autoComplete="current-password"
                 />
-                <div className="presentation-input-hint">Минимум 8 символов</div>
+                <div className="presentation-input-hint">Введите пароль от вашего аккаунта</div>
               </div>
 
               <button className="presentation-auth-button" type="submit" disabled={loading}>
@@ -182,13 +188,13 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
                     <span>Вход...</span>
                   </div>
                 ) : (
-                  'Войти в аккаунт'
+                  'Продолжить создание'
                 )}
               </button>
             </form>
 
             <div className="presentation-link-text">
-              Ещё нет аккаунта?{' '}
+              Нет аккаунта?{' '}
               <a
                 href="#"
                 onClick={handleSwitchToRegister}

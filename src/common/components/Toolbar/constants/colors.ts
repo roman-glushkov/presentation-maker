@@ -1,5 +1,5 @@
 export const THEME_COLUMNS: string[][] = [
-  ['#f2f2f2', '#d8d8d8', '#bfbfbf', '#a5a5a5', '#7f7f7f'],
+  ['#ffffff', '#d8d8d8', '#bfbfbf', '#a5a5a5', '#7f7f7f'],
   ['#7f7f7f', '#595959', '#3f3f3f', '#262626', '#0c0c0c'],
   ['#d0cecf', '#adadab', '#74706f', '#3a3839', '#161616'],
   ['#d5dce4', '#adb8ca', '#8697b1', '#323f4f', '#222834'],

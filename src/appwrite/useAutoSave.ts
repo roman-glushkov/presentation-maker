@@ -1,47 +1,45 @@
 // src/appwrite/useAutoSave.ts
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { PresentationService } from './presentation-service';
 import { account, AppwriteUser } from './client';
 
+// useAutoSave.ts
 export function useAutoSave(intervalMs = 15000) {
   const presentation = useSelector((state: RootState) => state.editor.presentation);
   const presentationId = useSelector((state: RootState) => state.editor.presentationId);
-  const lastSaveRef = useRef<number>(Date.now());
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [user, setUser] = useState<AppwriteUser | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
-  // Получаем информацию о пользователе
   useEffect(() => {
     account
       .get<AppwriteUser>()
-      .then(setUser)
+      .then((userData) => {
+        setUser(userData);
+        setIsReady(true);
+      })
       .catch(() => {
-        console.log('Пользователь не авторизован, автосохранение отключено');
+        console.log('Пользователь не авторизован');
+        setIsReady(false);
       });
   }, []);
 
   // Функция сохранения
   const savePresentation = useCallback(async () => {
-    if (!user || isSaving) return;
-
-    // Не сохраняем, если нет presentationId (новая презентация еще не сохранена)
-    if (!presentationId) {
-      console.log('⚠️ Пропускаем сохранение: презентация еще не сохранена');
-      alert('Пожалуйста, сначала создайте презентацию');
-      return;
-    }
-
-    // Не сохраняем, если прошло меньше 2 секунд с последнего сохранения
-    if (Date.now() - lastSaveRef.current < 2000) {
-      console.log('⚠️ Слишком частое сохранение, пропускаем');
+    if (!user || isSaving || !presentationId) {
+      console.log('Не могу сохранить:', {
+        hasUser: !!user,
+        isSaving,
+        presentationId,
+      });
       return;
     }
 
     setIsSaving(true);
+    console.log('🔄 Сохраняем презентацию...', presentationId);
 
     try {
       const result = await PresentationService.savePresentation(
@@ -51,36 +49,35 @@ export function useAutoSave(intervalMs = 15000) {
         presentationId
       );
 
-      lastSaveRef.current = Date.now();
       setLastSaved(new Date());
-      console.log('✅ Презентация сохранена:', result.id);
+      console.log('✅ Сохранено успешно:', result.id);
     } catch (error) {
       console.error('❌ Ошибка сохранения:', error);
-      alert('Ошибка при сохранении презентации. Проверьте консоль для подробностей.');
     } finally {
       setIsSaving(false);
     }
   }, [presentation, user, isSaving, presentationId]);
 
-  // Настраиваем автосохранение
+  // Автосохранение
   useEffect(() => {
-    if (!user || !presentationId) return;
+    if (!user || !presentationId || !isReady) {
+      console.log('Автосохранение не активно:', {
+        hasUser: !!user,
+        hasPresentationId: !!presentationId,
+        isReady,
+      });
+      return;
+    }
 
-    const scheduleSave = () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+    console.log('✅ Автосохранение активно для:', presentationId);
 
-      saveTimeoutRef.current = setTimeout(() => {
-        savePresentation();
-      }, intervalMs);
-    };
+    const interval = setInterval(() => {
+      savePresentation();
+    }, intervalMs);
 
-    scheduleSave();
-
-    // Сохраняем при закрытии страницы
+    // Сохраняем при закрытии
     const handleBeforeUnload = () => {
-      if (!isSaving && presentationId) {
+      if (presentationId) {
         savePresentation();
       }
     };
@@ -88,16 +85,14 @@ export function useAutoSave(intervalMs = 15000) {
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+      clearInterval(interval);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [presentation, user, intervalMs, savePresentation, isSaving, presentationId]);
+  }, [presentation, user, presentationId, isReady, intervalMs, savePresentation]);
 
   return {
     isSaving,
     lastSaved,
-    saveNow: savePresentation, // Экспортируем функцию для ручного сохранения
+    saveNow: savePresentation,
   };
 }
