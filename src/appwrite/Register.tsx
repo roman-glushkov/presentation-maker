@@ -262,7 +262,7 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                     <span>Создаём аккаунт...</span>
                   </div>
                 ) : (
-                  'Начать создавать презентации'
+                  'Начать презентацию'
                 )}
               </button>
             </form>

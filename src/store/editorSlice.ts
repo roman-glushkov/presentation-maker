@@ -1,4 +1,3 @@
-// src/store/editorSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Presentation, Slide, Background, SlideElement } from './types/presentation';
 import * as func from './functions/presentation';
@@ -29,15 +28,27 @@ export interface EditorState {
   slides: Slide[];
 
   history: {
-    past: EditorSnapshot[]; // каждый snapshot — глубокая копия
+    past: EditorSnapshot[];
     future: EditorSnapshot[];
     maxItems: number;
 
-    transactionDepth: number; // для atomic транзакций (drag, resize, text-edit)
+    transactionDepth: number;
     transactionInitial?: EditorSnapshot | null;
     transactionAction?: string | null;
   };
 }
+
+const SELECTION_ACTIONS = new Set([
+  'editor/selectSlide',
+  'editor/selectSlides',
+  'editor/selectElement',
+  'editor/selectMultipleElements',
+  'editor/addToSelection',
+  'editor/removeFromSelection',
+  'editor/clearSelection',
+  'editor/clearSlideSelection',
+  'editor/clearAllSelections',
+]);
 
 const initialState: EditorState = {
   presentation: initialPresentation,
@@ -56,8 +67,6 @@ const initialState: EditorState = {
   },
 };
 
-// Функции помощи
-
 function clonePresentation(p: Presentation): Presentation {
   return JSON.parse(JSON.stringify(p));
 }
@@ -70,19 +79,6 @@ function makeSnapshot(state: EditorState): EditorSnapshot {
     selectedElementIds: [...state.selectedElementIds],
   };
 }
-
-// Список действий, которые НЕ должны попадать в историю (selection / UI)
-const SELECTION_ACTIONS = new Set([
-  'editor/selectSlide',
-  'editor/selectSlides',
-  'editor/selectElement',
-  'editor/selectMultipleElements',
-  'editor/addToSelection',
-  'editor/removeFromSelection',
-  'editor/clearSelection',
-  'editor/clearSlideSelection',
-  'editor/clearAllSelections',
-]);
 
 function pushToPast(state: EditorState, actionType?: string) {
   if (actionType && SELECTION_ACTIONS.has(actionType)) return;
@@ -100,9 +96,6 @@ export const editorSlice = createSlice({
   name: 'editor',
   initialState,
   reducers: {
-    // ----------------------
-    // TRANSACTION CONTROLS (atomic)
-    // ----------------------
     beginTransaction(state, action: PayloadAction<string | undefined>) {
       state.history.transactionDepth += 1;
       if (state.history.transactionDepth === 1) {
@@ -134,67 +127,55 @@ export const editorSlice = createSlice({
       }
     },
 
-    // ----------------------
-    // SELECTION (no history)
-    // ----------------------
-    // Выбор слайда - очищает выделение элементов
     selectSlide(state, action: PayloadAction<string>) {
       const slideId = action.payload;
       state.selectedSlideId = slideId;
       state.selectedSlideIds = [slideId];
-      state.selectedElementIds = []; // Очищаем элементы
+      state.selectedElementIds = [];
     },
 
-    // Выбор нескольких слайдов - очищает выделение элементов
     selectSlides(state, action: PayloadAction<string[]>) {
       if (action.payload.length > 0) {
         state.selectedSlideIds = action.payload;
         state.selectedSlideId = action.payload[0];
-        state.selectedElementIds = []; // Очищаем элементы
+        state.selectedElementIds = [];
       } else {
         state.selectedSlideIds = [];
         state.selectedSlideId = '';
       }
     },
 
-    // Выбор одного элемента - очищает выделение слайдов
     selectElement(state, action: PayloadAction<string>) {
       const elementId = action.payload;
       state.selectedElementIds = [elementId];
-      state.selectedSlideIds = []; // Очищаем слайды
+      state.selectedSlideIds = [];
     },
 
-    // Выбор нескольких элементов - очищает выделение слайдов
     selectMultipleElements(state, action: PayloadAction<string[]>) {
       state.selectedElementIds = action.payload;
-      state.selectedSlideIds = []; // Очищаем слайды
+      state.selectedSlideIds = [];
     },
 
-    // Добавление элемента к выделению - очищает выделение слайдов
     addToSelection(state, action: PayloadAction<string>) {
       const elementId = action.payload;
       if (!state.selectedElementIds.includes(elementId)) {
         state.selectedElementIds.push(elementId);
       }
-      state.selectedSlideIds = []; // Очищаем слайды при любом выделении элементов
+      state.selectedSlideIds = [];
     },
 
-    // Удаление элемента из выделения
     removeFromSelection(state, action: PayloadAction<string>) {
       state.selectedElementIds = state.selectedElementIds.filter((id) => id !== action.payload);
     },
 
-    // Очистка выделения элементов (НЕ слайдов)
     clearSelection(state) {
       state.selectedElementIds = [];
     },
 
-    // Очистка выделения слайдов (НЕ элементов)
     clearSlideSelection(state) {
       state.selectedSlideIds = [];
     },
 
-    // Очистка ВСЕГО выделения
     clearAllSelections(state) {
       state.selectedElementIds = [];
       state.selectedSlideIds = [];
@@ -204,9 +185,6 @@ export const editorSlice = createSlice({
       state.presentationId = action.payload;
     },
 
-    // ----------------------
-    // PRESENTATION MUTATIONS (history-aware)
-    // ----------------------
     loadDemoPresentation(state) {
       pushToPast(state, 'editor/loadDemoPresentation');
       state.presentation = clonePresentation(demoPresentation);
@@ -353,17 +331,14 @@ export const editorSlice = createSlice({
 
       const newSlideId = `slide-${Date.now()}`;
 
-      // ПРОВЕРКА: что sld.slideTitle существует
       console.log('slideTitle существует?', !!sld.slideTitle);
       console.log('slideTitle структура:', sld.slideTitle);
 
-      // Создаем копию титульного слайда
       const titleSlide = {
         ...sld.slideTitle,
         id: newSlideId,
       };
 
-      // Обновляем ID элементов внутри слайда
       titleSlide.elements =
         titleSlide.elements?.map((el) => ({
           ...el,
@@ -379,8 +354,7 @@ export const editorSlice = createSlice({
         selectedSlideIds: [newSlideId],
       };
 
-      // ВАЖНО: presentationId должен быть сброшен для новой презентации
-      state.presentationId = undefined; // Это правильно - новая презентация еще не сохранена
+      state.presentationId = undefined;
       state.selectedSlideId = newSlideId;
       state.selectedSlideIds = [newSlideId];
       state.selectedElementIds = [];
@@ -416,7 +390,7 @@ export const editorSlice = createSlice({
       };
 
       state.selectedElementIds = newElements.map((el) => el.id);
-      state.selectedSlideIds = []; // Очищаем выделение слайдов
+      state.selectedSlideIds = [];
     },
 
     duplicateSlide(state, action: PayloadAction<string | undefined>) {
@@ -443,7 +417,7 @@ export const editorSlice = createSlice({
       state.presentation.slides = newSlides;
       state.selectedSlideId = duplicatedSlide.id;
       state.selectedSlideIds = [duplicatedSlide.id];
-      state.selectedElementIds = []; // Очищаем выделение элементов
+      state.selectedElementIds = [];
     },
 
     loadExistingPresentation(state, action: PayloadAction<Presentation>) {
@@ -671,9 +645,6 @@ export const editorSlice = createSlice({
       }
     },
 
-    // ----------------------
-    // UNDO / REDO
-    // ----------------------
     undo(state) {
       const past = state.history.past;
       if (past.length === 0) return;
