@@ -1,4 +1,3 @@
-// src/appwrite/components/SaveButton.tsx - упрощенная версия
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -26,15 +25,13 @@ export default function SaveButton({ onSave }: { onSave?: () => void }) {
 
     setSaving(true);
     try {
-      // ВАЖНО: передаем presentationId для обновления существующей записи
       const result = await PresentationService.savePresentation(
         presentation,
         user.$id,
         user.name || user.email,
-        presentationId // ← Это важно для предотвращения дублирования
+        presentationId
       );
 
-      // ВАЖНО: Сохраняем ID презентации в Redux store
       if (result.id) {
         dispatch(setPresentationId(result.id));
         console.log('✅ Презентация сохранена, ID:', result.id);
@@ -56,7 +53,6 @@ export default function SaveButton({ onSave }: { onSave?: () => void }) {
     }
   };
 
-  // Скрытая кнопка для вызова из панели инструментов
   return (
     <button
       onClick={handleSave}

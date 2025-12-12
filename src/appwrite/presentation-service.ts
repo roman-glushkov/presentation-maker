@@ -1,8 +1,7 @@
-// src/appwrite/presentation-service.ts
 import { databases, DATABASE_ID, COLLECTION_ID, ID } from './client';
-import { Query } from 'appwrite'; // ← Импорт Query напрямую из appwrite!
+import { Query } from 'appwrite';
 import { Presentation } from '../store/types/presentation';
-import { Slide } from '../store/types/presentation'; // Добавьте этот импорт если есть
+import { Slide } from '../store/types/presentation';
 
 export interface SavedPresentation extends Presentation {
   id?: string;
@@ -26,7 +25,6 @@ export interface StoredPresentation extends SavedPresentation {
 }
 
 export class PresentationService {
-  // Сохранить презентацию
   static async savePresentation(
     presentation: Presentation,
     userId: string,
@@ -41,7 +39,6 @@ export class PresentationService {
       console.log('Title:', presentation.title);
       console.log('Slides count:', presentation.slides?.length || 0);
 
-      // Сериализуем массивы/объекты в строки для хранения в String поле
       const slidesJson = JSON.stringify(presentation.slides || []);
       const selectedSlideIdsJson = JSON.stringify(presentation.selectedSlideIds || []);
 
@@ -56,7 +53,7 @@ export class PresentationService {
         slides: slidesJson,
         currentSlideId: presentation.currentSlideId || '',
         selectedSlideIds: selectedSlideIdsJson,
-        ownerId: userId, // ← ОЧЕНЬ ВАЖНО: сохраняем userId
+        ownerId: userId,
         ownerName: userName,
         updatedAt: new Date().toISOString(),
       };
@@ -68,7 +65,6 @@ export class PresentationService {
       });
 
       if (presentationId) {
-        // Обновляем существующую
         console.log('🔄 Обновляем существующую презентацию:', presentationId);
         const result = await databases.updateDocument(
           DATABASE_ID,
@@ -80,7 +76,6 @@ export class PresentationService {
         console.log('✅ Презентация обновлена:', result.$id);
         return this.mapToStoredPresentation(result, data);
       } else {
-        // Создаем новую
         const docId = ID.unique();
         console.log('🆕 Создаем новую презентацию с ID:', docId);
 
@@ -106,37 +101,32 @@ export class PresentationService {
     try {
       console.log('🔍 Ищем презентации пользователя:', userId);
 
-      // Получаем ВСЕ документы пользователя
       const result = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
         Query.equal('ownerId', userId),
-        Query.orderDesc('$updatedAt'), // Сортируем по дате обновления
+        Query.orderDesc('$updatedAt'),
       ]);
 
       console.log(`✅ Найдено документов пользователя: ${result.documents.length}`);
 
       const presentations: StoredPresentation[] = [];
 
-      // Фильтруем и преобразуем найденные документы
       for (const doc of result.documents) {
         const docData = doc as any;
 
-        // Пропускаем документы без ownerId (на всякий случай)
         if (!docData.ownerId || docData.ownerId !== userId) {
           console.warn(`⚠️ Пропускаем документ ${doc.$id}: не совпадает ownerId`);
           continue;
         }
 
-        // Десериализуем slides
         let slides: Slide[] = [];
         try {
           slides = docData.slides ? JSON.parse(docData.slides) : [];
         } catch (e) {
           console.error(`Ошибка парсинга slides для документа ${doc.$id}:`, e);
-          // Пропускаем поврежденные презентации
+
           continue;
         }
 
-        // Десериализуем selectedSlideIds
         let selectedSlideIds: string[] = [];
         try {
           selectedSlideIds = docData.selectedSlideIds ? JSON.parse(docData.selectedSlideIds) : [];
@@ -178,14 +168,12 @@ export class PresentationService {
     }
   }
 
-  // Получить одну презентацию по ID
   static async getPresentation(id: string): Promise<StoredPresentation> {
     try {
       const doc = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
 
       const docData = doc as any;
 
-      // Десериализуем данные
       let slides: Slide[] = [];
       try {
         slides = docData.slides ? JSON.parse(docData.slides) : [];
@@ -228,9 +216,7 @@ export class PresentationService {
     }
   }
 
-  // Вспомогательный метод для преобразования
   private static mapToStoredPresentation(doc: any, data: any): StoredPresentation {
-    // Десериализуем строки обратно в массивы
     let slides: Slide[] = [];
     let selectedSlideIds: string[] = [];
 
@@ -260,9 +246,9 @@ export class PresentationService {
       $databaseId: doc.$databaseId,
       id: doc.$id,
       title: data.title as string,
-      slides: slides, // Теперь это массив, а не строка
+      slides: slides,
       currentSlideId: data.currentSlideId as string,
-      selectedSlideIds: selectedSlideIds, // Теперь это массив, а не строка
+      selectedSlideIds: selectedSlideIds,
       ownerId: data.ownerId as string,
       ownerName: data.ownerName as string,
       updatedAt: data.updatedAt as string,
@@ -270,7 +256,6 @@ export class PresentationService {
     };
   }
 
-  // Удалить презентацию
   static async deletePresentation(id: string): Promise<void> {
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
@@ -281,7 +266,6 @@ export class PresentationService {
     }
   }
 
-  // Создать новую пустую презентацию (клиентская функция)
   static createEmptyPresentation(title = 'Новая презентация'): Presentation {
     const slideId = `slide-${Date.now()}`;
     return {

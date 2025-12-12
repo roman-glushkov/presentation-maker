@@ -1,8 +1,7 @@
-// src/appwrite/AuthWrapper.tsx
 import React, { useState, useEffect, ReactNode } from 'react';
 import { account } from './../client';
-import Login from './../Login'; // ← если Login в той же папке appwrite
-import Register from './../Register'; // ← если Register в той же папке appwrite
+import Login from './../Login';
+import Register from './../Register';
 import PresentationList from './../components/PresentationList';
 import { useAutoSave } from './../useAutoSave';
 
@@ -82,7 +81,6 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
-  // Показываем список презентаций или редактор
   if (!currentPresentationId) {
     return (
       <div className="presentation-body">
@@ -100,7 +98,6 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
-  // Показываем редактор
   return (
     <div className="presentation-body">
       <div className="presentation-user-panel">

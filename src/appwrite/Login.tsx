@@ -1,4 +1,3 @@
-// src/appwrite/Login.tsx
 'use client';
 import React, { useState } from 'react';
 import { account, AppwriteError } from './client';
@@ -80,7 +79,6 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
         </nav>
 
         <div className="presentation-auth-container">
-          {/* Боковая панель с преимуществами */}
           <div className="presentation-sidebar">
             <h2 className="presentation-side-title">Войдите в SlideCraft</h2>
             <p className="presentation-side-subtitle">Продолжите работу над вашими презентациями</p>
@@ -132,7 +130,6 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
             </div>
           </div>
 
-          {/* Форма входа */}
           <div className="presentation-auth-card">
             <div className="presentation-auth-header">
               <h1 className="presentation-auth-title">Добро пожаловать в SlideCraft</h1>

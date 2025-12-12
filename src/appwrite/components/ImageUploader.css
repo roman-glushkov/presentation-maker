@@ -1,0 +1,60 @@
+.image-uploader-container {
+  display: inline-block;
+}
+
+.image-uploader-button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.image-uploader-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.image-uploader-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.image-uploader-button.opacity-half {
+  opacity: 0.5;
+}
+
+.image-uploader-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.image-uploader-progress {
+  margin-left: 8px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.image-uploader-input {
+  display: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

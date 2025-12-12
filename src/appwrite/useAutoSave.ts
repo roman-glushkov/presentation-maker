@@ -1,11 +1,9 @@
-// src/appwrite/useAutoSave.ts
 import { useEffect, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { PresentationService } from './presentation-service';
 import { account, AppwriteUser } from './client';
 
-// useAutoSave.ts
 export function useAutoSave(intervalMs = 15000) {
   const presentation = useSelector((state: RootState) => state.editor.presentation);
   const presentationId = useSelector((state: RootState) => state.editor.presentationId);
@@ -27,7 +25,6 @@ export function useAutoSave(intervalMs = 15000) {
       });
   }, []);
 
-  // Функция сохранения
   const savePresentation = useCallback(async () => {
     if (!user || isSaving || !presentationId) {
       console.log('Не могу сохранить:', {
@@ -58,7 +55,6 @@ export function useAutoSave(intervalMs = 15000) {
     }
   }, [presentation, user, isSaving, presentationId]);
 
-  // Автосохранение
   useEffect(() => {
     if (!user || !presentationId || !isReady) {
       console.log('Автосохранение не активно:', {
@@ -75,7 +71,6 @@ export function useAutoSave(intervalMs = 15000) {
       savePresentation();
     }, intervalMs);
 
-    // Сохраняем при закрытии
     const handleBeforeUnload = () => {
       if (presentationId) {
         savePresentation();

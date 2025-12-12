@@ -1,8 +1,4 @@
-/* auth-presentation.css */
-/* Стили для презентейшн-тематики - SlideCraft */
-
 :root {
-  /* Основные цвета в стиле "презентаций" */
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --slide-blue: #2563eb;
@@ -16,20 +12,17 @@
   --slide-success: #10b981;
   --slide-warning: #f59e0b;
 
-  /* Тени для презентационного эффекта */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-  /* Анимации */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Анимации для презентационного эффекта */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -126,7 +119,6 @@
   }
 }
 
-/* Базовые стили для страниц авторизации в стиле SlideCraft */
 .presentation-body {
   font-family:
     'Inter',
@@ -142,7 +134,6 @@
   overflow-x: hidden;
 }
 
-/* Контейнер с эффектом слайда */
 .presentation-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -150,7 +141,6 @@
   animation: slideIn 0.8s ease-out;
 }
 
-/* Навигация в стиле презентаций */
 .presentation-navbar {
   display: flex;
   justify-content: space-between;
@@ -257,7 +247,6 @@
   opacity: 1;
 }
 
-/* Основной контейнер авторизации с эффектом слайда */
 .presentation-auth-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -271,7 +260,6 @@
   animation: slideUp 0.8s ease-out;
 }
 
-/* Эффект "слайд-презентации" сбоку */
 .presentation-sidebar {
   padding: 60px 40px;
   background: var(--primary-gradient);
@@ -324,7 +312,6 @@
   z-index: 2;
 }
 
-/* Особенности в стиле презентаций */
 .presentation-features {
   display: flex;
   flex-direction: column;
@@ -378,7 +365,6 @@
   line-height: 1.5;
 }
 
-/* Карточка авторизации в стиле "слайда" */
 .presentation-auth-card {
   padding: 60px;
   display: flex;
@@ -408,7 +394,6 @@
   font-weight: 500;
 }
 
-/* Форма в стиле презентаций */
 .presentation-auth-form {
   display: flex;
   flex-direction: column;
@@ -438,8 +423,8 @@
   transition: all var(--transition-normal);
   color: var(--slide-dark);
   font-family: 'Inter', sans-serif;
-  max-width: 100%; /* ← Добавьте это */
-  box-sizing: border-box; /* ← Это должно быть уже есть, но проверьте */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .presentation-form-input:focus {
@@ -462,7 +447,6 @@
   margin-left: 4px;
 }
 
-/* Кнопка в стиле презентации */
 .presentation-auth-button {
   width: 100%;
   padding: 18px;
@@ -535,7 +519,6 @@
   }
 }
 
-/* Ошибки в стиле презентаций */
 .presentation-error {
   padding: 16px;
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
@@ -560,7 +543,6 @@
   background: var(--slide-error);
 }
 
-/* Ссылки в стиле презентаций */
 .presentation-link-text {
   text-align: center;
   margin-top: 32px;
@@ -594,7 +576,6 @@
   transform: scaleX(1);
 }
 
-/* Социальные кнопки в стиле презентаций */
 .presentation-social-auth {
   display: flex;
   flex-direction: column;
@@ -648,7 +629,6 @@
   z-index: 1;
 }
 
-/* Разделитель в стиле презентаций */
 .presentation-divider {
   display: flex;
   align-items: center;
@@ -677,7 +657,6 @@
   background: linear-gradient(90deg, var(--slide-border), transparent);
 }
 
-/* Элементы загрузки в стиле презентаций */
 .presentation-loading-container {
   display: flex;
   flex-direction: column;
@@ -730,7 +709,6 @@
   letter-spacing: 1px;
 }
 
-/* Панель пользователя в стиле презентаций */
 .presentation-user-panel {
   position: fixed;
   top: 20px;
@@ -781,7 +759,6 @@
   transform: translateY(0);
 }
 
-/* Адаптивность */
 @media (max-width: 1024px) {
   .presentation-auth-container {
     grid-template-columns: 1fr;
@@ -843,8 +820,6 @@
   }
 }
 
-/* Дополнительные стили для регистрации */
-
 .presentation-agreement {
   margin-top: 24px;
   padding-top: 16px;
@@ -863,36 +838,30 @@
   margin: 0 4px;
 }
 
-/* Эффект для социальных кнопок */
 .presentation-social-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
 }
 
-/* Плейсхолдер для имени */
 .presentation-form-input::placeholder {
   color: var(--slide-light);
   opacity: 0.6;
 }
 
-/* Кастомные подсказки для полей ввода */
 .presentation-form-group:focus-within .presentation-input-hint {
   color: var(--slide-indigo);
   font-weight: 500;
 }
 
-/* Эффект при успешной валидации */
 .presentation-form-input:valid:not(:placeholder-shown) {
   border-color: var(--slide-success);
 }
 
-/* Эффект при ошибке */
 .presentation-form-input:invalid:not(:focus):not(:placeholder-shown) {
   border-color: var(--slide-error);
 }
 
-/* Анимация появления формы */
 @keyframes formSlideIn {
   from {
     opacity: 0;
@@ -908,7 +877,6 @@
   animation: formSlideIn 0.5s ease-out;
 }
 
-/* Адаптивность для регистрации */
 @media (max-width: 768px) {
   .presentation-agreement-text {
     font-size: 11px;

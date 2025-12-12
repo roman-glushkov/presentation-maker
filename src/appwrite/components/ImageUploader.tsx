@@ -1,51 +1,10 @@
-// src/appwrite/components/ImageUploader.tsx
 'use client';
-import React, { useRef, useState, CSSProperties, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { ImageService } from '../image-service';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { addImageWithUrl } from '../../store/editorSlice';
-
-// Стили в виде объектов
-const styles: { [key: string]: CSSProperties } = {
-  button: {
-    padding: '10px 20px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  spinner: {
-    width: '16px',
-    height: '16px',
-    border: '2px solid rgba(255,255,255,0.3)',
-    borderTop: '2px solid white',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-};
-
-// Добавляем стили в документ
-const addStylesToDocument = () => {
-  if (typeof document === 'undefined') return;
-
-  const styleId = 'image-uploader-styles';
-  if (document.getElementById(styleId)) return;
-
-  const style = document.createElement('style');
-  style.id = styleId;
-  style.innerHTML = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(style);
-};
+import './ImageUploader.css';
 
 export default function ImageUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,10 +13,6 @@ export default function ImageUploader() {
   const dispatch = useDispatch();
 
   const currentSlideId = useSelector((state: RootState) => state.editor.selectedSlideId);
-
-  useEffect(() => {
-    addStylesToDocument();
-  }, []);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,13 +41,11 @@ export default function ImageUploader() {
     }, 300);
 
     try {
-      // Получаем URL и размеры изображения
       const imageData = await ImageService.uploadImage(file);
 
       clearInterval(progressInterval);
       setProgress(100);
 
-      // Диспатчим с размерами
       dispatch(
         addImageWithUrl({
           url: imageData.url,
@@ -120,31 +73,25 @@ export default function ImageUploader() {
     fileInputRef.current?.click();
   };
 
-  const buttonStyle = {
-    ...styles.button,
-    cursor: uploading || !currentSlideId ? 'not-allowed' : 'pointer',
-    opacity: !currentSlideId ? 0.5 : 1,
-  };
-
   return (
-    <div style={{ display: 'inline-block' }}>
+    <div className="image-uploader-container">
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileSelect}
         accept="image/*"
-        style={{ display: 'none' }}
+        className="image-uploader-input"
       />
 
       <button
         onClick={triggerFileInput}
         disabled={uploading || !currentSlideId}
-        style={buttonStyle}
+        className={`image-uploader-button ${!currentSlideId ? 'opacity-half' : ''}`}
       >
         {uploading ? (
           <>
             <span>Загрузка... {progress}%</span>
-            <div style={styles.spinner} />
+            <div className="image-uploader-spinner" />
           </>
         ) : (
           '📷 Вставить изображение'

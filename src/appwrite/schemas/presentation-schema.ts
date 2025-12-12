@@ -1,12 +1,7 @@
-/**
- * JSON Schema для валидации презентаций
- * Соответствует структуре Presentation и Slide
- */
 export const presentationSchema = {
   type: 'object',
   required: ['title', 'slides', 'ownerId', 'ownerName'],
   properties: {
-    // Основные поля документа
     $id: { type: 'string' },
     $createdAt: { type: 'string' },
     $updatedAt: { type: 'string' },
@@ -14,7 +9,6 @@ export const presentationSchema = {
     $collectionId: { type: 'string' },
     $databaseId: { type: 'string' },
 
-    // Поля презентации
     id: { type: 'string' },
     title: {
       type: 'string',
@@ -22,16 +16,16 @@ export const presentationSchema = {
       maxLength: 255,
     },
     slides: {
-      type: 'string', // В БД хранится как строка JSON
-      minLength: 2, // Минимум "[]"
+      type: 'string',
+      minLength: 2,
     },
     currentSlideId: {
       type: 'string',
       maxLength: 255,
     },
     selectedSlideIds: {
-      type: 'string', // В БД хранится как строка JSON
-      minLength: 2, // Минимум "[]"
+      type: 'string',
+      minLength: 2,
     },
     ownerId: {
       type: 'string',
@@ -46,12 +40,9 @@ export const presentationSchema = {
     updatedAt: { type: 'string' },
     createdAt: { type: 'string' },
   },
-  additionalProperties: false, // Запрещаем лишние поля
+  additionalProperties: false,
 } as const;
 
-/**
- * Схема для проверки структуры слайдов после парсинга JSON
- */
 export const slidesArraySchema = {
   type: 'array',
   minItems: 1,
@@ -86,7 +77,7 @@ export const slidesArraySchema = {
             y: { type: 'number', minimum: 0 },
             width: { type: 'number', minimum: 1 },
             height: { type: 'number', minimum: 1 },
-            // Дополнительные свойства в зависимости от типа
+
             text: { type: 'string' },
             fontSize: { type: 'number', minimum: 1 },
             fontColor: { type: 'string', pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$' },
@@ -106,17 +97,11 @@ export const slidesArraySchema = {
   },
 } as const;
 
-/**
- * Схема для массива selectedSlideIds после парсинга
- */
 export const selectedSlideIdsSchema = {
   type: 'array',
   items: { type: 'string', minLength: 1 },
 } as const;
 
-/**
- * Функция для форматирования ошибок валидации в читаемый вид
- */
 export function formatValidationErrors(errors: any[]): string {
   return errors
     .map((error) => {

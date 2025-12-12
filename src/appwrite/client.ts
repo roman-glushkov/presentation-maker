@@ -1,4 +1,3 @@
-// src/appwrite/client.ts
 import { Client, Account, Databases, Storage, ID, Models } from 'appwrite';
 
 const client = new Client()
@@ -10,12 +9,10 @@ export const databases = new Databases(client);
 export const storage = new Storage(client);
 export { ID };
 
-// Константы
 export const DATABASE_ID = '69317f9100076b3b6300';
 export const COLLECTION_ID = 'presentations';
 export const STORAGE_BUCKET_ID = 'presentation_media';
 
-// Типы
 export interface AppwriteUser {
   $id: string;
   name: string;
@@ -59,7 +56,6 @@ export interface AppwriteSession {
   current: boolean;
 }
 
-// Тип для ответа от Appwrite
 export interface DatabaseDocument extends Models.Document {
   [key: string]: any;
 }

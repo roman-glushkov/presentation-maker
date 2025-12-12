@@ -1,4 +1,3 @@
-// src/appwrite/Register.tsx
 'use client';
 import React from 'react';
 import { useState } from 'react';
@@ -113,7 +112,6 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
         </nav>
 
         <div className="presentation-auth-container">
-          {/* Боковая панель с преимуществами */}
           <div className="presentation-sidebar">
             <h2 className="presentation-side-title">Присоединяйтесь к SlideCraft</h2>
             <p className="presentation-side-subtitle">
@@ -189,7 +187,6 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
             </div>
           </div>
 
-          {/* Форма регистрации */}
           <div className="presentation-auth-card">
             <div className="presentation-auth-header">
               <h1 className="presentation-auth-title">Создайте аккаунт в SlideCraft</h1>
