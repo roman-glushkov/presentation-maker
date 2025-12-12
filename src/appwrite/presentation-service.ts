@@ -1,4 +1,4 @@
-import { databases, DATABASE_ID, COLLECTION_ID, ID } from './client';
+import { databases, DATABASE_ID, COLLECTION_ID, ID, Models } from './client';
 import { Query } from 'appwrite';
 import { Presentation } from '../store/types/presentation';
 import { Slide } from '../store/types/presentation';
@@ -86,7 +86,7 @@ export class PresentationService {
         console.log('✅ Новая презентация создана:', result.$id);
         return this.mapToStoredPresentation(result, data);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as Error;
       console.error('❌ Ошибка сохранения презентации:', {
         message: err.message,
@@ -111,7 +111,7 @@ export class PresentationService {
       const presentations: StoredPresentation[] = [];
 
       for (const doc of result.documents) {
-        const docData = doc as any;
+        const docData = doc as Record<string, unknown>;
 
         if (!docData.ownerId || docData.ownerId !== userId) {
           console.warn(`⚠️ Пропускаем документ ${doc.$id}: не совпадает ownerId`);
@@ -120,18 +120,24 @@ export class PresentationService {
 
         let slides: Slide[] = [];
         try {
-          slides = docData.slides ? JSON.parse(docData.slides) : [];
-        } catch (e) {
-          console.error(`Ошибка парсинга slides для документа ${doc.$id}:`, e);
+          slides =
+            docData.slides && typeof docData.slides === 'string' ? JSON.parse(docData.slides) : [];
+        } catch (e: unknown) {
+          const errorMessage = e instanceof Error ? e.message : 'Unknown parsing error';
+          console.error(`Ошибка парсинга slides для документа ${doc.$id}:`, errorMessage);
 
           continue;
         }
 
         let selectedSlideIds: string[] = [];
         try {
-          selectedSlideIds = docData.selectedSlideIds ? JSON.parse(docData.selectedSlideIds) : [];
-        } catch (e) {
-          console.error(`Ошибка парсинга selectedSlideIds для документа ${doc.$id}:`, e);
+          selectedSlideIds =
+            docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
+              ? JSON.parse(docData.selectedSlideIds)
+              : [];
+        } catch (e: unknown) {
+          const errorMessage = e instanceof Error ? e.message : 'Unknown parsing error';
+          console.error(`Ошибка парсинга selectedSlideIds для документа ${doc.$id}:`, errorMessage);
           selectedSlideIds = [];
         }
 
@@ -143,14 +149,14 @@ export class PresentationService {
           $collectionId: doc.$collectionId,
           $databaseId: doc.$databaseId,
           id: doc.$id,
-          title: docData.title || 'Без названия',
+          title: typeof docData.title === 'string' ? docData.title : 'Без названия',
           slides: slides,
-          currentSlideId: docData.currentSlideId || '',
+          currentSlideId: typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '',
           selectedSlideIds: selectedSlideIds,
-          ownerId: docData.ownerId || '',
-          ownerName: docData.ownerName || '',
-          updatedAt: docData.updatedAt || '',
-          createdAt: docData.createdAt || '',
+          ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
+          ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
+          updatedAt: typeof docData.updatedAt === 'string' ? docData.updatedAt : '',
+          createdAt: typeof docData.createdAt === 'string' ? docData.createdAt : '',
         };
 
         presentations.push(presentation);
@@ -158,7 +164,7 @@ export class PresentationService {
 
       console.log(`🎯 Возвращаем ${presentations.length} валидных презентаций пользователя`);
       return presentations;
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as Error;
       console.error('❌ Ошибка загрузки презентаций:', {
         message: err.message,
@@ -172,12 +178,13 @@ export class PresentationService {
     try {
       const doc = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
 
-      const docData = doc as any;
+      const docData = doc as Record<string, unknown>;
 
       let slides: Slide[] = [];
       try {
-        slides = docData.slides ? JSON.parse(docData.slides) : [];
-      } catch (e) {
+        slides =
+          docData.slides && typeof docData.slides === 'string' ? JSON.parse(docData.slides) : [];
+      } catch (e: unknown) {
         const err = e as Error;
         console.error('❌ Ошибка парсинга slides:', err.message);
         slides = [];
@@ -185,8 +192,11 @@ export class PresentationService {
 
       let selectedSlideIds: string[] = [];
       try {
-        selectedSlideIds = docData.selectedSlideIds ? JSON.parse(docData.selectedSlideIds) : [];
-      } catch (e) {
+        selectedSlideIds =
+          docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
+            ? JSON.parse(docData.selectedSlideIds)
+            : [];
+      } catch (e: unknown) {
         const err = e as Error;
         console.error('❌ Ошибка парсинга selectedSlideIds:', err.message);
         selectedSlideIds = [];
@@ -200,29 +210,37 @@ export class PresentationService {
         $collectionId: doc.$collectionId,
         $databaseId: doc.$databaseId,
         id: doc.$id,
-        title: docData.title || 'Без названия',
+        title: typeof docData.title === 'string' ? docData.title : 'Без названия',
         slides: slides,
-        currentSlideId: docData.currentSlideId || '',
+        currentSlideId: typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '',
         selectedSlideIds: selectedSlideIds,
-        ownerId: docData.ownerId || '',
-        ownerName: docData.ownerName || '',
-        updatedAt: docData.updatedAt || '',
-        createdAt: docData.createdAt || '',
+        ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
+        ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
+        updatedAt: typeof docData.updatedAt === 'string' ? docData.updatedAt : '',
+        createdAt: typeof docData.createdAt === 'string' ? docData.createdAt : '',
       } as StoredPresentation;
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as Error;
       console.error('❌ Ошибка загрузки презентации:', err.message);
       throw error;
     }
   }
 
-  private static mapToStoredPresentation(doc: any, data: any): StoredPresentation {
+  private static mapToStoredPresentation(
+    doc: Models.Document,
+    data: Record<string, unknown>
+  ): StoredPresentation {
     let slides: Slide[] = [];
     let selectedSlideIds: string[] = [];
 
     try {
-      slides = typeof data.slides === 'string' ? JSON.parse(data.slides) : data.slides || [];
-    } catch (e) {
+      slides =
+        typeof data.slides === 'string'
+          ? JSON.parse(data.slides)
+          : Array.isArray(data.slides)
+            ? data.slides
+            : [];
+    } catch (e: unknown) {
       console.error('Ошибка парсинга slides в mapToStoredPresentation:', e);
       slides = [];
     }
@@ -231,8 +249,10 @@ export class PresentationService {
       selectedSlideIds =
         typeof data.selectedSlideIds === 'string'
           ? JSON.parse(data.selectedSlideIds)
-          : data.selectedSlideIds || [];
-    } catch (e) {
+          : Array.isArray(data.selectedSlideIds)
+            ? data.selectedSlideIds
+            : [];
+    } catch (e: unknown) {
       console.error('Ошибка парсинга selectedSlideIds в mapToStoredPresentation:', e);
       selectedSlideIds = [];
     }
@@ -245,21 +265,21 @@ export class PresentationService {
       $collectionId: doc.$collectionId,
       $databaseId: doc.$databaseId,
       id: doc.$id,
-      title: data.title as string,
+      title: typeof data.title === 'string' ? data.title : 'Без названия',
       slides: slides,
-      currentSlideId: data.currentSlideId as string,
+      currentSlideId: typeof data.currentSlideId === 'string' ? data.currentSlideId : '',
       selectedSlideIds: selectedSlideIds,
-      ownerId: data.ownerId as string,
-      ownerName: data.ownerName as string,
-      updatedAt: data.updatedAt as string,
-      createdAt: data.createdAt as string,
+      ownerId: typeof data.ownerId === 'string' ? data.ownerId : '',
+      ownerName: typeof data.ownerName === 'string' ? data.ownerName : '',
+      updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : '',
+      createdAt: typeof data.createdAt === 'string' ? data.createdAt : '',
     };
   }
 
   static async deletePresentation(id: string): Promise<void> {
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as Error;
       console.error('❌ Ошибка удаления презентации:', err.message);
       throw error;

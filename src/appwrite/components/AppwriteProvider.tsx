@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { account } from './../client';
+import { account, AppwriteUser, AccountUser } from './../client';
 import Login from './../Login';
 import Register from './../Register';
 import PresentationList from './../components/PresentationList';
@@ -12,7 +12,7 @@ interface AuthWrapperProps {
 export default function AuthWrapper({ children }: AuthWrapperProps) {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AccountUser | null>(null);
   const [page, setPage] = useState<'login' | 'register' | 'presentations'>('login');
   const [currentPresentationId, setCurrentPresentationId] = useState<string | null>(null);
 
@@ -24,8 +24,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
   const checkAuth = async () => {
     try {
-      const u = await account.get();
-      setUser(u);
+      const u = await account.get<AppwriteUser>();
+      setUser(u as AccountUser);
       setIsAuthenticated(true);
       setPage('presentations');
     } catch {

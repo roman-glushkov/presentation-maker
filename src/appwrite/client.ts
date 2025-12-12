@@ -7,7 +7,7 @@ const client = new Client()
 export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
-export { ID };
+export { ID, Models };
 
 export const DATABASE_ID = '69317f9100076b3b6300';
 export const COLLECTION_ID = 'presentations';
@@ -20,8 +20,20 @@ export interface AppwriteUser {
   registration: string;
   status: boolean;
   emailVerification: boolean;
-  prefs: any;
+  prefs: Record<string, unknown>;
+  [key: string]: unknown;
 }
+
+export type AccountUser = {
+  $id: string;
+  name?: string;
+  email?: string;
+  registration?: string;
+  status?: boolean;
+  emailVerification?: boolean;
+  prefs?: Record<string, unknown>;
+  [key: string]: unknown;
+};
 
 export interface AppwriteError {
   code: number;
@@ -57,5 +69,5 @@ export interface AppwriteSession {
 }
 
 export interface DatabaseDocument extends Models.Document {
-  [key: string]: any;
+  [key: string]: unknown;
 }

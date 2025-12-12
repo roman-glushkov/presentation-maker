@@ -26,7 +26,7 @@ export class ImageService {
         height: dimensions.height,
         originalName: file.name,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Ошибка при загрузке изображения:', error);
       throw error;
     }
@@ -57,7 +57,7 @@ export class ImageService {
   static async deleteImage(fileId: string) {
     try {
       await storage.deleteFile(STORAGE_BUCKET_ID, fileId);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('❌ Ошибка удаления изображения:', error);
       throw error;
     }

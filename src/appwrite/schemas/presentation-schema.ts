@@ -102,7 +102,20 @@ export const selectedSlideIdsSchema = {
   items: { type: 'string', minLength: 1 },
 } as const;
 
-export function formatValidationErrors(errors: any[]): string {
+export interface ValidationError {
+  instancePath?: string;
+  keyword: string;
+  message?: string;
+  params?: {
+    type?: string;
+    limit?: number;
+    allowedValues?: string[];
+    missingProperty?: string;
+  };
+  data?: unknown;
+}
+
+export function formatValidationErrors(errors: ValidationError[]): string {
   return errors
     .map((error) => {
       const field = error.instancePath
@@ -114,15 +127,15 @@ export function formatValidationErrors(errors: any[]): string {
         case 'required':
           return `Отсутствует обязательное поле: "${field}"`;
         case 'type':
-          return `Поле "${field}" должно быть типа ${error.params.type}, получено ${typeof error.data}`;
+          return `Поле "${field}" должно быть типа ${error.params?.type}, получено ${typeof error.data}`;
         case 'minLength':
-          return `Поле "${field}" слишком короткое (минимум ${error.params.limit} символов)`;
+          return `Поле "${field}" слишком короткое (минимум ${error.params?.limit} символов)`;
         case 'maxLength':
-          return `Поле "${field}" слишком длинное (максимум ${error.params.limit} символов)`;
+          return `Поле "${field}" слишком длинное (максимум ${error.params?.limit} символов)`;
         case 'minItems':
-          return `Массив "${field}" должен содержать минимум ${error.params.limit} элементов`;
+          return `Массив "${field}" должен содержать минимум ${error.params?.limit} элементов`;
         case 'enum':
-          return `Поле "${field}" содержит недопустимое значение. Допустимые: ${error.params.allowedValues.join(', ')}`;
+          return `Поле "${field}" содержит недопустимое значение. Допустимые: ${error.params?.allowedValues?.join(', ')}`;
         case 'pattern':
           return `Поле "${field}" имеет неверный формат`;
         default:

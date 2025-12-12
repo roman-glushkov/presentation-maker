@@ -35,7 +35,7 @@ export default function NewPresentationModal({
       const presentations = await PresentationService.getUserPresentations(currentUser.$id);
       const titles = presentations.map((p) => p.title.toLowerCase().trim());
       setExistingTitles(titles);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Ошибка загрузки данных:', error);
     }
   };
@@ -73,8 +73,9 @@ export default function NewPresentationModal({
       onCreate(trimmedTitle);
       onClose();
       setTitle('');
-    } catch (error: any) {
-      setError(error.message || 'Ошибка создания презентации');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка создания презентации';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

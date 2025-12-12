@@ -2,21 +2,21 @@ import { useEffect, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { PresentationService } from './presentation-service';
-import { account, AppwriteUser } from './client';
+import { account, AppwriteUser, AccountUser } from './client';
 
 export function useAutoSave(intervalMs = 15000) {
   const presentation = useSelector((state: RootState) => state.editor.presentation);
   const presentationId = useSelector((state: RootState) => state.editor.presentationId);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [user, setUser] = useState<AppwriteUser | null>(null);
+  const [user, setUser] = useState<AccountUser | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     account
       .get<AppwriteUser>()
       .then((userData) => {
-        setUser(userData);
+        setUser(userData as AccountUser);
         setIsReady(true);
       })
       .catch(() => {
@@ -39,10 +39,12 @@ export function useAutoSave(intervalMs = 15000) {
     console.log('🔄 Сохраняем презентацию...', presentationId);
 
     try {
+      const userName = user.name || user.email || '';
+
       const result = await PresentationService.savePresentation(
         presentation,
         user.$id,
-        user.name || user.email,
+        userName,
         presentationId
       );
 

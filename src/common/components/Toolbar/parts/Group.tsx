@@ -1,4 +1,3 @@
-// Group.tsx - ИСПРАВЛЕННАЯ ВЕРСИЯ (без условных хуков)
 import { GROUPS, GroupButton, GroupKey } from '../constants/config';
 import ColorSection from './ColorSection';
 import TextOptionsPopup from './TextOptionsPopup';
@@ -12,6 +11,7 @@ import { useRef, useState, useEffect } from 'react';
 import { ImageService } from '../../../../appwrite/image-service';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
+import React from 'react';
 
 export default function ToolbarGroup() {
   const dispatch = useAppDispatch();
@@ -141,8 +141,10 @@ export default function ToolbarGroup() {
       setTimeout(() => {
         alert('✅ Изображение успешно загружено!');
       }, 100);
-    } catch (error: any) {
-      alert(`❌ Ошибка: ${error.message || 'Не удалось загрузить изображение'}`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Не удалось загрузить изображение';
+      alert(`❌ Ошибка: ${errorMessage}`);
     } finally {
       clearInterval(progressInterval);
       setUploading(false);

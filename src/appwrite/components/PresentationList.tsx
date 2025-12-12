@@ -1,7 +1,7 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { PresentationService, StoredPresentation } from '../presentation-service';
-import { account, AppwriteUser } from '../client';
+import { account, AppwriteUser, AccountUser } from '../client';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import {
@@ -17,7 +17,7 @@ import './PresentationList.css';
 export default function PresentationList({ onSelect }: { onSelect?: () => void }) {
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<AppwriteUser | null>(null);
+  const [user, setUser] = useState<AccountUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showNewPresentationModal, setShowNewPresentationModal] = useState(false);
   const [creatingNew, setCreatingNew] = useState(false);
@@ -28,11 +28,13 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   useEffect(() => {
     account
       .get<AppwriteUser>()
-      .then(setUser)
+      .then((userData) => {
+        setUser(userData as AccountUser);
+      })
       .catch(() => setUser(null));
   }, []);
 
-  const loadPresentations = async () => {
+  const loadPresentations = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -45,19 +47,20 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       if (userPresentations.length === 0) {
         console.log('⚠️ У пользователя нет валидных презентаций');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
       console.error('Ошибка загрузки:', error);
-      setError(`Ошибка загрузки презентаций: ${error.message || 'Неизвестная ошибка'}`);
+      setError(`Ошибка загрузки презентаций: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user) {
       loadPresentations();
     }
-  }, [user]);
+  }, [user, loadPresentations]);
 
   const handleCreateNew = () => {
     setShowNewPresentationModal(true);
@@ -79,17 +82,19 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
 
       const currentUser = await account.get<AppwriteUser>();
 
+      const userName = currentUser.name || currentUser.email || '';
+
       console.log('Сохраняем данные:', {
         title: presentationToSave.title,
         slidesCount: presentationToSave.slides?.length || 0,
         userId: currentUser.$id,
-        userName: currentUser.name,
+        userName: userName,
       });
 
       const savedPresentation = await PresentationService.savePresentation(
         presentationToSave,
         currentUser.$id,
-        currentUser.name || currentUser.email
+        userName
       );
 
       console.log('✅ Презентация сохранена в Appwrite:', savedPresentation.$id);
@@ -119,9 +124,10 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       if (onSelect) {
         onSelect();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
       console.error('❌ Ошибка создания презентации:', error);
-      alert(`Ошибка создания презентации: ${error.message || 'Неизвестная ошибка'}`);
+      alert(`Ошибка создания презентации: ${errorMessage}`);
     } finally {
       setCreatingNew(false);
       setShowNewPresentationModal(false);
@@ -140,7 +146,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
     try {
       await account.deleteSession('current');
       window.location.reload();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Ошибка выхода:', error);
       alert('Ошибка при выходе из системы');
     }
@@ -176,19 +182,20 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       if (onSelect) {
         onSelect();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
       console.error('❌ Ошибка загрузки презентации:', error);
 
-      if (error.message && error.message.includes('Данные презентации повреждены')) {
+      if (errorMessage && errorMessage.includes('Данные презентации повреждены')) {
         alert(
-          `❌ Ошибка загрузки презентации:\n\n${error.message}\n\nЭта презентация содержит поврежденные данные.`
+          `❌ Ошибка загрузки презентации:\n\n${errorMessage}\n\nЭта презентация содержит поврежденные данные.`
         );
-      } else if (error.message && error.message.includes('Невалидная структура')) {
+      } else if (errorMessage && errorMessage.includes('Невалидная структура')) {
         alert(
-          `❌ Ошибка загрузки:\n\n${error.message}\n\nДанные презентации имеют неверный формат.`
+          `❌ Ошибка загрузки:\n\n${errorMessage}\n\nДанные презентации имеют неверный формат.`
         );
       } else {
-        alert(`Не удалось загрузить презентацию: ${error.message || 'Неизвестная ошибка'}`);
+        alert(`Не удалось загрузить презентацию: ${errorMessage || 'Неизвестная ошибка'}`);
       }
     }
   };
@@ -210,7 +217,9 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       <div className="presentation-list-header">
         <h2 className="presentation-list-title">Мои презентации</h2>
         <div className="presentation-list-user-info">
-          <span className="presentation-list-user-name">{user?.name || user?.email}</span>
+          <span className="presentation-list-user-name">
+            {user?.name || user?.email || 'Пользователь'}
+          </span>
           <button
             onClick={handleLogout}
             className="presentation-list-logout-button"
@@ -282,7 +291,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
 
                     <div className="presentation-list-card-meta">
                       <span>📊 {(pres.slides || []).length} слайдов</span>
-                      <span>👤 {pres.ownerName || user.name || user.email}</span>
+                      <span>👤 {pres.ownerName || user?.name || user?.email || ''}</span>
                     </div>
                   </div>
 

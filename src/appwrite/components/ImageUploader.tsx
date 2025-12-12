@@ -57,8 +57,10 @@ export default function ImageUploader() {
       setTimeout(() => {
         alert('✅ Изображение успешно загружено!');
       }, 100);
-    } catch (error: any) {
-      alert(`❌ Ошибка: ${error.message || 'Не удалось загрузить изображение'}`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Не удалось загрузить изображение';
+      alert(`❌ Ошибка: ${errorMessage}`);
     } finally {
       clearInterval(progressInterval);
       setUploading(false);
