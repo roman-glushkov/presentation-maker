@@ -1,7 +1,8 @@
-import { databases, DATABASE_ID, COLLECTION_ID, ID, Models } from './client';
+import { databases, DATABASE_ID, COLLECTION_ID, ID, DatabaseDocument } from './client';
 import { Query } from 'appwrite';
 import { Presentation } from '../store/types/presentation';
 import { Slide } from '../store/types/presentation';
+import validatePresentation from './schemas/validator';
 
 export interface SavedPresentation extends Presentation {
   id?: string;
@@ -118,27 +119,72 @@ export class PresentationService {
           continue;
         }
 
+        console.log(`📋 Документ ${doc.$id}:`, {
+          title: docData.title,
+          slides: docData.slides,
+          slidesType: typeof docData.slides,
+          slidesIsArray: Array.isArray(docData.slides),
+          selectedSlideIds: docData.selectedSlideIds,
+          selectedSlideIdsType: typeof docData.selectedSlideIds,
+          selectedSlideIdsIsArray: Array.isArray(docData.selectedSlideIds),
+        });
+        const validationResult = validatePresentation(doc);
+
+        if (!validationResult.isValid) {
+          console.warn(`⚠️ Документ ${doc.$id} не прошел валидацию:`, {
+            title: docData.title || 'Без названия',
+            errors: validationResult.errors,
+            formattedError: validationResult.formattedError,
+          });
+
+          console.log('Полные ошибки валидации:', validationResult.errors?.join('\n'));
+
+          continue;
+        }
+
         let slides: Slide[] = [];
         try {
-          slides =
-            docData.slides && typeof docData.slides === 'string' ? JSON.parse(docData.slides) : [];
+          if (validationResult.parsedData?.slides) {
+            slides = validationResult.parsedData.slides as Slide[];
+          } else {
+            slides =
+              docData.slides && typeof docData.slides === 'string'
+                ? JSON.parse(docData.slides)
+                : [];
+          }
         } catch (e: unknown) {
           const errorMessage = e instanceof Error ? e.message : 'Unknown parsing error';
           console.error(`Ошибка парсинга slides для документа ${doc.$id}:`, errorMessage);
-
           continue;
         }
 
         let selectedSlideIds: string[] = [];
         try {
-          selectedSlideIds =
-            docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
-              ? JSON.parse(docData.selectedSlideIds)
-              : [];
+          if (validationResult.parsedData?.selectedSlideIds) {
+            selectedSlideIds = validationResult.parsedData.selectedSlideIds as string[];
+          } else {
+            selectedSlideIds =
+              docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
+                ? JSON.parse(docData.selectedSlideIds)
+                : [];
+          }
         } catch (e: unknown) {
           const errorMessage = e instanceof Error ? e.message : 'Unknown parsing error';
           console.error(`Ошибка парсинга selectedSlideIds для документа ${doc.$id}:`, errorMessage);
           selectedSlideIds = [];
+        }
+
+        let currentSlideId =
+          typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '';
+
+        if (currentSlideId && slides.length > 0) {
+          const slideExists = slides.some((slide) => slide.id === currentSlideId);
+          if (!slideExists && slides.length > 0) {
+            currentSlideId = slides[0].id;
+            console.log(`🔄 Исправлен currentSlideId для документа ${doc.$id}`);
+          }
+        } else if (slides.length > 0 && !currentSlideId) {
+          currentSlideId = slides[0].id;
         }
 
         const presentation: StoredPresentation = {
@@ -151,7 +197,7 @@ export class PresentationService {
           id: doc.$id,
           title: typeof docData.title === 'string' ? docData.title : 'Без названия',
           slides: slides,
-          currentSlideId: typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '',
+          currentSlideId: currentSlideId,
           selectedSlideIds: selectedSlideIds,
           ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
           ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
@@ -160,9 +206,19 @@ export class PresentationService {
         };
 
         presentations.push(presentation);
+        console.log(
+          `✅ Добавлена валидная презентация: "${presentation.title}" (${slides.length} слайдов)`
+        );
       }
 
       console.log(`🎯 Возвращаем ${presentations.length} валидных презентаций пользователя`);
+
+      presentations.sort((a, b) => {
+        const dateA = new Date(a.$updatedAt || a.updatedAt || 0);
+        const dateB = new Date(b.$updatedAt || b.updatedAt || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+
       return presentations;
     } catch (error: unknown) {
       const err = error as Error;
@@ -176,33 +232,77 @@ export class PresentationService {
 
   static async getPresentation(id: string): Promise<StoredPresentation> {
     try {
+      console.log(`📥 Загружаем презентацию ${id} с валидацией`);
+
       const doc = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
+
+      console.log('📄 Документ загружен:', {
+        id: doc.$id,
+        title: (doc as Record<string, unknown>).title,
+        hasSlides: !!(doc as Record<string, unknown>).slides,
+      });
+
+      const validationResult = validatePresentation(doc);
+
+      if (!validationResult.isValid) {
+        console.error('❌ ВАЛИДАЦИЯ НЕ ПРОЙДЕНА:', {
+          errors: validationResult.errors,
+          formattedError: validationResult.formattedError,
+        });
+
+        const validationError = new Error(
+          `Данные презентации повреждены или имеют неверный формат.\n\n${
+            validationResult.formattedError ||
+            validationResult.errors?.join('\n') ||
+            'Ошибка валидации данных'
+          }`
+        );
+        validationError.name = 'ValidationError';
+        throw validationError;
+      }
+
+      console.log('✅ Валидация пройдена успешно');
 
       const docData = doc as Record<string, unknown>;
 
       let slides: Slide[] = [];
+      let selectedSlideIds: string[] = [];
+
       try {
-        slides =
-          docData.slides && typeof docData.slides === 'string' ? JSON.parse(docData.slides) : [];
+        if (docData.slides && typeof docData.slides === 'string') {
+          const parsedSlides = validationResult.parsedData?.slides || [];
+          slides = (parsedSlides as Slide[]) || [];
+          console.log(`📊 Распарсено слайдов: ${slides.length}`);
+        }
       } catch (e: unknown) {
         const err = e as Error;
-        console.error('❌ Ошибка парсинга slides:', err.message);
+        console.error('❌ Критическая ошибка парсинга slides после валидации:', err.message);
         slides = [];
       }
 
-      let selectedSlideIds: string[] = [];
       try {
-        selectedSlideIds =
-          docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
-            ? JSON.parse(docData.selectedSlideIds)
-            : [];
+        if (docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string') {
+          const parsedIds = validationResult.parsedData?.selectedSlideIds || [];
+          selectedSlideIds = (parsedIds as string[]) || [];
+          console.log(`🎯 Выбранных слайдов: ${selectedSlideIds.length}`);
+        }
       } catch (e: unknown) {
         const err = e as Error;
-        console.error('❌ Ошибка парсинга selectedSlideIds:', err.message);
+        console.error('❌ Критическая ошибка парсинга selectedSlideIds:', err.message);
         selectedSlideIds = [];
       }
 
-      return {
+      const currentSlideId =
+        typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '';
+
+      if (currentSlideId && slides.length > 0) {
+        const slideExists = slides.some((slide) => slide.id === currentSlideId);
+        if (!slideExists) {
+          console.warn(`⚠️ currentSlideId "${currentSlideId}" не найден среди слайдов`);
+        }
+      }
+
+      const result: StoredPresentation = {
         $id: doc.$id,
         $createdAt: doc.$createdAt,
         $updatedAt: doc.$updatedAt,
@@ -212,22 +312,37 @@ export class PresentationService {
         id: doc.$id,
         title: typeof docData.title === 'string' ? docData.title : 'Без названия',
         slides: slides,
-        currentSlideId: typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '',
+        currentSlideId: currentSlideId,
         selectedSlideIds: selectedSlideIds,
         ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
         ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
         updatedAt: typeof docData.updatedAt === 'string' ? docData.updatedAt : '',
         createdAt: typeof docData.createdAt === 'string' ? docData.createdAt : '',
-      } as StoredPresentation;
+      };
+
+      console.log('✅ Презентация успешно загружена:', {
+        id: result.id,
+        title: result.title,
+        slidesCount: result.slides.length,
+        valid: true,
+      });
+
+      return result;
     } catch (error: unknown) {
       const err = error as Error;
-      console.error('❌ Ошибка загрузки презентации:', err.message);
+
+      console.error('❌ Ошибка загрузки презентации:', {
+        message: err.message,
+        name: err.name,
+        stack: err.stack,
+      });
+
       throw error;
     }
   }
 
   private static mapToStoredPresentation(
-    doc: Models.Document,
+    doc: DatabaseDocument,
     data: Record<string, unknown>
   ): StoredPresentation {
     let slides: Slide[] = [];

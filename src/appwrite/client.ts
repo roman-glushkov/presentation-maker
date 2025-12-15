@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Storage, ID, Models } from 'appwrite';
+import { Client, Account, Databases, Storage, ID } from 'appwrite';
 
 const client = new Client()
   .setEndpoint('https://nyc.cloud.appwrite.io/v1')
@@ -7,7 +7,7 @@ const client = new Client()
 export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
-export { ID, Models };
+export { ID };
 
 export const DATABASE_ID = '69317f9100076b3b6300';
 export const COLLECTION_ID = 'presentations';
@@ -68,6 +68,12 @@ export interface AppwriteSession {
   current: boolean;
 }
 
-export interface DatabaseDocument extends Models.Document {
+export interface DatabaseDocument {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  $permissions: string[];
+  $collectionId: string;
+  $databaseId: string;
   [key: string]: unknown;
 }

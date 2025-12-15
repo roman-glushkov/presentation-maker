@@ -10,7 +10,7 @@ import {
 
 const ajv = new Ajv({
   allErrors: true,
-  strict: true,
+  strict: false,
   coerceTypes: false,
   removeAdditional: false,
   useDefaults: false,
@@ -32,51 +32,78 @@ export default function validatePresentation(data: unknown): {
   };
 } {
   const errors: string[] = [];
+  const typedData = data as Record<string, unknown>;
 
-  if (!validatePresentationStructure(data)) {
+  const transformedData = { ...typedData };
+
+  if (transformedData.slides && Array.isArray(transformedData.slides)) {
+    transformedData.slides = JSON.stringify(transformedData.slides);
+  }
+
+  if (transformedData.selectedSlideIds && Array.isArray(transformedData.selectedSlideIds)) {
+    transformedData.selectedSlideIds = JSON.stringify(transformedData.selectedSlideIds);
+  }
+
+  if (!validatePresentationStructure(transformedData)) {
     const docErrors = (validatePresentationStructure.errors as ValidationError[]) || [];
     errors.push('Невалидная структура документа:');
     errors.push(...docErrors.map((e) => `  - ${e.instancePath || 'root'}: ${e.message}`));
   }
 
-  const typedData = data as Record<string, unknown>;
-
   let parsedSlides: unknown[] = [];
-  if (typedData.slides && typeof typedData.slides === 'string') {
-    try {
-      parsedSlides = JSON.parse(typedData.slides);
 
-      if (!validateSlidesArray(parsedSlides)) {
-        const slideErrors = (validateSlidesArray.errors as ValidationError[]) || [];
-        errors.push('Невалидная структура слайдов:');
-        errors.push(...slideErrors.map((e) => `  - slides${e.instancePath}: ${e.message}`));
+  if (typedData.slides) {
+    if (typeof typedData.slides === 'string') {
+      try {
+        parsedSlides = JSON.parse(typedData.slides);
+      } catch (parseError: unknown) {
+        errors.push(
+          `Ошибка парсинга поля slides: ${parseError instanceof Error ? parseError.message : 'Неизвестная ошибка'}`
+        );
       }
-    } catch (parseError: unknown) {
-      errors.push(
-        `Ошибка парсинга поля slides: ${parseError instanceof Error ? parseError.message : 'Неизвестная ошибка'}`
-      );
+    } else if (Array.isArray(typedData.slides)) {
+      parsedSlides = typedData.slides;
+    } else {
+      errors.push('Поле slides должно быть строкой (JSON) или массивом');
     }
-  } else if (typedData.slides !== undefined && typedData.slides !== null) {
-    errors.push('Поле slides должно быть строкой (JSON)');
+  } else {
+    errors.push('Поле slides обязательно');
+  }
+
+  if (parsedSlides.length > 0) {
+    if (!validateSlidesArray(parsedSlides)) {
+      const slideErrors = (validateSlidesArray.errors as ValidationError[]) || [];
+      errors.push('Невалидная структура слайдов:');
+      errors.push(...slideErrors.map((e) => `  - slides${e.instancePath}: ${e.message}`));
+    }
+  } else if (parsedSlides.length === 0 && typedData.slides) {
+    errors.push('Презентация должна содержать хотя бы один слайд');
   }
 
   let parsedSelectedSlideIds: string[] = [];
-  if (typedData.selectedSlideIds && typeof typedData.selectedSlideIds === 'string') {
-    try {
-      parsedSelectedSlideIds = JSON.parse(typedData.selectedSlideIds);
 
-      if (!validateSelectedSlideIds(parsedSelectedSlideIds)) {
-        const idsErrors = (validateSelectedSlideIds.errors as ValidationError[]) || [];
-        errors.push('Невалидная структура selectedSlideIds:');
-        errors.push(...idsErrors.map((e) => `  - selectedSlideIds${e.instancePath}: ${e.message}`));
+  if (typedData.selectedSlideIds) {
+    if (typeof typedData.selectedSlideIds === 'string') {
+      try {
+        parsedSelectedSlideIds = JSON.parse(typedData.selectedSlideIds);
+      } catch (parseError: unknown) {
+        errors.push(
+          `Ошибка парсинга поля selectedSlideIds: ${parseError instanceof Error ? parseError.message : 'Неизвестная ошибка'}`
+        );
       }
-    } catch (parseError: unknown) {
-      errors.push(
-        `Ошибка парсинга поля selectedSlideIds: ${parseError instanceof Error ? parseError.message : 'Неизвестная ошибка'}`
-      );
+    } else if (Array.isArray(typedData.selectedSlideIds)) {
+      parsedSelectedSlideIds = typedData.selectedSlideIds;
+    } else {
+      errors.push('Поле selectedSlideIds должно быть строкой (JSON) или массивом');
     }
-  } else if (typedData.selectedSlideIds !== undefined && typedData.selectedSlideIds !== null) {
-    errors.push('Поле selectedSlideIds должно быть строкой (JSON)');
+  }
+
+  if (parsedSelectedSlideIds.length > 0) {
+    if (!validateSelectedSlideIds(parsedSelectedSlideIds)) {
+      const idsErrors = (validateSelectedSlideIds.errors as ValidationError[]) || [];
+      errors.push('Невалидная структура selectedSlideIds:');
+      errors.push(...idsErrors.map((e) => `  - selectedSlideIds${e.instancePath}: ${e.message}`));
+    }
   }
 
   if (typedData.currentSlideId && parsedSlides.length > 0) {

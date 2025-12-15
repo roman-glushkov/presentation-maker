@@ -1,4 +1,3 @@
-// App.tsx - УДАЛИТЕ БЕЛЫЙ DIV ОБЕРТКУ
 import React from 'react';
 import Toolbar from './common/components/Toolbar';
 import SlidesPanel from './common/components/SlidesPanel';
@@ -13,7 +12,6 @@ function AppContent() {
 
   return (
     <div className="container">
-      {/* ПРОСТО ТУЛБАР БЕЗ ОБЕРТКИ */}
       <Toolbar />
 
       <div className="main-content">

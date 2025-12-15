@@ -16,16 +16,32 @@ export const presentationSchema = {
       maxLength: 255,
     },
     slides: {
-      type: 'string',
-      minLength: 2,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 2,
+        },
+        {
+          type: 'array',
+          minItems: 1,
+        },
+      ],
     },
     currentSlideId: {
       type: 'string',
       maxLength: 255,
     },
     selectedSlideIds: {
-      type: 'string',
-      minLength: 2,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 2,
+        },
+        {
+          type: 'array',
+          items: { type: 'string', minLength: 1 },
+        },
+      ],
     },
     ownerId: {
       type: 'string',
@@ -40,7 +56,7 @@ export const presentationSchema = {
     updatedAt: { type: 'string' },
     createdAt: { type: 'string' },
   },
-  additionalProperties: false,
+  additionalProperties: true,
 } as const;
 
 export const slidesArraySchema = {
@@ -66,18 +82,18 @@ export const slidesArraySchema = {
         type: 'array',
         items: {
           type: 'object',
-          required: ['id', 'type', 'x', 'y', 'width', 'height'],
+          required: ['id', 'type'],
           properties: {
             id: { type: 'string', minLength: 1 },
             type: {
               type: 'string',
               enum: ['text', 'image', 'shape', 'line'],
             },
+
             x: { type: 'number', minimum: 0 },
             y: { type: 'number', minimum: 0 },
             width: { type: 'number', minimum: 1 },
             height: { type: 'number', minimum: 1 },
-
             text: { type: 'string' },
             fontSize: { type: 'number', minimum: 1 },
             fontColor: { type: 'string', pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$' },
@@ -90,6 +106,27 @@ export const slidesArraySchema = {
             fillColor: { type: 'string', pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$' },
             strokeColor: { type: 'string', pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$' },
             strokeWidth: { type: 'number', minimum: 0 },
+
+            content: { type: 'string' },
+            placeholder: { type: 'string' },
+            position: {
+              type: 'object',
+              properties: {
+                x: { type: 'number' },
+                y: { type: 'number' },
+              },
+            },
+            size: {
+              type: 'object',
+              properties: {
+                width: { type: 'number' },
+                height: { type: 'number' },
+              },
+            },
+            font: { type: 'string' },
+            color: { type: 'string' },
+            align: { type: 'string' },
+            verticalAlign: { type: 'string' },
           },
         },
       },
