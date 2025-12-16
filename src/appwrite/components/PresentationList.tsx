@@ -1,7 +1,8 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PresentationService, StoredPresentation } from '../services/PresentationService';
-import { account, AppwriteUser, AccountUser } from '../client';
+import { account, AccountUser } from '../client';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import {
@@ -12,122 +13,163 @@ import {
 } from '../../store/editorSlice';
 import { Presentation } from '../../store/types/presentation';
 import NewPresentationModal from './NewPresentationModal';
+import { useNotifications } from '../hooks/useNotifications';
+import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications/messages';
 import '../styles/PresentationList.css';
+
+// Иконки для уведомлений
+const NotificationIcons = {
+  success: '✅',
+  info: 'ℹ️',
+  error: '❌',
+  warning: '⚠️',
+};
 
 export default function PresentationList({ onSelect }: { onSelect?: () => void }) {
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AccountUser | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [showNewPresentationModal, setShowNewPresentationModal] = useState(false);
   const [creatingNew, setCreatingNew] = useState(false);
-  const dispatch = useDispatch();
 
+  // useRef вместо useState для избежания ререндеров
+  const validationErrorDetected = useRef(false);
+  const notificationsShown = useRef(false);
+
+  const dispatch = useDispatch();
   const currentPresentation = useSelector((state: RootState) => state.editor.presentation);
+  const { notifications, addNotification, removeNotification } = useNotifications();
 
   useEffect(() => {
     account
-      .get<AppwriteUser>()
-      .then((userData) => {
-        setUser(userData as AccountUser);
-      })
+      .get<AccountUser>()
+      .then(setUser)
       .catch(() => setUser(null));
+  }, []);
+
+  // Перехватываем ошибки валидации из PresentationService
+  useEffect(() => {
+    const originalWarn = console.warn;
+
+    console.warn = function (...args) {
+      // Проверяем, содержит ли предупреждение информацию о валидации
+      if (
+        args[0] &&
+        typeof args[0] === 'string' &&
+        args[0].includes('не прошел валидацию') &&
+        !validationErrorDetected.current
+      ) {
+        validationErrorDetected.current = true;
+      }
+      // Не выводим в консоль
+      return;
+    };
+
+    return () => {
+      console.warn = originalWarn;
+    };
   }, []);
 
   const loadPresentations = useCallback(async () => {
     if (!user) return;
-
     setLoading(true);
-    setError(null);
+    validationErrorDetected.current = false;
+    notificationsShown.current = false;
+
     try {
       const userPresentations = await PresentationService.getUserPresentations(user.$id);
       setPresentations(userPresentations);
-      console.log('✅ Презентации загружены:', userPresentations.length);
 
       if (userPresentations.length === 0) {
-        console.log('⚠️ У пользователя нет валидных презентаций');
+        if (!notificationsShown.current) {
+          addNotification(
+            PRESENTATION_NOTIFICATIONS.INFO.NO_PRESENTATIONS,
+            'info',
+            NOTIFICATION_TIMEOUT.INFO
+          );
+          notificationsShown.current = true;
+        }
+      } else {
+        if (!notificationsShown.current) {
+          // Даем время для обнаружения ошибок валидации
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          if (validationErrorDetected.current) {
+            addNotification(
+              PRESENTATION_NOTIFICATIONS.WARNING.VALIDATION_FAILED,
+              'warning',
+              NOTIFICATION_TIMEOUT.WARNING
+            );
+          }
+
+          addNotification(
+            PRESENTATION_NOTIFICATIONS.SUCCESS.LOADED(userPresentations.length),
+            'success',
+            NOTIFICATION_TIMEOUT.SUCCESS
+          );
+          notificationsShown.current = true;
+        }
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('Ошибка загрузки:', error);
-      setError(`Ошибка загрузки презентаций: ${errorMessage}`);
+    } catch {
+      if (!notificationsShown.current) {
+        addNotification(
+          PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
+          'error',
+          NOTIFICATION_TIMEOUT.ERROR
+        );
+        notificationsShown.current = true;
+      }
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, addNotification]);
 
   useEffect(() => {
     if (user) {
       loadPresentations();
     }
-  }, [user, loadPresentations]);
-
-  const handleCreateNew = () => {
-    setShowNewPresentationModal(true);
-  };
+  }, [user]);
 
   const handleCreatePresentation = async (title: string) => {
+    setCreatingNew(true);
     try {
-      console.log('🆕 Создаем новую презентацию с названием:', title);
-      setCreatingNew(true);
-
       dispatch(createNewPresentation());
+      const presentationToSave = { ...currentPresentation, title: title || 'Новая презентация' };
+      const currentUser = await account.get<AccountUser>();
 
-      await new Promise((resolve) => setTimeout(resolve, 50));
-
-      const presentationToSave = {
-        ...currentPresentation,
-        title: title || 'Новая презентация',
-      };
-
-      const currentUser = await account.get<AppwriteUser>();
-
-      const userName = currentUser.name || currentUser.email || '';
-
-      console.log('Сохраняем данные:', {
-        title: presentationToSave.title,
-        slidesCount: presentationToSave.slides?.length || 0,
-        userId: currentUser.$id,
-        userName: userName,
-      });
-
-      const savedPresentation = await PresentationService.savePresentation(
+      const saved = await PresentationService.savePresentation(
         presentationToSave,
         currentUser.$id,
-        userName
+        currentUser.name || currentUser.email || ''
       );
 
-      console.log('✅ Презентация сохранена в Appwrite:', savedPresentation.$id);
+      const loaded = await PresentationService.getPresentation(saved.$id);
 
-      const loadedPresentation = await PresentationService.getPresentation(savedPresentation.$id);
-
-      const presentationForEditor: Presentation = {
-        title: loadedPresentation.title || 'Без названия',
-        slides: loadedPresentation.slides || [],
-        currentSlideId:
-          loadedPresentation.currentSlideId || loadedPresentation.slides?.[0]?.id || '',
+      const presForEditor: Presentation = {
+        title: loaded.title || 'Без названия',
+        slides: loaded.slides || [],
+        currentSlideId: loaded.currentSlideId || loaded.slides?.[0]?.id || '',
         selectedSlideIds:
-          loadedPresentation.selectedSlideIds ||
-          (loadedPresentation.slides?.[0]?.id ? [loadedPresentation.slides[0].id] : []),
+          loaded.selectedSlideIds || (loaded.slides?.[0]?.id ? [loaded.slides[0].id] : []),
       };
 
-      dispatch(loadExistingPresentation(presentationForEditor));
-      dispatch(setPresentationId(savedPresentation.$id));
+      dispatch(loadExistingPresentation(presForEditor));
+      dispatch(setPresentationId(saved.$id));
 
-      console.log('🎯 PresentationId установлен:', savedPresentation.$id);
-      console.log('Созданная презентация:', {
-        title: presentationForEditor.title,
-        slidesCount: presentationForEditor.slides?.length,
-        hasElements: presentationForEditor.slides?.[0]?.elements?.length || 0,
-      });
+      addNotification(
+        PRESENTATION_NOTIFICATIONS.SUCCESS.CREATED,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
 
-      if (onSelect) {
-        onSelect();
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('❌ Ошибка создания презентации:', error);
-      alert(`Ошибка создания презентации: ${errorMessage}`);
+      loadPresentations();
+      onSelect?.();
+    } catch {
+      addNotification(
+        PRESENTATION_NOTIFICATIONS.ERROR.CREATE_FAILED,
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
     } finally {
       setCreatingNew(false);
       setShowNewPresentationModal(false);
@@ -137,147 +179,136 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   const handleLoadDemo = () => {
     dispatch(setPresentationId('demo'));
     dispatch(loadDemoPresentation());
-    if (onSelect) {
-      onSelect();
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await account.deleteSession('current');
-      window.location.reload();
-    } catch (error: unknown) {
-      console.error('Ошибка выхода:', error);
-      alert('Ошибка при выходе из системы');
-    }
+    addNotification(PRESENTATION_NOTIFICATIONS.INFO.DEMO_LOADED, 'info', NOTIFICATION_TIMEOUT.INFO);
+    onSelect?.();
   };
 
   const handleLoadPresentation = async (presentation: StoredPresentation) => {
     try {
-      console.log(`🔄 Загружаем презентацию: "${presentation.title}"`);
-
-      const fullPresentation = await PresentationService.getPresentation(
-        presentation.id || presentation.$id
-      );
-
-      const presentationForEditor: Presentation = {
-        title: fullPresentation.title || 'Без названия',
-        slides: fullPresentation.slides || [],
-        currentSlideId: fullPresentation.currentSlideId || fullPresentation.slides?.[0]?.id || '',
+      const full = await PresentationService.getPresentation(presentation.id || presentation.$id);
+      const presForEditor: Presentation = {
+        title: full.title || 'Без названия',
+        slides: full.slides || [],
+        currentSlideId: full.currentSlideId || full.slides?.[0]?.id || '',
         selectedSlideIds:
-          fullPresentation.selectedSlideIds ||
-          (fullPresentation.slides?.[0]?.id ? [fullPresentation.slides[0].id] : []),
+          full.selectedSlideIds || (full.slides?.[0]?.id ? [full.slides[0].id] : []),
       };
+      dispatch(setPresentationId(full.id || full.$id));
+      dispatch(loadExistingPresentation(presForEditor));
 
-      dispatch(setPresentationId(fullPresentation.id || fullPresentation.$id));
-      dispatch(loadExistingPresentation(presentationForEditor));
-
-      console.log(`✅ Презентация "${fullPresentation.title}" успешно загружена`);
-      console.log('Данные:', {
-        title: presentationForEditor.title,
-        slidesCount: presentationForEditor.slides?.length,
-        currentSlideId: presentationForEditor.currentSlideId,
-      });
-
-      if (onSelect) {
-        onSelect();
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('❌ Ошибка загрузки презентации:', error);
-
-      if (errorMessage && errorMessage.includes('Данные презентации повреждены')) {
-        alert(
-          `❌ Ошибка загрузки презентации:\n\n${errorMessage}\n\nЭта презентация содержит поврежденные данные.`
-        );
-      } else if (errorMessage && errorMessage.includes('Невалидная структура')) {
-        alert(
-          `❌ Ошибка загрузки:\n\n${errorMessage}\n\nДанные презентации имеют неверный формат.`
-        );
-      } else {
-        alert(`Не удалось загрузить презентацию: ${errorMessage || 'Неизвестная ошибка'}`);
-      }
+      addNotification(
+        PRESENTATION_NOTIFICATIONS.SUCCESS.PRESENTATION_LOADED(presForEditor.title),
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
+      onSelect?.();
+    } catch {
+      addNotification(
+        PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
     }
   };
 
-  const handleRefresh = () => {
-    loadPresentations();
-  };
-
-  if (!user) {
+  if (!user)
     return (
-      <div className="presentation-list-container" style={{ textAlign: 'center' }}>
+      <div className="presentation-list-container--empty">
         Войдите, чтобы видеть ваши презентации
       </div>
     );
-  }
 
   return (
-    <div className="presentation-list-container">
-      <div className="presentation-list-header">
-        <h2 className="presentation-list-title">Мои презентации</h2>
-        <div className="presentation-list-user-info">
-          <span className="presentation-list-user-name">
-            {user?.name || user?.email || 'Пользователь'}
-          </span>
-          <button
-            onClick={handleLogout}
-            className="presentation-list-logout-button"
-            title="Выйти из аккаунта"
-          >
-            Выйти
-          </button>
-        </div>
+    <>
+      <div className="presentation-notifications-container">
+        {notifications.map(({ id, message, type }) => (
+          <div key={id} className={`presentation-notification presentation-notification--${type}`}>
+            <div className="presentation-notification-content">
+              <span className="presentation-notification-icon">
+                {NotificationIcons[type as keyof typeof NotificationIcons] || 'ℹ️'}
+              </span>
+              <span className="presentation-notification-message">{message}</span>
+            </div>
+            <button
+              className="presentation-notification-close"
+              onClick={() => removeNotification(id)}
+              aria-label="Закрыть уведомление"
+            >
+              ✖
+            </button>
+          </div>
+        ))}
       </div>
 
-      <div className="presentation-list-buttons-grid">
-        <div className="presentation-list-button-wrapper">
-          <button
-            onClick={handleCreateNew}
-            className="presentation-list-button"
-            disabled={creatingNew}
-          >
-            <span>{creatingNew ? 'Создание...' : 'Создать новую'}</span>
-          </button>
+      <div className="presentation-list-container">
+        <div className="presentation-list-header">
+          <h2 className="presentation-list-title">Мои презентации</h2>
+          <div className="presentation-list-user-info">
+            <span className="presentation-list-user-name">{user.name || user.email}</span>
+            <button
+              className="presentation-list-logout-button"
+              onClick={async () => {
+                await account.deleteSession('current');
+                window.location.reload();
+              }}
+            >
+              Выйти
+            </button>
+          </div>
         </div>
 
-        <div className="presentation-list-button-wrapper">
-          <button
-            onClick={handleLoadDemo}
-            className="presentation-list-button presentation-list-button-demo"
-          >
-            <span>Демо-презентация</span>
-          </button>
-        </div>
-      </div>
+        <div className="presentation-list-buttons-grid">
+          <div className="presentation-list-button-wrapper">
+            <button
+              onClick={() => setShowNewPresentationModal(true)}
+              className="presentation-list-button"
+              disabled={creatingNew}
+            >
+              {creatingNew ? 'Создание...' : 'Создать новую'}
+            </button>
+          </div>
 
-      {error && (
-        <div className="presentation-list-error">
-          <strong>Ошибка:</strong> {error}
-          <button onClick={handleRefresh} className="presentation-list-retry-button">
-            Повторить попытку
-          </button>
+          <div className="presentation-list-button-wrapper">
+            <button
+              onClick={handleLoadDemo}
+              className="presentation-list-button presentation-list-button-demo"
+            >
+              Демо-презентация
+            </button>
+          </div>
         </div>
-      )}
 
-      {loading ? (
-        <div className="presentation-list-loading">
-          <div className="presentation-list-loading-spinner" />
-          <p>Загрузка презентаций...</p>
-        </div>
-      ) : (
-        presentations.length > 0 && (
+        {loading && (
+          <div className="presentation-list-loading">
+            <div className="presentation-list-loading-spinner" />
+            <p>Загружаем ваши презентации...</p>
+          </div>
+        )}
+
+        {!loading && presentations.length > 0 && (
           <>
             <div className="presentation-list-count">
               Загружено презентаций: {presentations.length}
+              {validationErrorDetected.current && (
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: '#f59e0b',
+                    marginLeft: '10px',
+                    fontWeight: 'normal',
+                  }}
+                >
+                  (некоторые презентации повреждены)
+                </span>
+              )}
             </div>
 
             <div className="presentation-list-grid">
               {presentations.map((pres) => (
                 <div
                   key={pres.id || pres.$id}
-                  onClick={() => handleLoadPresentation(pres)}
                   className="presentation-list-card"
+                  onClick={() => handleLoadPresentation(pres)}
                 >
                   <div
                     className="presentation-list-card-valid"
@@ -312,17 +343,29 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
               ))}
             </div>
           </>
-        )
-      )}
+        )}
 
-      {showNewPresentationModal && (
-        <NewPresentationModal
-          isOpen={showNewPresentationModal}
-          onClose={() => setShowNewPresentationModal(false)}
-          onCreate={handleCreatePresentation}
-          onCancel={() => setShowNewPresentationModal(false)}
-        />
-      )}
-    </div>
+        {!loading && presentations.length === 0 && (
+          <div
+            className="presentation-list-container--empty"
+            style={{ textAlign: 'center', padding: '40px' }}
+          >
+            <p>У вас пока нет презентаций</p>
+            <p style={{ fontSize: '14px', color: '#64748b', marginTop: '10px' }}>
+              Создайте новую или попробуйте демо-презентацию
+            </p>
+          </div>
+        )}
+
+        {showNewPresentationModal && (
+          <NewPresentationModal
+            isOpen={showNewPresentationModal}
+            onClose={() => setShowNewPresentationModal(false)}
+            onCreate={handleCreatePresentation}
+            onCancel={() => setShowNewPresentationModal(false)}
+          />
+        )}
+      </div>
+    </>
   );
 }

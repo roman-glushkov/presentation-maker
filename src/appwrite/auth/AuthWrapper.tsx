@@ -27,8 +27,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   const canUndo = useSelector((state: RootState) => state.editor.history.past.length > 0);
   const canRedo = useSelector((state: RootState) => state.editor.history.future.length > 0);
 
-  const { notifications, addNotification, removeNotification, clearNotifications } =
-    useNotifications();
+  const { notifications, addNotification, removeNotification } = useNotifications();
 
   useEffect(() => {
     checkAuth();

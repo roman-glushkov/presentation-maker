@@ -1,7 +1,75 @@
+/* PresentationList.css */
+
 .presentation-list-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  position: relative;
+}
+
+.presentation-list-notifications {
+  margin-bottom: 20px;
+}
+
+.presentation-list-notification {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.presentation-list-notification--info {
+  background-color: #dbeafe;
+  border: 1px solid #60a5fa;
+  color: #1e40af;
+}
+
+.presentation-list-notification--success {
+  background-color: #d1fae5;
+  border: 1px solid #34d399;
+  color: #065f46;
+}
+
+.presentation-list-notification--error {
+  background-color: #fee2e2;
+  border: 1px solid #f87171;
+  color: #991b1b;
+}
+
+.presentation-list-notification--warning {
+  background-color: #fef3c7;
+  border: 1px solid #fbbf24;
+  color: #92400e;
+}
+
+.presentation-list-notification button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0;
+  margin-left: 10px;
+}
+
+.presentation-list-notification button:hover {
+  opacity: 1;
 }
 
 .presentation-list-header {
@@ -126,6 +194,8 @@
 .presentation-list-loading {
   text-align: center;
   padding: 40px;
+  color: #64748b;
+  font-size: 16px;
 }
 
 .presentation-list-loading-spinner {
@@ -142,7 +212,6 @@
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
@@ -215,4 +284,207 @@
   border-top: 1px solid #f1f5f9;
   padding-top: 10px;
   margin-top: 10px;
+}
+
+.presentation-list-container--empty {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.presentation-notifications-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.presentation-notification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+
+.presentation-notification--success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-left: 4px solid #047857;
+}
+
+.presentation-notification--info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-left: 4px solid #1d4ed8;
+}
+
+.presentation-notification--error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-left: 4px solid #991b1b;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.presentation-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.presentation-notification-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.presentation-notification-message {
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.presentation-notification-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 12px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.presentation-notification-close:hover {
+  opacity: 1;
+}
+
+.presentation-notification-close svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.presentation-notifications-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.presentation-notification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+
+.presentation-notification--success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-left: 4px solid #047857;
+}
+
+.presentation-notification--info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-left: 4px solid #1d4ed8;
+}
+
+.presentation-notification--error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-left: 4px solid #991b1b;
+}
+
+.presentation-notification--warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-left: 4px solid #92400e;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.presentation-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.presentation-notification-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.presentation-notification-message {
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 500;
+  flex: 1;
+}
+
+.presentation-notification-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 12px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.presentation-notification-close:hover {
+  opacity: 1;
+}
+
+/* Удаляем старые стили уведомлений, если они есть */
+.presentation-list-notifications,
+.presentation-list-notification,
+.presentation-list-notification--info,
+.presentation-list-notification--success,
+.presentation-list-notification--error,
+.presentation-list-notification--warning {
+  all: unset;
 }

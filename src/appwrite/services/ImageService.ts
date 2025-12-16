@@ -7,33 +7,24 @@ export class ImageService {
     height: number;
     originalName: string;
   }> {
-    try {
-      console.log('Загружаем изображение...');
+    const fileId = ID.unique();
 
-      const fileId = ID.unique();
+    await storage.createFile(STORAGE_BUCKET_ID, fileId, file, ['read("any")']);
 
-      const result = await storage.createFile(STORAGE_BUCKET_ID, fileId, file, ['read("any")']);
+    const fileUrl = storage.getFileDownload(STORAGE_BUCKET_ID, fileId).toString();
 
-      console.log('✅ Файл загружен:', result);
+    const dimensions = await this.getImageDimensions(file);
 
-      const fileUrl = storage.getFileDownload(STORAGE_BUCKET_ID, fileId).toString();
-
-      const dimensions = await this.getImageDimensions(file);
-
-      return {
-        url: fileUrl,
-        width: dimensions.width,
-        height: dimensions.height,
-        originalName: file.name,
-      };
-    } catch (error: unknown) {
-      console.error('❌ Ошибка при загрузке изображения:', error);
-      throw error;
-    }
+    return {
+      url: fileUrl,
+      width: dimensions.width,
+      height: dimensions.height,
+      originalName: file.name,
+    };
   }
 
   private static getImageDimensions(file: File): Promise<{ width: number; height: number }> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
 
@@ -46,7 +37,6 @@ export class ImageService {
       };
 
       img.onerror = () => {
-        reject(new Error('Не удалось определить размеры изображения'));
         URL.revokeObjectURL(objectUrl);
       };
 
@@ -55,11 +45,6 @@ export class ImageService {
   }
 
   static async deleteImage(fileId: string) {
-    try {
-      await storage.deleteFile(STORAGE_BUCKET_ID, fileId);
-    } catch (error: unknown) {
-      console.error('❌ Ошибка удаления изображения:', error);
-      throw error;
-    }
+    await storage.deleteFile(STORAGE_BUCKET_ID, fileId);
   }
 }
