@@ -11,16 +11,16 @@ export default function useUndoRedoHotkeys() {
       const ctrl = isMac ? e.metaKey : e.ctrlKey;
       if (!ctrl) return;
 
-      const key = (e.key || '').toLowerCase();
+      const key = (e.code || '').toLowerCase();
 
-      if ((key === 'z' || key === 'я') && !e.shiftKey) {
+      if (key === 'KeyZ' && !e.shiftKey) {
         e.preventDefault();
         e.stopPropagation();
         dispatch(undo());
         return;
       }
 
-      if (key === 'y' || key === 'н') {
+      if (key === 'KeyY') {
         e.preventDefault();
         e.stopPropagation();
         dispatch(redo());

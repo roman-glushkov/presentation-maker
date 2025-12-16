@@ -1,4 +1,4 @@
-import { storage, STORAGE_BUCKET_ID, ID } from './client';
+import { storage, STORAGE_BUCKET_ID, ID } from '../client';
 
 export class ImageService {
   static async uploadImage(file: File): Promise<{

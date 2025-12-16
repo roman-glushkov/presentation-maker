@@ -45,7 +45,7 @@
 
 .presentation-list-logout-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 12px rgb(220 38 38 / 30%);
 }
 
 .presentation-list-buttons-grid {
@@ -77,14 +77,14 @@
   gap: 10px;
   padding: 12px 20px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
   height: 40px;
   font-family: inherit;
 }
 
 .presentation-list-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
 }
 
 .presentation-list-button:disabled {
@@ -142,6 +142,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -166,7 +167,7 @@
   padding: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
   position: relative;
   min-height: 140px;
   display: flex;
@@ -176,7 +177,7 @@
 
 .presentation-list-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgb(0 0 0 / 10%);
 }
 
 .presentation-list-card-valid {
@@ -192,7 +193,7 @@
 }
 
 .presentation-list-card-title {
-  margin: 0 0 10px 0;
+  margin: 0 0 10px;
   font-size: 18px;
   color: #1e293b;
   overflow: hidden;

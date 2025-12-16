@@ -1,2 +1,2 @@
-export * from './presentation-schema';
+export * from './PresentationSchema';
 export { default as validatePresentation } from './validator';

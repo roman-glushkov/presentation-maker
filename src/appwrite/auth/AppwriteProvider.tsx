@@ -1,9 +1,9 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { account, AppwriteUser, AccountUser } from './../client';
-import Login from './../Login';
-import Register from './../Register';
-import PresentationList from './../components/PresentationList';
-import { useAutoSave } from './../useAutoSave';
+import { account, AppwriteUser, AccountUser } from '../client';
+import Login from './Login';
+import Register from './Register';
+import PresentationList from '../components/PresentationList';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 interface AuthWrapperProps {
   children: ReactNode;

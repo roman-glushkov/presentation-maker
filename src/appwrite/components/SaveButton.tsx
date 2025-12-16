@@ -1,32 +1,24 @@
+// C:\PGTU\FRONT-end\presentation maker\src\appwrite\components\SaveButton.tsx
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
-import { PresentationService } from '../presentation-service';
-import { account, AppwriteUser, AccountUser } from '../client';
+import { PresentationService } from '../PresentationService';
+import { account, AppwriteUser } from '../client';
 import { setPresentationId } from '../../store/editorSlice';
 
 export default function SaveButton({ onSave }: { onSave?: () => void }) {
   const [saving, setSaving] = useState(false);
-  const [user, setUser] = useState<AccountUser | null>(null);
   const presentation = useSelector((state: RootState) => state.editor.presentation);
   const presentationId = useSelector((state: RootState) => state.editor.presentationId);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    account
-      .get<AppwriteUser>()
-      .then((userData) => setUser(userData as AccountUser))
-      .catch(() => setUser(null));
-  }, []);
-
   const handleSave = async () => {
-    if (!user || saving) return;
-
-    setSaving(true);
     try {
+      const user = await account.get<AppwriteUser>();
       const userName = user.name || user.email || '';
 
+      setSaving(true);
       const result = await PresentationService.savePresentation(
         presentation,
         user.$id,
@@ -34,23 +26,14 @@ export default function SaveButton({ onSave }: { onSave?: () => void }) {
         presentationId
       );
 
-      if (result.id) {
-        dispatch(setPresentationId(result.id));
-        console.log('✅ Презентация сохранена, ID:', result.id);
+      if (result.$id) {
+        dispatch(setPresentationId(result.$id));
+        alert('✅ Презентация сохранена');
       }
 
-      if (onSave) {
-        onSave();
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('❌ Ошибка сохранения:', error);
-
-      if (errorMessage?.includes('longer than')) {
-        alert('❌ Ошибка: Презентация слишком большая. Попробуйте удалить некоторые элементы.');
-      } else {
-        alert(`❌ Не удалось сохранить презентацию: ${errorMessage}`);
-      }
+      if (onSave) onSave();
+    } catch {
+      alert('❌ Не удалось сохранить презентацию');
     } finally {
       setSaving(false);
     }
@@ -59,13 +42,12 @@ export default function SaveButton({ onSave }: { onSave?: () => void }) {
   return (
     <button
       onClick={handleSave}
-      disabled={saving || !user}
+      disabled={saving}
       style={{
         display: 'none',
         position: 'absolute',
         visibility: 'hidden',
       }}
-      className="save-button"
     >
       Сохранить
     </button>

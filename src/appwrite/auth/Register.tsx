@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { useState } from 'react';
-import { account, AppwriteError } from './client';
+import { account, AppwriteError } from '../client';
 import { ID } from 'appwrite';
 
 interface RegisterProps {

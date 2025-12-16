@@ -1,6 +1,7 @@
+// C:\PGTU\FRONT-end\presentation maker\src\appwrite\components\PresentationList.tsx
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import { PresentationService, StoredPresentation } from '../presentation-service';
+import { PresentationService, StoredPresentation } from '../services/PresentationService';
 import { account, AppwriteUser, AccountUser } from '../client';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -18,9 +19,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AccountUser | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [showNewPresentationModal, setShowNewPresentationModal] = useState(false);
-  const [creatingNew, setCreatingNew] = useState(false);
   const dispatch = useDispatch();
 
   const currentPresentation = useSelector((state: RootState) => state.editor.presentation);
@@ -38,19 +37,11 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
     if (!user) return;
 
     setLoading(true);
-    setError(null);
     try {
       const userPresentations = await PresentationService.getUserPresentations(user.$id);
       setPresentations(userPresentations);
-      console.log('✅ Презентации загружены:', userPresentations.length);
-
-      if (userPresentations.length === 0) {
-        console.log('⚠️ У пользователя нет валидных презентаций');
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('Ошибка загрузки:', error);
-      setError(`Ошибка загрузки презентаций: ${errorMessage}`);
+    } catch {
+      alert('Ошибка загрузки презентаций');
     } finally {
       setLoading(false);
     }
@@ -68,36 +59,25 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
 
   const handleCreatePresentation = async (title: string) => {
     try {
-      console.log('🆕 Создаем новую презентацию с названием:', title);
-      setCreatingNew(true);
-
+      // Сначала создаем новую презентацию в состоянии
       dispatch(createNewPresentation());
 
+      // Ждем обновления состояния
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      const presentationToSave = {
+      const presentationToSave: Presentation = {
         ...currentPresentation,
         title: title || 'Новая презентация',
       };
 
       const currentUser = await account.get<AppwriteUser>();
-
       const userName = currentUser.name || currentUser.email || '';
-
-      console.log('Сохраняем данные:', {
-        title: presentationToSave.title,
-        slidesCount: presentationToSave.slides?.length || 0,
-        userId: currentUser.$id,
-        userName: userName,
-      });
 
       const savedPresentation = await PresentationService.savePresentation(
         presentationToSave,
         currentUser.$id,
         userName
       );
-
-      console.log('✅ Презентация сохранена в Appwrite:', savedPresentation.$id);
 
       const loadedPresentation = await PresentationService.getPresentation(savedPresentation.$id);
 
@@ -114,22 +94,12 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       dispatch(loadExistingPresentation(presentationForEditor));
       dispatch(setPresentationId(savedPresentation.$id));
 
-      console.log('🎯 PresentationId установлен:', savedPresentation.$id);
-      console.log('Созданная презентация:', {
-        title: presentationForEditor.title,
-        slidesCount: presentationForEditor.slides?.length,
-        hasElements: presentationForEditor.slides?.[0]?.elements?.length || 0,
-      });
-
       if (onSelect) {
         onSelect();
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('❌ Ошибка создания презентации:', error);
-      alert(`Ошибка создания презентации: ${errorMessage}`);
+    } catch {
+      alert('Ошибка создания презентации');
     } finally {
-      setCreatingNew(false);
       setShowNewPresentationModal(false);
     }
   };
@@ -146,16 +116,13 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
     try {
       await account.deleteSession('current');
       window.location.reload();
-    } catch (error: unknown) {
-      console.error('Ошибка выхода:', error);
+    } catch {
       alert('Ошибка при выходе из системы');
     }
   };
 
   const handleLoadPresentation = async (presentation: StoredPresentation) => {
     try {
-      console.log(`🔄 Загружаем презентацию: "${presentation.title}"`);
-
       const fullPresentation = await PresentationService.getPresentation(
         presentation.id || presentation.$id
       );
@@ -172,36 +139,12 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       dispatch(setPresentationId(fullPresentation.id || fullPresentation.$id));
       dispatch(loadExistingPresentation(presentationForEditor));
 
-      console.log(`✅ Презентация "${fullPresentation.title}" успешно загружена`);
-      console.log('Данные:', {
-        title: presentationForEditor.title,
-        slidesCount: presentationForEditor.slides?.length,
-        currentSlideId: presentationForEditor.currentSlideId,
-      });
-
       if (onSelect) {
         onSelect();
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('❌ Ошибка загрузки презентации:', error);
-
-      if (errorMessage && errorMessage.includes('Данные презентации повреждены')) {
-        alert(
-          `❌ Ошибка загрузки презентации:\n\n${errorMessage}\n\nЭта презентация содержит поврежденные данные.`
-        );
-      } else if (errorMessage && errorMessage.includes('Невалидная структура')) {
-        alert(
-          `❌ Ошибка загрузки:\n\n${errorMessage}\n\nДанные презентации имеют неверный формат.`
-        );
-      } else {
-        alert(`Не удалось загрузить презентацию: ${errorMessage || 'Неизвестная ошибка'}`);
-      }
+    } catch {
+      alert('Не удалось загрузить презентацию');
     }
-  };
-
-  const handleRefresh = () => {
-    loadPresentations();
   };
 
   if (!user) {
@@ -232,12 +175,8 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
 
       <div className="presentation-list-buttons-grid">
         <div className="presentation-list-button-wrapper">
-          <button
-            onClick={handleCreateNew}
-            className="presentation-list-button"
-            disabled={creatingNew}
-          >
-            <span>{creatingNew ? 'Создание...' : 'Создать новую'}</span>
+          <button onClick={handleCreateNew} className="presentation-list-button">
+            <span>Создать новую</span>
           </button>
         </div>
 
@@ -250,15 +189,6 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
           </button>
         </div>
       </div>
-
-      {error && (
-        <div className="presentation-list-error">
-          <strong>Ошибка:</strong> {error}
-          <button onClick={handleRefresh} className="presentation-list-retry-button">
-            Повторить попытку
-          </button>
-        </div>
-      )}
 
       {loading ? (
         <div className="presentation-list-loading">
@@ -298,14 +228,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
                   <div className="presentation-list-card-footer">
                     Обновлено:{' '}
                     {pres.updatedAt
-                      ? new Date(pres.updatedAt).toLocaleString('ru-RU', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })
+                      ? new Date(pres.updatedAt).toLocaleDateString('ru-RU')
                       : 'Нет данных'}
                   </div>
                 </div>

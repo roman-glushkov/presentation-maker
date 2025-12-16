@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { account, AppwriteError } from './client';
+import { account, AppwriteError } from '../client';
 
 interface LoginProps {
   onSuccess: () => void;

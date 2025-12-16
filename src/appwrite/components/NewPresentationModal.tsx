@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { PresentationService } from '../presentation-service';
+import { PresentationService } from '../services/PresentationService';
 import { account, AppwriteUser } from '../client';
 import './NewPresentationModal.css';
 
