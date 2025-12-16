@@ -23,26 +23,21 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   }, []);
 
   const checkAuth = async () => {
-    try {
-      const u = await account.get<AppwriteUser>();
+    const u = await account.get<AppwriteUser>();
+    if (u) {
       setUser(u as AccountUser);
       setIsAuthenticated(true);
       setPage('presentations');
-    } catch {
+    } else {
       setUser(null);
       setIsAuthenticated(false);
       setPage('login');
-    } finally {
-      setAuthChecked(true);
     }
+    setAuthChecked(true);
   };
 
   const handleLogout = async () => {
-    try {
-      await account.deleteSession('current');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    await account.deleteSession('current');
     setIsAuthenticated(false);
     setUser(null);
     setPage('login');

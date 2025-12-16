@@ -7,6 +7,8 @@ import { useAutoSave } from '../hooks/useAutoSave';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPresentationId, undo, redo } from '../../store/editorSlice';
 import type { RootState } from '../../store/index';
+import { useNotifications } from '../hooks/useNotifications';
+import { NOTIFICATION_TIMEOUT, GENERAL_NOTIFICATIONS } from '../notifications/messages';
 import '../styles/AuthWrapper.css';
 
 interface AuthWrapperProps {
@@ -24,6 +26,9 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
   const canUndo = useSelector((state: RootState) => state.editor.history.past.length > 0);
   const canRedo = useSelector((state: RootState) => state.editor.history.future.length > 0);
+
+  const { notifications, addNotification, removeNotification, clearNotifications } =
+    useNotifications();
 
   useEffect(() => {
     checkAuth();
@@ -52,17 +57,60 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   };
 
   const handleSaveClick = async () => {
-    if (saveNow) {
-      try {
-        await saveNow();
-      } catch (error) {
-        console.error('Ошибка сохранения:', error);
-      }
+    if (!saveNow) return;
+
+    try {
+      await saveNow();
+      addNotification(GENERAL_NOTIFICATIONS.SUCCESS.SAVED, 'success', NOTIFICATION_TIMEOUT.SUCCESS);
+    } catch (error) {
+      console.error('Ошибка сохранения:', error);
+      addNotification(GENERAL_NOTIFICATIONS.ERROR.SAVE_FAILED, 'error', NOTIFICATION_TIMEOUT.ERROR);
     }
   };
 
+  const renderWithNotifications = (content: ReactNode) => (
+    <div className="presentation-body">
+      <div className="presentation-notifications-container">
+        {notifications.map(({ id, message, type }) => (
+          <div key={id} className={`presentation-notification presentation-notification--${type}`}>
+            <div className="presentation-notification-content">
+              <svg
+                className="presentation-notification-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  d="M20 6L9 17l-5-5"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="presentation-notification-message">{message}</span>
+            </div>
+            <button
+              className="presentation-notification-close"
+              onClick={() => removeNotification(id)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        ))}
+      </div>
+      {content}
+    </div>
+  );
+
   if (!authChecked) {
-    return (
+    return renderWithNotifications(
       <div className="presentation-loading-container">
         <div className="presentation-loading-content">
           <div className="presentation-loading-logo">SlideCraft</div>
@@ -78,23 +126,21 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   if (!isAuthenticated) {
-    return page === 'login' ? (
-      <Login onSuccess={checkAuth} switchToRegister={() => setPage('register')} />
-    ) : (
-      <Register onSuccess={checkAuth} switchToLogin={() => setPage('login')} />
+    return renderWithNotifications(
+      page === 'login' ? (
+        <Login onSuccess={checkAuth} switchToRegister={() => setPage('register')} />
+      ) : (
+        <Register onSuccess={checkAuth} switchToLogin={() => setPage('login')} />
+      )
     );
   }
 
   if (!currentPresentationId) {
-    return (
-      <div className="presentation-body">
-        <PresentationList onSelect={handleSelectPresentation} />
-      </div>
-    );
+    return renderWithNotifications(<PresentationList onSelect={handleSelectPresentation} />);
   }
 
-  return (
-    <div className="presentation-body" style={{ paddingTop: '60px' }}>
+  return renderWithNotifications(
+    <div style={{ paddingTop: '60px' }}>
       <div className="presentation-toolbar">
         <div className="toolbar-left">
           <button onClick={handleReturnToList} className="toolbar-button" title="Мои презентации">
