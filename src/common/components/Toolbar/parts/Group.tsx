@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
 import { useRef, useState, useEffect } from 'react';
-import { ImageService } from '../../../../appwrite/ImageService';
+import { ImageService } from '../../../../appwrite/services/ImageService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import React from 'react';

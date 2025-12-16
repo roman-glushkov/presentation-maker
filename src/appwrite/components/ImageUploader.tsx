@@ -1,6 +1,6 @@
 'use client';
 import React, { useRef, useState } from 'react';
-import { ImageService } from '../ImageService';
+import { ImageService } from '../services/ImageService';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { addImageWithUrl } from '../../store/editorSlice';

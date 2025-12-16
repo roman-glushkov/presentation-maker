@@ -1,8 +1,7 @@
-// C:\PGTU\FRONT-end\presentation maker\src\appwrite\AuthWrapper.tsx
 import React, { useState, useEffect, ReactNode } from 'react';
 import { account } from '../client';
-import Login from '../Login';
-import Register from '../Register';
+import Login from './Login';
+import Register from './Register';
 import PresentationList from '../components/PresentationList';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useDispatch, useSelector } from 'react-redux';
@@ -56,9 +55,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     if (saveNow) {
       try {
         await saveNow();
-        alert('✅ Презентация сохранена');
-      } catch {
-        alert('❌ Ошибка сохранения');
+      } catch (error) {
+        console.error('Ошибка сохранения:', error);
       }
     }
   };
