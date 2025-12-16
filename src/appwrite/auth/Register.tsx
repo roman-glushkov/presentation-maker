@@ -1,8 +1,17 @@
 'use client';
-import React from 'react';
-import { useState } from 'react';
-import { account, AppwriteError } from '../client';
+
+import React, { useState } from 'react';
 import { ID } from 'appwrite';
+import { account } from '../client';
+
+import { useNotifications } from '../hooks/useNotifications';
+import {
+  REGISTER_NOTIFICATIONS,
+  VALIDATION_MESSAGES,
+  NOTIFICATION_TIMEOUT,
+  TRANSITION_DELAY,
+  validateRegisterForm,
+} from '../notifications';
 
 interface RegisterProps {
   onSuccess: () => void;
@@ -13,79 +22,53 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
+  const { notifications, addNotification, removeNotification, clearNotifications } =
+    useNotifications();
 
   const register = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    clearNotifications();
 
-    if (!email || !password || !name) {
-      setError('Все поля обязательны для заполнения');
-      setLoading(false);
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError('Введите корректный email адрес (например: user@company.com)');
-      setLoading(false);
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Пароль должен содержать минимум 8 символов');
-      setLoading(false);
-      return;
-    }
-
-    if (name.length < 2) {
-      setError('Имя должно содержать минимум 2 символа');
+    const validation = validateRegisterForm(email, password, name);
+    if (!validation.isValid && validation.error) {
+      addNotification(VALIDATION_MESSAGES[validation.error], 'error', NOTIFICATION_TIMEOUT.ERROR);
       setLoading(false);
       return;
     }
 
     try {
-      console.log('Регистрация с данными:', {
-        email,
-        passwordLength: password.length,
-        name,
-      });
+      await account.create(ID.unique(), email, password, name);
 
-      const userId = ID.unique();
-      console.log('Создан userId:', userId);
+      addNotification(
+        REGISTER_NOTIFICATIONS.SUCCESS.CREATING_SESSION,
+        'info',
+        NOTIFICATION_TIMEOUT.INFO
+      );
 
-      await account.create(userId, email, password, name);
-      console.log('Пользователь создан успешно');
+      await account.createEmailPasswordSession(email, password);
 
-      const session = await account.createEmailPasswordSession(email, password);
-      console.log('Сессия создана:', session);
+      addNotification(
+        REGISTER_NOTIFICATIONS.SUCCESS.REGISTRATION_SUCCESS,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
 
-      onSuccess();
-    } catch (err: unknown) {
-      console.error('Полная информация об ошибке:', err);
-      const error = err as AppwriteError;
+      addNotification(
+        REGISTER_NOTIFICATIONS.SUCCESS.WELCOME,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
 
-      if (error.code === 400) {
-        if (error.message.includes('email')) {
-          setError('Некорректный email адрес. Проверьте формат');
-        } else if (error.message.includes('password')) {
-          setError('Пароль не соответствует требованиям безопасности');
-        } else {
-          setError('Некорректные данные. Проверьте все поля');
-        }
-      } else if (error.code === 409) {
-        setError('Пользователь с таким email уже существует');
-      } else if (error.message?.includes('Network Error')) {
-        setError('Проблемы с соединением. Проверьте интернет');
-      } else {
-        setError(`Ошибка регистрации: ${error.message || 'Неизвестная ошибка'}`);
-      }
+      setTimeout(onSuccess, TRANSITION_DELAY.AFTER_SUCCESS);
+    } catch (error: any) {
+      const message =
+        REGISTER_NOTIFICATIONS.ERROR[error?.code as keyof typeof REGISTER_NOTIFICATIONS.ERROR] ??
+        REGISTER_NOTIFICATIONS.ERROR.GENERIC;
+
+      addNotification(message, 'error', NOTIFICATION_TIMEOUT.ERROR);
     } finally {
       setLoading(false);
     }
@@ -98,6 +81,45 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
 
   return (
     <div className="presentation-body">
+      {/* Контейнер для уведомлений */}
+      <div className="presentation-notifications-container">
+        {notifications.map(({ id, message, type }) => (
+          <div key={id} className={`presentation-notification presentation-notification--${type}`}>
+            <div className="presentation-notification-content">
+              <svg
+                className="presentation-notification-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  d="M20 6L9 17l-5-5"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+
+              <span className="presentation-notification-message">{message}</span>
+            </div>
+
+            <button
+              className="presentation-notification-close"
+              onClick={() => removeNotification(id)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        ))}
+      </div>
+
       <div className="presentation-container">
         <nav className="presentation-navbar">
           <div>
@@ -119,71 +141,63 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
             </p>
 
             <div className="presentation-features">
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
+              {[
+                {
+                  title: 'Текстовые и графические элементы',
+                  text: 'Добавляйте текст, изображения, фигуры и настраивайте их оформление',
+                  icon: (
+                    <>
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </>
+                  ),
+                },
+                {
+                  title: 'Гибкое редактирование слайдов',
+                  text: 'Изменяйте размер, положение и стиль элементов, перетаскивайте их мышью',
+                  icon: (
+                    <>
+                      <path d="M3 6h18" />
+                      <path d="M3 12h18" />
+                      <path d="M3 18h18" />
+                    </>
+                  ),
+                },
+                {
+                  title: 'Управление несколькими слайдами',
+                  text: 'Создавайте, удаляйте, дублируйте и переупорядочивайте слайды',
+                  icon: (
+                    <>
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <line x1="3" y1="9" x2="21" y2="9" />
+                      <line x1="9" y1="21" x2="9" y2="9" />
+                    </>
+                  ),
+                },
+                {
+                  title: 'Сохранение и загрузка проектов',
+                  text: 'Храните презентации в облаке и возвращайтесь к ним позже',
+                  icon: (
+                    <>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </>
+                  ),
+                },
+              ].map(({ title, text, icon }) => (
+                <div className="presentation-feature" key={title}>
+                  <div className="presentation-feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      {icon}
+                    </svg>
+                  </div>
+                  <div className="presentation-feature-content">
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </div>
                 </div>
-                <div className="presentation-feature-content">
-                  <h3>Текстовые и графические элементы</h3>
-                  <p>
-                    Добавляйте текст, изображения, фигуры и настраивайте их оформление с помощью
-                    интуитивных инструментов
-                  </p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M3 6h18"></path>
-                    <path d="M3 12h18"></path>
-                    <path d="M3 18h18"></path>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Гибкое редактирование слайдов</h3>
-                  <p>
-                    Изменяйте размер, положение и стиль элементов, перетаскивайте их мышью и
-                    настраивайте визуальное оформление
-                  </p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="3" y1="9" x2="21" y2="9"></line>
-                    <line x1="9" y1="21" x2="9" y2="9"></line>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Управление несколькими слайдами</h3>
-                  <p>
-                    Создавайте, удаляйте, дублируйте и переупорядочивайте слайды для
-                    структурированной презентации
-                  </p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Сохранение и загрузка проектов</h3>
-                  <p>
-                    Храните презентации в облаке, возвращайтесь к ним позже и делитесь с коллегами
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -196,22 +210,16 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
             </div>
 
             <form onSubmit={register} className="presentation-auth-form">
-              {error && <div className="presentation-error">{error}</div>}
-
               <div className="presentation-form-group">
                 <label className="presentation-form-label">Как вас зовут?</label>
                 <input
                   className="presentation-form-input"
                   type="text"
                   placeholder="Александр Петров"
-                  onChange={(e) => setName(e.target.value)}
                   value={name}
-                  required
+                  onChange={(e) => setName(e.target.value)}
                   disabled={loading}
-                  pattern=".{2,}"
-                  title="Минимум 2 символа"
                 />
-                <div className="presentation-input-hint">Используйте ваше настоящее имя</div>
               </div>
 
               <div className="presentation-form-group">
@@ -220,17 +228,10 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                   className="presentation-form-input"
                   type="email"
                   placeholder="alexander@company.com"
-                  onChange={(e) => setEmail(e.target.value.trim())}
                   value={email}
-                  required
+                  onChange={(e) => setEmail(e.target.value.trim())}
                   disabled={loading}
-                  pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                  title="Введите корректный email"
-                  autoComplete="email"
                 />
-                <div className="presentation-input-hint">
-                  На этот email будут приходить уведомления о ваших презентациях
-                </div>
               </div>
 
               <div className="presentation-form-group">
@@ -239,23 +240,16 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
                   className="presentation-form-input"
                   type="password"
                   placeholder="••••••••"
-                  onChange={(e) => setPassword(e.target.value)}
                   value={password}
-                  required
+                  onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  minLength={8}
-                  pattern=".{8,}"
-                  title="Минимум 8 символов"
                 />
-                <div className="presentation-input-hint">
-                  Минимум 8 символов, используйте буквы и цифры для безопасности
-                </div>
               </div>
 
               <button className="presentation-auth-button" type="submit" disabled={loading}>
                 {loading ? (
                   <div className="presentation-button-content">
-                    <div className="presentation-spinner"></div>
+                    <div className="presentation-spinner" />
                     <span>Создаём аккаунт...</span>
                   </div>
                 ) : (
@@ -266,26 +260,19 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
 
             <div className="presentation-link-text">
               Уже есть аккаунт?{' '}
-              <a
-                href="#"
-                onClick={handleSwitchToLogin}
-                className="presentation-link"
-                tabIndex={loading ? -1 : 0}
-              >
+              <a href="#" onClick={handleSwitchToLogin} className="presentation-link">
                 Войти
               </a>
             </div>
 
             <div className="presentation-agreement">
               <p className="presentation-agreement-text">
-                Нажимая "Начать создавать презентации", вы соглашаетесь с
+                Нажимая «Начать создавать презентации», вы соглашаетесь с{' '}
                 <a href="#" className="presentation-link">
-                  {' '}
                   Условиями использования
                 </a>{' '}
-                и
+                и{' '}
                 <a href="#" className="presentation-link">
-                  {' '}
                   Политикой конфиденциальности
                 </a>
                 .

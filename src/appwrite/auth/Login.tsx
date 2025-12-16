@@ -1,6 +1,17 @@
 'use client';
+
 import React, { useState } from 'react';
-import { account, AppwriteError } from '../client';
+import { account } from '../client';
+
+import { useNotifications } from '../hooks/useNotifications';
+import {
+  LOGIN_NOTIFICATIONS,
+  VALIDATION_MESSAGES,
+  NOTIFICATION_TIMEOUT,
+  TRANSITION_DELAY,
+  validateEmail,
+  validatePassword,
+} from '../notifications';
 
 interface LoginProps {
   onSuccess: () => void;
@@ -10,47 +21,51 @@ interface LoginProps {
 export default function Login({ onSuccess, switchToRegister }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+  const { notifications, addNotification, removeNotification, clearNotifications } =
+    useNotifications();
+
+  const validateLoginForm = (email: string, password: string) => {
+    if (!email.trim() || !password) return { isValid: false, error: 'REQUIRED_FIELDS' };
+    if (!validateEmail(email)) return { isValid: false, error: 'INVALID_EMAIL' };
+    if (!validatePassword(password)) return { isValid: false, error: 'PASSWORD_TOO_SHORT' };
+    return { isValid: true };
   };
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
-    if (!validateEmail(email.trim())) {
-      setError('Введите корректный email адрес (например: user@example.com)');
-      return;
-    }
-
-    if (!password || password.length < 8) {
-      setError('Введите пароль (минимум 8 символов)');
-      return;
-    }
-
     setLoading(true);
+    clearNotifications();
+
+    const validation = validateLoginForm(email, password);
+    if (!validation.isValid && validation.error) {
+      addNotification(VALIDATION_MESSAGES[validation.error], 'error', NOTIFICATION_TIMEOUT.ERROR);
+      setLoading(false);
+      return;
+    }
 
     try {
-      const session = await account.createEmailPasswordSession(email.trim(), password);
-      console.log('Сессия создана:', session);
-      onSuccess();
-    } catch (err: unknown) {
-      console.error('Ошибка входа:', err);
-      const error = err as AppwriteError;
+      await account.createEmailPasswordSession(email.trim(), password);
 
-      if (error.code === 401) {
-        setError('Неверный email или пароль');
-      } else if (error.code === 429) {
-        setError('Слишком много попыток. Попробуйте позже');
-      } else if (error.message?.includes('Network Error')) {
-        setError('Проблемы с соединением. Проверьте интернет');
-      } else {
-        setError(`Ошибка входа: ${error.message || 'Неизвестная ошибка'}`);
-      }
+      addNotification(
+        LOGIN_NOTIFICATIONS.SUCCESS.LOGIN_SUCCESS,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
+      addNotification(
+        LOGIN_NOTIFICATIONS.SUCCESS.WELCOME_BACK,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
+
+      setTimeout(onSuccess, TRANSITION_DELAY.AFTER_SUCCESS);
+    } catch (error: any) {
+      const message =
+        LOGIN_NOTIFICATIONS.ERROR[error?.code as keyof typeof LOGIN_NOTIFICATIONS.ERROR] ??
+        LOGIN_NOTIFICATIONS.ERROR.USER_NOT_FOUND;
+
+      addNotification(message, 'error', NOTIFICATION_TIMEOUT.ERROR);
     } finally {
       setLoading(false);
     }
@@ -58,13 +73,47 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
 
   const handleSwitchToRegister = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!loading) {
-      switchToRegister();
-    }
+    switchToRegister();
   };
 
   return (
     <div className="presentation-body">
+      <div className="presentation-notifications-container">
+        {notifications.map(({ id, message, type }) => (
+          <div key={id} className={`presentation-notification presentation-notification--${type}`}>
+            <div className="presentation-notification-content">
+              <svg
+                className="presentation-notification-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  d="M20 6L9 17l-5-5"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="presentation-notification-message">{message}</span>
+            </div>
+            <button
+              className="presentation-notification-close"
+              onClick={() => removeNotification(id)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        ))}
+      </div>
+
       <div className="presentation-container">
         <nav className="presentation-navbar">
           <div>
@@ -84,49 +133,60 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
             <p className="presentation-side-subtitle">Продолжите работу над вашими презентациями</p>
 
             <div className="presentation-features">
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="3" y1="9" x2="21" y2="9"></line>
-                    <line x1="9" y1="21" x2="9" y2="9"></line>
-                  </svg>
+              {[
+                {
+                  title: 'Продолжайте редактирование',
+                  text: 'Вернитесь к вашим незавершенным проектам и продолжите работу с того же места',
+                  icon: (
+                    <>
+                      <path d="M3 6h18" />
+                      <path d="M3 12h18" />
+                      <path d="M3 18h18" />
+                    </>
+                  ),
+                },
+                {
+                  title: 'Доступ к сохраненным презентациям',
+                  text: 'Все ваши презентации хранятся в облаке и доступны с любого устройства',
+                  icon: (
+                    <>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </>
+                  ),
+                },
+                {
+                  title: 'Синхронизация изменений',
+                  text: 'Все изменения автоматически сохраняются, вы никогда не потеряете прогресс',
+                  icon: (
+                    <>
+                      <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                    </>
+                  ),
+                },
+                {
+                  title: 'Новые функции и обновления',
+                  text: 'Получайте доступ к последним улучшениям конструктора сразу после выхода',
+                  icon: (
+                    <>
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </>
+                  ),
+                },
+              ].map(({ title, text, icon }) => (
+                <div className="presentation-feature" key={title}>
+                  <div className="presentation-feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      {icon}
+                    </svg>
+                  </div>
+                  <div className="presentation-feature-content">
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </div>
                 </div>
-                <div className="presentation-feature-content">
-                  <h3>Простой конструктор презентаций</h3>
-                  <p>Создавайте слайды с текстом и изображениями, настраивайте цвета и шрифты</p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Управление слайдами</h3>
-                  <p>
-                    Добавляйте, удаляйте и переупорядочивайте слайды, настраивайте фон каждого
-                    слайда
-                  </p>
-                </div>
-              </div>
-
-              <div className="presentation-feature">
-                <div className="presentation-feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
-                  </svg>
-                </div>
-                <div className="presentation-feature-content">
-                  <h3>Быстрое редактирование</h3>
-                  <p>
-                    Изменяйте размер и положение элементов, копируйте стили и настраивайте
-                    выравнивание
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -139,25 +199,16 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
             </div>
 
             <form onSubmit={login} className="presentation-auth-form">
-              {error && <div className="presentation-error">{error}</div>}
-
               <div className="presentation-form-group">
                 <label className="presentation-form-label">Ваш email</label>
                 <input
                   className="presentation-form-input"
                   type="email"
                   placeholder="work@email.com"
-                  onChange={(e) => setEmail(e.target.value)}
                   value={email}
-                  required
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                  title="Введите корректный email"
-                  autoComplete="email"
                 />
-                <div className="presentation-input-hint">
-                  Email, который вы использовали при регистрации
-                </div>
               </div>
 
               <div className="presentation-form-group">
@@ -166,22 +217,16 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
                   className="presentation-form-input"
                   type="password"
                   placeholder="••••••••"
-                  onChange={(e) => setPassword(e.target.value)}
                   value={password}
-                  required
+                  onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  minLength={8}
-                  pattern=".{8,}"
-                  title="Минимум 8 символов"
-                  autoComplete="current-password"
                 />
-                <div className="presentation-input-hint">Введите пароль от вашего аккаунта</div>
               </div>
 
               <button className="presentation-auth-button" type="submit" disabled={loading}>
                 {loading ? (
                   <div className="presentation-button-content">
-                    <div className="presentation-spinner"></div>
+                    <div className="presentation-spinner" />
                     <span>Вход...</span>
                   </div>
                 ) : (
@@ -192,12 +237,7 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
 
             <div className="presentation-link-text">
               Нет аккаунта?{' '}
-              <a
-                href="#"
-                onClick={handleSwitchToRegister}
-                className="presentation-link"
-                tabIndex={loading ? -1 : 0}
-              >
+              <a href="#" onClick={handleSwitchToRegister} className="presentation-link">
                 Зарегистрироваться
               </a>
             </div>
