@@ -12,7 +12,7 @@ import {
 } from '../../store/editorSlice';
 import { Presentation } from '../../store/types/presentation';
 import NewPresentationModal from './NewPresentationModal';
-import './PresentationList.css';
+import '../styles/PresentationList.css';
 
 export default function PresentationList({ onSelect }: { onSelect?: () => void }) {
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);

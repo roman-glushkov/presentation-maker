@@ -7,7 +7,7 @@ import { useAutoSave } from '../hooks/useAutoSave';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPresentationId, undo, redo } from '../../store/editorSlice';
 import type { RootState } from '../../store/index';
-import './AuthWrapper.css';
+import '../styles/AuthWrapper.css';
 
 interface AuthWrapperProps {
   children: ReactNode;

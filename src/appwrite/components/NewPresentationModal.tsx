@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { PresentationService } from '../services/PresentationService';
 import { account, AppwriteUser } from '../client';
-import './NewPresentationModal.css';
+import '../styles/NewPresentationModal.css';
 
 interface NewPresentationModalProps {
   isOpen: boolean;
