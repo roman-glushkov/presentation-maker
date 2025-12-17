@@ -27,11 +27,14 @@ const NotificationIcons = {
 
 export default function PresentationList({ onSelect }: { onSelect?: () => void }) {
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
-  const [invalidPresentations, setInvalidPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AccountUser | null>(null);
   const [showNewPresentationModal, setShowNewPresentationModal] = useState(false);
   const [creatingNew, setCreatingNew] = useState(false);
+
+  // useRef вместо useState для избежания ререндеров
+  const validationErrorDetected = useRef(false);
+  const notificationsShown = useRef(false);
 
   const dispatch = useDispatch();
   const currentPresentation = useSelector((state: RootState) => state.editor.presentation);
@@ -44,177 +47,82 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       .catch(() => setUser(null));
   }, []);
 
-  const loadPresentations = useCallback(async () => {
-    if (!user) {
-      console.log('🚫 loadPresentations: пользователь не авторизован');
+  // Перехватываем ошибки валидации из PresentationService
+  useEffect(() => {
+    const originalWarn = console.warn;
+
+    console.warn = function (...args) {
+      // Проверяем, содержит ли предупреждение информацию о валидации
+      if (
+        args[0] &&
+        typeof args[0] === 'string' &&
+        args[0].includes('не прошел валидацию') &&
+        !validationErrorDetected.current
+      ) {
+        validationErrorDetected.current = true;
+      }
+      // Не выводим в консоль
       return;
-    }
+    };
 
-    console.log('🔄 loadPresentations: начали загрузку для пользователя', {
-      userId: user.$id,
-      userName: user.name || user.email,
-    });
+    return () => {
+      console.warn = originalWarn;
+    };
+  }, []);
 
+  const loadPresentations = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
+    validationErrorDetected.current = false;
+    notificationsShown.current = false;
 
     try {
-      console.log('📥 Загружаем презентации из PresentationService...');
       const userPresentations = await PresentationService.getUserPresentations(user.$id);
+      setPresentations(userPresentations);
 
-      console.log('📊 Получены презентации:', {
-        totalCount: userPresentations.length,
-        presentations: userPresentations.map((p) => ({
-          id: p.id || p.$id,
-          title: p.title || '(без названия)',
-          slidesCount: p.slides?.length || 0,
-          hasOwner: !!p.ownerId,
-          ownerName: p.ownerName || '(нет имени)',
-          updatedAt: p.updatedAt || '(нет даты)',
-        })),
-      });
-
-      // Разделяем презентации на валидные и невалидные
-      const validPres: StoredPresentation[] = [];
-      const invalidPres: StoredPresentation[] = [];
-
-      userPresentations.forEach((presentation, index) => {
-        console.log(`🔍 Проверяем презентацию ${index + 1}/${userPresentations.length}:`, {
-          id: presentation.id || presentation.$id || '(нет ID)',
-          title: presentation.title || '(без названия)',
-          slidesType: typeof presentation.slides,
-          slidesIsArray: Array.isArray(presentation.slides),
-          slidesLength: presentation.slides?.length || 0,
-          ownerId: presentation.ownerId || '(нет ownerId)',
-          ownerName: presentation.ownerName || '(нет имени владельца)',
-        });
-
-        // Проверяем основные поля на валидность
-        const isValid = validatePresentation(presentation);
-
-        if (isValid) {
-          console.log(
-            `✅ Презентация ${presentation.title} (${presentation.id || presentation.$id}) - ВАЛИДНАЯ`
-          );
-          validPres.push(presentation);
-        } else {
-          console.log(
-            `❌ Презентация ${presentation.title} (${presentation.id || presentation.$id}) - НЕВАЛИДНАЯ`
-          );
-          invalidPres.push(presentation);
-
-          // Детальный лог невалидной презентации
-          console.log('❌ Детали невалидной презентации:', {
-            id: presentation.id || presentation.$id || '(нет ID)',
-            title: presentation.title,
-            slides: presentation.slides,
-            slidesType: typeof presentation.slides,
-            slidesIsArray: Array.isArray(presentation.slides),
-            ownerId: presentation.ownerId,
-            ownerName: presentation.ownerName,
-            userId: user.$id,
-          });
-        }
-      });
-
-      setPresentations(validPres);
-      setInvalidPresentations(invalidPres);
-
-      console.log('📈 Результаты валидации:', {
-        validCount: validPres.length,
-        invalidCount: invalidPres.length,
-        totalCount: userPresentations.length,
-      });
-
-      if (validPres.length === 0 && invalidPres.length === 0) {
-        console.log('📭 Нет ни одной презентации');
-        addNotification(
-          PRESENTATION_NOTIFICATIONS.INFO.NO_PRESENTATIONS,
-          'info',
-          NOTIFICATION_TIMEOUT.INFO
-        );
-      } else if (validPres.length > 0) {
-        console.log(`✅ Найдено ${validPres.length} валидных презентаций`);
-        // Показываем уведомление о валидных презентациях
-        addNotification(
-          PRESENTATION_NOTIFICATIONS.SUCCESS.LOADED(validPres.length),
-          'success',
-          NOTIFICATION_TIMEOUT.SUCCESS
-        );
-
-        // Показываем предупреждение о невалидных презентациях
-        if (invalidPres.length > 0) {
-          console.log(`⚠️ Найдено ${invalidPres.length} невалидных презентаций`);
+      if (userPresentations.length === 0) {
+        if (!notificationsShown.current) {
           addNotification(
-            PRESENTATION_NOTIFICATIONS.WARNING.VALIDATION_FAILED,
-            'warning',
-            NOTIFICATION_TIMEOUT.WARNING
+            PRESENTATION_NOTIFICATIONS.INFO.NO_PRESENTATIONS,
+            'info',
+            NOTIFICATION_TIMEOUT.INFO
           );
+          notificationsShown.current = true;
         }
-      } else if (invalidPres.length > 0) {
-        console.log(`❌ Есть ${invalidPres.length} презентаций, но все они невалидные`);
-        addNotification(
-          PRESENTATION_NOTIFICATIONS.WARNING.VALIDATION_FAILED,
-          'warning',
-          NOTIFICATION_TIMEOUT.WARNING
-        );
+      } else {
+        if (!notificationsShown.current) {
+          // Даем время для обнаружения ошибок валидации
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          if (validationErrorDetected.current) {
+            addNotification(
+              PRESENTATION_NOTIFICATIONS.WARNING.VALIDATION_FAILED,
+              'warning',
+              NOTIFICATION_TIMEOUT.WARNING
+            );
+          }
+
+          addNotification(
+            PRESENTATION_NOTIFICATIONS.SUCCESS.LOADED(userPresentations.length),
+            'success',
+            NOTIFICATION_TIMEOUT.SUCCESS
+          );
+          notificationsShown.current = true;
+        }
       }
-    } catch (error) {
-      console.error('💥 Ошибка загрузки презентаций:', error);
-      addNotification(
-        PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
-        'error',
-        NOTIFICATION_TIMEOUT.ERROR
-      );
+    } catch {
+      if (!notificationsShown.current) {
+        addNotification(
+          PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
+          'error',
+          NOTIFICATION_TIMEOUT.ERROR
+        );
+        notificationsShown.current = true;
+      }
     } finally {
-      console.log('🏁 loadPresentations: завершено');
       setLoading(false);
     }
   }, [user, addNotification]);
-
-  // Функция для валидации презентации
-  const validatePresentation = (presentation: StoredPresentation): boolean => {
-    try {
-      // Проверка обязательных полей
-      if (!presentation.id && !presentation.$id) {
-        console.log('❌ Презентация без ID:', presentation);
-        return false;
-      }
-
-      // Проверка структуры slides
-      if (!Array.isArray(presentation.slides)) {
-        console.log('❌ Презентация с некорректными слайдами:', {
-          id: presentation.id || presentation.$id,
-          title: presentation.title,
-          slidesType: typeof presentation.slides,
-        });
-        return false;
-      }
-
-      // Проверка, что все слайды имеют нужные поля
-      const hasInvalidSlides = presentation.slides.some((slide: any, index: number) => {
-        if (!slide || typeof slide !== 'object') {
-          console.log(`❌ Слайд ${index} не является объектом:`, slide);
-          return true;
-        }
-
-        if (!slide.id || typeof slide.id !== 'string') {
-          console.log(`❌ Слайд ${index} без ID или ID не строка:`, slide);
-          return true;
-        }
-
-        return false;
-      });
-
-      if (hasInvalidSlides) {
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Ошибка при валидации презентации:', error, presentation);
-      return false;
-    }
-  };
 
   useEffect(() => {
     if (user) {
@@ -294,8 +202,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
         NOTIFICATION_TIMEOUT.SUCCESS
       );
       onSelect?.();
-    } catch (error) {
-      console.error('Ошибка загрузки презентации:', error);
+    } catch {
       addNotification(
         PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
         'error',
@@ -378,11 +285,11 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
           </div>
         )}
 
-        {!loading && (
+        {!loading && presentations.length > 0 && (
           <>
             <div className="presentation-list-count">
               Загружено презентаций: {presentations.length}
-              {invalidPresentations.length > 0 && (
+              {validationErrorDetected.current && (
                 <span
                   style={{
                     fontSize: '12px',
@@ -391,70 +298,63 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
                     fontWeight: 'normal',
                   }}
                 >
-                  ({invalidPresentations.length} поврежденных скрыто)
+                  (некоторые презентации повреждены)
                 </span>
               )}
             </div>
 
-            {presentations.length > 0 ? (
-              <div className="presentation-list-grid">
-                {presentations.map((pres) => (
+            <div className="presentation-list-grid">
+              {presentations.map((pres) => (
+                <div
+                  key={pres.id || pres.$id}
+                  className="presentation-list-card"
+                  onClick={() => handleLoadPresentation(pres)}
+                >
                   <div
-                    key={pres.id || pres.$id}
-                    className="presentation-list-card"
-                    onClick={() => handleLoadPresentation(pres)}
+                    className="presentation-list-card-valid"
+                    title="Эта презентация прошла проверку валидации"
                   >
-                    <div
-                      className="presentation-list-card-valid"
-                      title="Эта презентация прошла проверку валидации"
-                    >
-                      ✅
-                    </div>
+                    ✅
+                  </div>
 
-                    <div>
-                      <h3 className="presentation-list-card-title">
-                        {pres.title || 'Без названия'}
-                      </h3>
+                  <div>
+                    <h3 className="presentation-list-card-title">{pres.title || 'Без названия'}</h3>
 
-                      <div className="presentation-list-card-meta">
-                        <span>📊 {(pres.slides || []).length} слайдов</span>
-                        <span>👤 {pres.ownerName || user?.name || user?.email || ''}</span>
-                      </div>
-                    </div>
-
-                    <div className="presentation-list-card-footer">
-                      Обновлено:{' '}
-                      {pres.updatedAt
-                        ? new Date(pres.updatedAt).toLocaleString('ru-RU', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                          })
-                        : 'Нет данных'}
+                    <div className="presentation-list-card-meta">
+                      <span>📊 {(pres.slides || []).length} слайдов</span>
+                      <span>👤 {pres.ownerName || user?.name || user?.email || ''}</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div
-                className="presentation-list-container--empty"
-                style={{ textAlign: 'center', padding: '40px' }}
-              >
-                <p>У вас пока нет презентаций</p>
-                <p style={{ fontSize: '14px', color: '#64748b', marginTop: '10px' }}>
-                  Создайте новую или попробуйте демо-презентацию
-                </p>
-                {invalidPresentations.length > 0 && (
-                  <p style={{ fontSize: '12px', color: '#f59e0b', marginTop: '10px' }}>
-                    ⚠️ Обнаружено {invalidPresentations.length} поврежденных презентаций
-                  </p>
-                )}
-              </div>
-            )}
+
+                  <div className="presentation-list-card-footer">
+                    Обновлено:{' '}
+                    {pres.updatedAt
+                      ? new Date(pres.updatedAt).toLocaleString('ru-RU', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })
+                      : 'Нет данных'}
+                  </div>
+                </div>
+              ))}
+            </div>
           </>
+        )}
+
+        {!loading && presentations.length === 0 && (
+          <div
+            className="presentation-list-container--empty"
+            style={{ textAlign: 'center', padding: '40px' }}
+          >
+            <p>У вас пока нет презентаций</p>
+            <p style={{ fontSize: '14px', color: '#64748b', marginTop: '10px' }}>
+              Создайте новую или попробуйте демо-презентацию
+            </p>
+          </div>
         )}
 
         {showNewPresentationModal && (

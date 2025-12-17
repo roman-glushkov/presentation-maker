@@ -53,102 +53,121 @@ export class PresentationService {
         data
       );
       return this.mapToStoredPresentation(result, data);
-    } else {
-      const docId = ID.unique();
-      data.createdAt = new Date().toISOString();
-
-      const result = await databases.createDocument(DATABASE_ID, COLLECTION_ID, docId, data);
-      return this.mapToStoredPresentation(result, data);
     }
+
+    const docId = ID.unique();
+    data.createdAt = new Date().toISOString();
+    const result = await databases.createDocument(DATABASE_ID, COLLECTION_ID, docId, data);
+    return this.mapToStoredPresentation(result, data);
   }
 
   static async getUserPresentations(userId: string): Promise<StoredPresentation[]> {
-    const result = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-      Query.equal('ownerId', userId),
-      Query.orderDesc('$updatedAt'),
-    ]);
+    try {
+      const result = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+        Query.equal('ownerId', userId),
+        Query.orderDesc('$updatedAt'),
+      ]);
 
-    const presentations: StoredPresentation[] = [];
+      const presentations: StoredPresentation[] = [];
 
-    for (const doc of result.documents) {
-      const docData = doc as Record<string, unknown>;
+      for (const doc of result.documents) {
+        const docData = doc as Record<string, unknown>;
 
-      if (!docData.ownerId || docData.ownerId !== userId) {
-        continue;
-      }
+        if (!docData.ownerId || docData.ownerId !== userId) {
+          continue;
+        }
 
-      const validationResult = validatePresentation(doc);
+        const validationResult = validatePresentation(doc);
 
-      if (!validationResult.isValid) {
-        continue;
-      }
+        if (!validationResult.isValid) {
+          continue;
+        }
 
-      let slides: Slide[] = [];
-      if (validationResult.parsedData?.slides) {
-        slides = validationResult.parsedData.slides as Slide[];
-      } else {
-        slides =
-          docData.slides && typeof docData.slides === 'string' ? JSON.parse(docData.slides) : [];
-      }
+        let slides: Slide[] = [];
+        try {
+          if (validationResult.parsedData?.slides) {
+            slides = validationResult.parsedData.slides as Slide[];
+          } else {
+            slides =
+              docData.slides && typeof docData.slides === 'string'
+                ? JSON.parse(docData.slides)
+                : [];
+          }
+        } catch {
+          continue;
+        }
 
-      let selectedSlideIds: string[] = [];
-      if (validationResult.parsedData?.selectedSlideIds) {
-        selectedSlideIds = validationResult.parsedData.selectedSlideIds as string[];
-      } else {
-        selectedSlideIds =
-          docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
-            ? JSON.parse(docData.selectedSlideIds)
-            : [];
-      }
+        let selectedSlideIds: string[] = [];
+        try {
+          if (validationResult.parsedData?.selectedSlideIds) {
+            selectedSlideIds = validationResult.parsedData.selectedSlideIds as string[];
+          } else {
+            selectedSlideIds =
+              docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
+                ? JSON.parse(docData.selectedSlideIds)
+                : [];
+          }
+        } catch {
+          selectedSlideIds = [];
+        }
 
-      let currentSlideId = typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '';
+        let currentSlideId =
+          typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '';
 
-      if (currentSlideId && slides.length > 0) {
-        const slideExists = slides.some((slide) => slide.id === currentSlideId);
-        if (!slideExists && slides.length > 0) {
+        if (currentSlideId && slides.length > 0) {
+          const slideExists = slides.some((slide) => slide.id === currentSlideId);
+          if (!slideExists && slides.length > 0) {
+            currentSlideId = slides[0].id;
+          }
+        } else if (slides.length > 0 && !currentSlideId) {
           currentSlideId = slides[0].id;
         }
-      } else if (slides.length > 0 && !currentSlideId) {
-        currentSlideId = slides[0].id;
+
+        const presentation: StoredPresentation = {
+          $id: doc.$id,
+          $createdAt: doc.$createdAt,
+          $updatedAt: doc.$updatedAt,
+          $permissions: doc.$permissions,
+          $collectionId: doc.$collectionId,
+          $databaseId: doc.$databaseId,
+          id: doc.$id,
+          title: typeof docData.title === 'string' ? docData.title : 'Без названия',
+          slides: slides,
+          currentSlideId: currentSlideId,
+          selectedSlideIds: selectedSlideIds,
+          ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
+          ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
+          updatedAt: typeof docData.updatedAt === 'string' ? docData.updatedAt : '',
+          createdAt: typeof docData.createdAt === 'string' ? docData.createdAt : '',
+        };
+
+        presentations.push(presentation);
       }
 
-      const presentation: StoredPresentation = {
-        $id: doc.$id,
-        $createdAt: doc.$createdAt,
-        $updatedAt: doc.$updatedAt,
-        $permissions: doc.$permissions,
-        $collectionId: doc.$collectionId,
-        $databaseId: doc.$databaseId,
-        id: doc.$id,
-        title: typeof docData.title === 'string' ? docData.title : 'Без названия',
-        slides: slides,
-        currentSlideId: currentSlideId,
-        selectedSlideIds: selectedSlideIds,
-        ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
-        ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
-        updatedAt: typeof docData.updatedAt === 'string' ? docData.updatedAt : '',
-        createdAt: typeof docData.createdAt === 'string' ? docData.createdAt : '',
-      };
+      presentations.sort((a, b) => {
+        const dateA = new Date(a.$updatedAt || a.updatedAt || 0);
+        const dateB = new Date(b.$updatedAt || b.updatedAt || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
 
-      presentations.push(presentation);
+      return presentations;
+    } catch {
+      return [];
     }
-
-    presentations.sort((a, b) => {
-      const dateA = new Date(a.$updatedAt || a.updatedAt || 0);
-      const dateB = new Date(b.$updatedAt || b.updatedAt || 0);
-      return dateB.getTime() - dateA.getTime();
-    });
-
-    return presentations;
   }
 
   static async getPresentation(id: string): Promise<StoredPresentation> {
     const doc = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
-
     const validationResult = validatePresentation(doc);
 
     if (!validationResult.isValid) {
-      const validationError = new Error('Данные презентации повреждены или имеют неверный формат');
+      const validationError = new Error(
+        `Данные презентации повреждены или имеют неверный формат.\n\n${
+          validationResult.formattedError ||
+          validationResult.errors?.join('\n') ||
+          'Ошибка валидации данных'
+        }`
+      );
       validationError.name = 'ValidationError';
       throw validationError;
     }
@@ -158,14 +177,22 @@ export class PresentationService {
     let slides: Slide[] = [];
     let selectedSlideIds: string[] = [];
 
-    if (docData.slides && typeof docData.slides === 'string') {
-      const parsedSlides = validationResult.parsedData?.slides || [];
-      slides = (parsedSlides as Slide[]) || [];
+    try {
+      if (docData.slides && typeof docData.slides === 'string') {
+        const parsedSlides = validationResult.parsedData?.slides || [];
+        slides = (parsedSlides as Slide[]) || [];
+      }
+    } catch {
+      slides = [];
     }
 
-    if (docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string') {
-      const parsedIds = validationResult.parsedData?.selectedSlideIds || [];
-      selectedSlideIds = (parsedIds as string[]) || [];
+    try {
+      if (docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string') {
+        const parsedIds = validationResult.parsedData?.selectedSlideIds || [];
+        selectedSlideIds = (parsedIds as string[]) || [];
+      }
+    } catch {
+      selectedSlideIds = [];
     }
 
     const currentSlideId = typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '';
@@ -173,7 +200,7 @@ export class PresentationService {
     if (currentSlideId && slides.length > 0) {
       const slideExists = slides.some((slide) => slide.id === currentSlideId);
       if (!slideExists) {
-        // currentSlideId не найден
+        // currentSlideId не найден среди слайдов
       }
     }
 
@@ -205,24 +232,26 @@ export class PresentationService {
     let slides: Slide[] = [];
     let selectedSlideIds: string[] = [];
 
-    if (typeof data.slides === 'string') {
-      try {
-        slides = JSON.parse(data.slides);
-      } catch {
-        slides = [];
-      }
-    } else if (Array.isArray(data.slides)) {
-      slides = data.slides;
+    try {
+      slides =
+        typeof data.slides === 'string'
+          ? JSON.parse(data.slides)
+          : Array.isArray(data.slides)
+            ? data.slides
+            : [];
+    } catch {
+      slides = [];
     }
 
-    if (typeof data.selectedSlideIds === 'string') {
-      try {
-        selectedSlideIds = JSON.parse(data.selectedSlideIds);
-      } catch {
-        selectedSlideIds = [];
-      }
-    } else if (Array.isArray(data.selectedSlideIds)) {
-      selectedSlideIds = data.selectedSlideIds;
+    try {
+      selectedSlideIds =
+        typeof data.selectedSlideIds === 'string'
+          ? JSON.parse(data.selectedSlideIds)
+          : Array.isArray(data.selectedSlideIds)
+            ? data.selectedSlideIds
+            : [];
+    } catch {
+      selectedSlideIds = [];
     }
 
     return {
