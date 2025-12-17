@@ -14,46 +14,31 @@ export default function SaveButton({ onSave }: { onSave?: () => void }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    account
-      .get<AppwriteUser>()
-      .then((userData) => setUser(userData as AccountUser))
-      .catch(() => setUser(null));
+    account.get<AppwriteUser>().then((userData) => setUser(userData as AccountUser));
   }, []);
 
   const handleSave = async () => {
     if (!user || saving) return;
 
     setSaving(true);
-    try {
-      const userName = user.name || user.email || '';
+    const userName = user.name || user.email || '';
 
-      const result = await PresentationService.savePresentation(
-        presentation,
-        user.$id,
-        userName,
-        presentationId
-      );
+    const result = await PresentationService.savePresentation(
+      presentation,
+      user.$id,
+      userName,
+      presentationId
+    );
 
-      if (result.id) {
-        dispatch(setPresentationId(result.id));
-        console.log('✅ Презентация сохранена, ID:', result.id);
-      }
-
-      if (onSave) {
-        onSave();
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      console.error('❌ Ошибка сохранения:', error);
-
-      if (errorMessage?.includes('longer than')) {
-        alert('❌ Ошибка: Презентация слишком большая. Попробуйте удалить некоторые элементы.');
-      } else {
-        alert(`❌ Не удалось сохранить презентацию: ${errorMessage}`);
-      }
-    } finally {
-      setSaving(false);
+    if (result.id) {
+      dispatch(setPresentationId(result.id));
     }
+
+    if (onSave) {
+      onSave();
+    }
+
+    setSaving(false);
   };
 
   return (
