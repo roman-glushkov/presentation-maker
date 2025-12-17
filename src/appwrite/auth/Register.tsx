@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ID } from 'appwrite';
 import { account } from '../client';
 
@@ -10,7 +10,10 @@ import {
   VALIDATION_MESSAGES,
   NOTIFICATION_TIMEOUT,
   TRANSITION_DELAY,
-  validateRegisterForm,
+  validateEmail,
+  validatePassword,
+  validateName,
+  validateRequired,
 } from '../notifications';
 
 interface RegisterProps {
@@ -23,18 +26,91 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
-  const { notifications, addNotification, removeNotification, clearNotifications } =
-    useNotifications();
+  const {
+    notifications,
+    addNotification,
+    removeNotification,
+    clearNotifications,
+    addValidationMessage,
+    removeValidationMessage,
+    clearValidationMessages,
+    getValidationMessage,
+    hasValidationErrors,
+  } = useNotifications();
+
+  // Валидация в реальном времени
+  useEffect(() => {
+    if (touchedFields.has('name') && name) {
+      if (!validateName(name)) {
+        addValidationMessage('name', VALIDATION_MESSAGES.NAME_TOO_SHORT, 'error');
+      } else {
+        removeValidationMessage('name');
+      }
+    }
+
+    if (touchedFields.has('email') && email) {
+      if (!validateEmail(email)) {
+        addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+      } else {
+        removeValidationMessage('email');
+      }
+    }
+
+    if (touchedFields.has('password') && password) {
+      if (!validatePassword(password)) {
+        addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+      } else {
+        removeValidationMessage('password');
+      }
+    }
+  }, [name, email, password, touchedFields, addValidationMessage, removeValidationMessage]);
+
+  const handleBlur = (field: string) => {
+    setTouchedFields((prev) => new Set(prev).add(field));
+  };
+
+  const validateForm = (): boolean => {
+    clearValidationMessages();
+    let isValid = true;
+
+    // Валидация имени
+    if (!validateRequired(name)) {
+      addValidationMessage('name', 'Введите ваше имя', 'error');
+      isValid = false;
+    } else if (!validateName(name)) {
+      addValidationMessage('name', VALIDATION_MESSAGES.NAME_TOO_SHORT, 'error');
+      isValid = false;
+    }
+
+    // Валидация email
+    if (!validateRequired(email)) {
+      addValidationMessage('email', 'Введите email адрес', 'error');
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+      isValid = false;
+    }
+
+    // Валидация пароля
+    if (!validateRequired(password)) {
+      addValidationMessage('password', 'Введите пароль', 'error');
+      isValid = false;
+    } else if (!validatePassword(password)) {
+      addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+      isValid = false;
+    }
+
+    return isValid;
+  };
 
   const register = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     clearNotifications();
 
-    const validation = validateRegisterForm(email, password, name);
-    if (!validation.isValid && validation.error) {
-      addNotification(VALIDATION_MESSAGES[validation.error], 'error', NOTIFICATION_TIMEOUT.ERROR);
+    if (!validateForm()) {
       setLoading(false);
       return;
     }
@@ -78,6 +154,10 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
     e.preventDefault();
     switchToLogin();
   };
+
+  const nameError = getValidationMessage('name');
+  const emailError = getValidationMessage('email');
+  const passwordError = getValidationMessage('password');
 
   return (
     <div className="presentation-body">
@@ -213,40 +293,62 @@ export default function Register({ onSuccess, switchToLogin }: RegisterProps) {
               <div className="presentation-form-group">
                 <label className="presentation-form-label">Как вас зовут?</label>
                 <input
-                  className="presentation-form-input"
+                  className={`presentation-form-input ${nameError ? 'presentation-form-input-error' : ''}`}
                   type="text"
                   placeholder="Александр Петров"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  onBlur={() => handleBlur('name')}
                   disabled={loading}
                 />
+                {nameError && (
+                  <div className="presentation-form-error">
+                    <span>{nameError}</span>
+                  </div>
+                )}
               </div>
 
               <div className="presentation-form-group">
                 <label className="presentation-form-label">Ваш рабочий Email</label>
                 <input
-                  className="presentation-form-input"
+                  className={`presentation-form-input ${emailError ? 'presentation-form-input-error' : ''}`}
                   type="email"
                   placeholder="alexander@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value.trim())}
+                  onBlur={() => handleBlur('email')}
                   disabled={loading}
                 />
+                {emailError && (
+                  <div className="presentation-form-error">
+                    <span>{emailError}</span>
+                  </div>
+                )}
               </div>
 
               <div className="presentation-form-group">
                 <label className="presentation-form-label">Создайте надежный пароль</label>
                 <input
-                  className="presentation-form-input"
+                  className={`presentation-form-input ${passwordError ? 'presentation-form-input-error' : ''}`}
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onBlur={() => handleBlur('password')}
                   disabled={loading}
                 />
+                {passwordError && (
+                  <div className="presentation-form-error">
+                    <span>{passwordError}</span>
+                  </div>
+                )}
               </div>
 
-              <button className="presentation-auth-button" type="submit" disabled={loading}>
+              <button
+                className="presentation-auth-button"
+                type="submit"
+                disabled={loading || hasValidationErrors()}
+              >
                 {loading ? (
                   <div className="presentation-button-content">
                     <div className="presentation-spinner" />

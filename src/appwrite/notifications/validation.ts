@@ -8,6 +8,14 @@ export const VALIDATION_MESSAGES = {
   NAME_TOO_SHORT: 'Имя должно содержать минимум 2 символа',
 } as const;
 
+// Сообщения валидации для логина
+export const LOGIN_VALIDATION_MESSAGES = {
+  EMAIL_REQUIRED: 'Введите email адрес',
+  PASSWORD_REQUIRED: 'Введите пароль',
+  INVALID_EMAIL: VALIDATION_MESSAGES.INVALID_EMAIL,
+  PASSWORD_TOO_SHORT: VALIDATION_MESSAGES.PASSWORD_TOO_SHORT,
+} as const;
+
 // Сообщения валидации для презентаций
 export const PRESENTATION_VALIDATION_MESSAGES = {
   REQUIRED: 'Введите название презентации',
@@ -19,6 +27,7 @@ export const PRESENTATION_VALIDATION_MESSAGES = {
 } as const;
 
 export type ValidationError = keyof typeof VALIDATION_MESSAGES;
+export type LoginValidationError = keyof typeof LOGIN_VALIDATION_MESSAGES;
 export type PresentationValidationError = keyof typeof PRESENTATION_VALIDATION_MESSAGES;
 
 // Валидационные функции для формы регистрации
@@ -65,6 +74,35 @@ export const validateRegisterForm = (
   }
 
   return { isValid: true };
+};
+
+// Валидационные функции для логина
+export const validateLoginForm = (
+  email: string,
+  password: string
+): { isValid: boolean; errors?: LoginValidationError[] } => {
+  const errors: LoginValidationError[] = [];
+
+  if (!validateRequired(email)) {
+    errors.push('EMAIL_REQUIRED');
+  } else if (!validateEmail(email)) {
+    errors.push('INVALID_EMAIL');
+  }
+
+  if (!validateRequired(password)) {
+    errors.push('PASSWORD_REQUIRED');
+  } else if (!validatePassword(password)) {
+    errors.push('PASSWORD_TOO_SHORT');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors: errors.length > 0 ? errors : undefined,
+  };
+};
+
+export const getLoginValidationMessage = (error: LoginValidationError): string => {
+  return LOGIN_VALIDATION_MESSAGES[error];
 };
 
 // Валидационные функции для названия презентации
@@ -134,4 +172,54 @@ export const validatePresentationTitle = (
   }
 
   return { isValid: true };
+};
+
+// Утилиты для валидации полей в реальном времени
+export const getFieldValidationMessage = (
+  field: string,
+  value: string,
+  existingTitles?: string[]
+): string | undefined => {
+  switch (field) {
+    case 'email':
+      if (!validateRequired(value)) return LOGIN_VALIDATION_MESSAGES.EMAIL_REQUIRED;
+      if (!validateEmail(value)) return LOGIN_VALIDATION_MESSAGES.INVALID_EMAIL;
+      break;
+    case 'password':
+      if (!validateRequired(value)) return LOGIN_VALIDATION_MESSAGES.PASSWORD_REQUIRED;
+      if (!validatePassword(value)) return LOGIN_VALIDATION_MESSAGES.PASSWORD_TOO_SHORT;
+      break;
+    case 'name':
+      if (!validateRequired(value)) return 'Введите ваше имя';
+      if (!validateName(value)) return VALIDATION_MESSAGES.NAME_TOO_SHORT;
+      break;
+    case 'title':
+      if (!value.trim()) return PRESENTATION_VALIDATION_MESSAGES.REQUIRED;
+      const trimmedTitle = value.trim();
+      if (trimmedTitle.length < 2) return PRESENTATION_VALIDATION_MESSAGES.TOO_SHORT;
+      if (trimmedTitle.length > 100) return PRESENTATION_VALIDATION_MESSAGES.TOO_LONG;
+      if (existingTitles?.includes(trimmedTitle.toLowerCase())) {
+        return PRESENTATION_VALIDATION_MESSAGES.DUPLICATE(trimmedTitle);
+      }
+      break;
+  }
+  return undefined;
+};
+
+export const validateLoginFields = (
+  email: string,
+  password: string,
+  validateOnBlur: boolean = false
+): { emailError?: string; passwordError?: string } => {
+  const errors: { emailError?: string; passwordError?: string } = {};
+
+  if (validateOnBlur || email) {
+    errors.emailError = getFieldValidationMessage('email', email);
+  }
+
+  if (validateOnBlur || password) {
+    errors.passwordError = getFieldValidationMessage('password', password);
+  }
+
+  return errors;
 };

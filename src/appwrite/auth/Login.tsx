@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { account } from '../client';
-
 import { useNotifications } from '../hooks/useNotifications';
 import {
   LOGIN_NOTIFICATIONS,
@@ -11,6 +10,7 @@ import {
   TRANSITION_DELAY,
   validateEmail,
   validatePassword,
+  validateRequired,
 } from '../notifications';
 
 interface LoginProps {
@@ -22,15 +22,63 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
-  const { notifications, addNotification, removeNotification, clearNotifications } =
-    useNotifications();
+  const {
+    notifications,
+    addNotification,
+    removeNotification,
+    clearNotifications,
+    addValidationMessage,
+    removeValidationMessage,
+    clearValidationMessages,
+    getValidationMessage,
+  } = useNotifications();
 
-  const validateLoginForm = (email: string, password: string) => {
-    if (!email.trim() || !password) return { isValid: false, error: 'REQUIRED_FIELDS' };
-    if (!validateEmail(email)) return { isValid: false, error: 'INVALID_EMAIL' };
-    if (!validatePassword(password)) return { isValid: false, error: 'PASSWORD_TOO_SHORT' };
-    return { isValid: true };
+  // Валидация в реальном времени
+  useEffect(() => {
+    if (touchedFields.has('email') && email) {
+      if (!validateEmail(email)) {
+        addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+      } else {
+        removeValidationMessage('email');
+      }
+    }
+
+    if (touchedFields.has('password') && password) {
+      if (!validatePassword(password)) {
+        addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+      } else {
+        removeValidationMessage('password');
+      }
+    }
+  }, [email, password, touchedFields, addValidationMessage, removeValidationMessage]);
+
+  const handleBlur = (field: string) => {
+    setTouchedFields((prev) => new Set(prev).add(field));
+  };
+
+  const validateForm = (): boolean => {
+    clearValidationMessages();
+    let isValid = true;
+
+    if (!validateRequired(email)) {
+      addValidationMessage('email', 'Введите email адрес', 'error');
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+      isValid = false;
+    }
+
+    if (!validateRequired(password)) {
+      addValidationMessage('password', 'Введите пароль', 'error');
+      isValid = false;
+    } else if (!validatePassword(password)) {
+      addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+      isValid = false;
+    }
+
+    return isValid;
   };
 
   const login = async (e: React.FormEvent) => {
@@ -38,9 +86,7 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
     setLoading(true);
     clearNotifications();
 
-    const validation = validateLoginForm(email, password);
-    if (!validation.isValid && validation.error) {
-      addNotification(VALIDATION_MESSAGES[validation.error], 'error', NOTIFICATION_TIMEOUT.ERROR);
+    if (!validateForm()) {
       setLoading(false);
       return;
     }
@@ -76,8 +122,12 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
     switchToRegister();
   };
 
+  const emailError = getValidationMessage('email');
+  const passwordError = getValidationMessage('password');
+
   return (
     <div className="presentation-body">
+      {/* Уведомления (popup) */}
       <div className="presentation-notifications-container">
         {notifications.map(({ id, message, type }) => (
           <div key={id} className={`presentation-notification presentation-notification--${type}`}>
@@ -136,7 +186,7 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
               {[
                 {
                   title: 'Продолжайте редактирование',
-                  text: 'Вернитесь к вашим незавершенным проектам и продолжите работу с того же места',
+                  text: 'Вернитесь к вашим незавершенным проектах и продолжите работу с того же места',
                   icon: (
                     <>
                       <path d="M3 6h18" />
@@ -202,25 +252,37 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
               <div className="presentation-form-group">
                 <label className="presentation-form-label">Ваш email</label>
                 <input
-                  className="presentation-form-input"
+                  className={`presentation-form-input ${emailError ? 'presentation-form-input-error' : ''}`}
                   type="email"
                   placeholder="work@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => handleBlur('email')}
                   disabled={loading}
                 />
+                {emailError && (
+                  <div className="presentation-form-error">
+                    <span>{emailError}</span>
+                  </div>
+                )}
               </div>
 
               <div className="presentation-form-group">
                 <label className="presentation-form-label">Ваш пароль</label>
                 <input
-                  className="presentation-form-input"
+                  className={`presentation-form-input ${passwordError ? 'presentation-form-input-error' : ''}`}
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onBlur={() => handleBlur('password')}
                   disabled={loading}
                 />
+                {passwordError && (
+                  <div className="presentation-form-error">
+                    <span>{passwordError}</span>
+                  </div>
+                )}
               </div>
 
               <button className="presentation-auth-button" type="submit" disabled={loading}>

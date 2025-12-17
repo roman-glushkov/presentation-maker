@@ -989,3 +989,50 @@
   height: 16px;
   stroke-width: 2;
 }
+
+/* Добавить в существующие стили для форм */
+
+/* Стили для ошибок валидации */
+.presentation-form-input-error {
+  border-color: #ef4444 !important;
+}
+
+.presentation-form-input-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.presentation-form-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 6px;
+  padding-left: 2px;
+}
+
+.presentation-form-error-icon {
+  flex-shrink: 0;
+  color: #dc2626;
+}
+
+/* Подсказки валидации для полей */
+.presentation-form-hints {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.presentation-form-hint {
+  font-size: 11px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.presentation-form-hint.valid {
+  color: #059669;
+}
