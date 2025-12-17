@@ -3,6 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { PresentationService } from '../services/PresentationService';
 import { account, AppwriteUser } from '../client';
 import '../styles/NewPresentationModal.css';
+import { useNotifications } from '../hooks/useNotifications';
+import {
+  validatePresentationTitle,
+  getPresentationValidationMessage,
+} from '../notifications/validation';
 
 interface NewPresentationModalProps {
   isOpen: boolean;
@@ -18,76 +23,83 @@ export default function NewPresentationModal({
   onCancel,
 }: NewPresentationModalProps) {
   const [title, setTitle] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [existingTitles, setExistingTitles] = useState<string[]>([]);
+  const [touched, setTouched] = useState(false);
+
+  const {
+    addValidationMessage,
+    removeValidationMessage,
+    clearValidationMessages,
+    getValidationMessage,
+    hasValidationErrors,
+  } = useNotifications();
 
   useEffect(() => {
     if (isOpen) {
-      loadUserAndTitles();
-    }
-  }, [isOpen]);
+      account
+        .get<AppwriteUser>()
+        .then((currentUser) => PresentationService.getUserPresentations(currentUser.$id))
+        .then((presentations) => {
+          const titles = presentations.map((p) => p.title?.toLowerCase().trim() || '');
+          setExistingTitles(titles.filter((t) => t));
+        });
 
-  const loadUserAndTitles = async () => {
-    try {
-      const currentUser = await account.get<AppwriteUser>();
-
-      const presentations = await PresentationService.getUserPresentations(currentUser.$id);
-      const titles = presentations.map((p) => p.title.toLowerCase().trim());
-      setExistingTitles(titles);
-    } catch (error: unknown) {
-      console.error('Ошибка загрузки данных:', error);
+      setTitle('');
+      clearValidationMessages();
+      setTouched(false);
     }
+  }, [isOpen, clearValidationMessages]);
+
+  useEffect(() => {
+    if (!touched) return;
+
+    const trimmedTitle = title.trim();
+    removeValidationMessage('title');
+
+    const validation = validatePresentationTitle(title, existingTitles);
+    if (!validation.isValid && validation.error) {
+      const message =
+        validation.message || getPresentationValidationMessage(validation.error, trimmedTitle);
+      addValidationMessage('title', message, 'error');
+    }
+  }, [title, touched, existingTitles, addValidationMessage, removeValidationMessage]);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    if (!touched) setTouched(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    if (!touched) setTouched(true);
 
     const trimmedTitle = title.trim();
+    const validation = validatePresentationTitle(title, existingTitles);
 
-    if (!trimmedTitle) {
-      setError('Введите название презентации');
-      return;
-    }
-
-    if (trimmedTitle.length < 2) {
-      setError('Название должно содержать минимум 2 символа');
-      return;
-    }
-
-    if (trimmedTitle.length > 100) {
-      setError('Название должно быть не длиннее 100 символов');
-      return;
-    }
-
-    if (existingTitles.includes(trimmedTitle.toLowerCase())) {
-      setError(
-        `У вас уже есть презентация с названием "${trimmedTitle}". Придумайте уникальное название.`
-      );
-      return;
-    }
+    if (!validation.isValid) return;
 
     setLoading(true);
-    try {
-      onCreate(trimmedTitle);
-      onClose();
-      setTitle('');
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Ошибка создания презентации';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    await onCreate(trimmedTitle);
+    onClose();
+    setTitle('');
+    clearValidationMessages();
+    setTouched(false);
+    setLoading(false);
   };
 
   const handleCancel = () => {
     setTitle('');
-    setError('');
+    clearValidationMessages();
+    setTouched(false);
     onCancel();
   };
 
   if (!isOpen) return null;
+
+  const trimmedTitle = title.trim();
+  const titleError = getValidationMessage('title');
 
   return (
     <div className="new-presentation-modal-overlay">
@@ -96,33 +108,36 @@ export default function NewPresentationModal({
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
-            <label className="new-presentation-modal-label">Название презентации *</label>
+            <div className="new-presentation-modal-label-container">
+              <label className="new-presentation-modal-label">Название презентации</label>
+            </div>
+
             <input
               type="text"
               value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setError('');
-              }}
+              onChange={handleTitleChange}
               placeholder="Моя новая презентация"
-              className={`new-presentation-modal-input ${error ? 'error' : ''}`}
+              className={`new-presentation-modal-input ${titleError ? 'error' : ''}`}
               autoFocus
+              disabled={loading}
             />
-            {error && <div className="new-presentation-modal-error">{error}</div>}
-            <div className="new-presentation-modal-hint">
-              Уникальное название для вашей презентации
-            </div>
+
+            {titleError && (
+              <div className="new-presentation-modal-error">
+                <span>{titleError}</span>
+              </div>
+            )}
           </div>
 
           {existingTitles.length > 0 && (
             <div className="new-presentation-modal-existing-list">
               <div className="new-presentation-modal-existing-title">
-                Ваши существующие презентации:
+                Ваши существующие презентации ({existingTitles.length}):
               </div>
               <div className="new-presentation-modal-existing-items">
-                {existingTitles.slice(0, 5).map((title, index) => (
+                {existingTitles.slice(0, 5).map((existingTitle, index) => (
                   <div key={index} className="new-presentation-modal-existing-item">
-                    • {title}
+                    • {existingTitle}
                   </div>
                 ))}
                 {existingTitles.length > 5 && (
@@ -143,7 +158,11 @@ export default function NewPresentationModal({
             >
               Отмена
             </button>
-            <button type="submit" className="new-presentation-modal-submit" disabled={loading}>
+            <button
+              type="submit"
+              className="new-presentation-modal-submit"
+              disabled={loading || !trimmedTitle || hasValidationErrors()}
+            >
               {loading ? 'Создание...' : 'Создать'}
             </button>
           </div>

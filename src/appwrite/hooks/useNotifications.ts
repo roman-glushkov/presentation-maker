@@ -1,9 +1,14 @@
 // hooks/useNotifications.ts
 import { useState, useCallback } from 'react';
-import type { Notification, NotificationType } from '../notifications/types';
+import type {
+  Notification,
+  NotificationType,
+  ValidationNotification,
+} from '../notifications/types';
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [validationMessages, setValidationMessages] = useState<ValidationNotification[]>([]);
 
   const addNotification = useCallback(
     (message: string, type: NotificationType = 'success', timeout?: number) => {
@@ -30,18 +35,63 @@ export const useNotifications = () => {
     []
   );
 
+  const addValidationMessage = useCallback(
+    (field: string, message: string, type: NotificationType = 'error') => {
+      const id = Date.now();
+      const validationMessage: ValidationNotification = {
+        id,
+        field,
+        message,
+        type,
+      };
+
+      setValidationMessages((prev) =>
+        prev.filter((msg) => msg.field !== field).concat(validationMessage)
+      );
+
+      return id;
+    },
+    []
+  );
+
   const removeNotification = useCallback((id: number) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+  }, []);
+
+  const removeValidationMessage = useCallback((field: string) => {
+    setValidationMessages((prev) => prev.filter((msg) => msg.field !== field));
   }, []);
 
   const clearNotifications = useCallback(() => {
     setNotifications([]);
   }, []);
 
+  const clearValidationMessages = useCallback(() => {
+    setValidationMessages([]);
+  }, []);
+
+  const getValidationMessage = useCallback(
+    (field: string): string | undefined => {
+      const message = validationMessages.find((msg) => msg.field === field);
+      return message?.message;
+    },
+    [validationMessages]
+  );
+
+  const hasValidationErrors = useCallback((): boolean => {
+    return validationMessages.length > 0;
+  }, [validationMessages]);
+
   return {
     notifications,
+    validationMessages,
     addNotification,
+    addValidationMessage,
     removeNotification,
+    removeValidationMessage,
     clearNotifications,
+    clearValidationMessages,
+    getValidationMessage,
+    hasValidationErrors,
   };
 };

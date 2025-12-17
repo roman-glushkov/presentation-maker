@@ -1,4 +1,6 @@
 // appwrite/notifications/validation.ts
+
+// Общие сообщения валидации
 export const VALIDATION_MESSAGES = {
   REQUIRED_FIELDS: 'Все поля обязательны для заполнения',
   INVALID_EMAIL: 'Введите корректный email адрес (например: user@company.com)',
@@ -6,6 +8,20 @@ export const VALIDATION_MESSAGES = {
   NAME_TOO_SHORT: 'Имя должно содержать минимум 2 символа',
 } as const;
 
+// Сообщения валидации для презентаций
+export const PRESENTATION_VALIDATION_MESSAGES = {
+  REQUIRED: 'Введите название презентации',
+  TOO_SHORT: 'Название должно содержать минимум 2 символа',
+  TOO_LONG: 'Название должно быть не длиннее 100 символов',
+  ONLY_SPACES: 'Название не может состоять только из пробелов',
+  DUPLICATE: (title: string) =>
+    `У вас уже есть презентация с названием "${title}". Придумайте уникальное название.`,
+} as const;
+
+export type ValidationError = keyof typeof VALIDATION_MESSAGES;
+export type PresentationValidationError = keyof typeof PRESENTATION_VALIDATION_MESSAGES;
+
+// Валидационные функции для формы регистрации
 export const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
@@ -22,8 +38,6 @@ export const validateName = (name: string): boolean => {
 export const validateRequired = (value: string): boolean => {
   return value.trim().length > 0;
 };
-
-export type ValidationError = keyof typeof VALIDATION_MESSAGES;
 
 export const getValidationMessage = (error: ValidationError): string => {
   return VALIDATION_MESSAGES[error];
@@ -48,6 +62,75 @@ export const validateRegisterForm = (
 
   if (!validateName(name)) {
     return { isValid: false, error: 'NAME_TOO_SHORT' };
+  }
+
+  return { isValid: true };
+};
+
+// Валидационные функции для названия презентации
+export const validatePresentationTitleLength = (title: string): boolean => {
+  return title.length >= 2;
+};
+
+export const validatePresentationTitleMaxLength = (title: string): boolean => {
+  return title.length <= 100;
+};
+
+export const validatePresentationTitleNotEmpty = (title: string): boolean => {
+  return title.trim().length > 0;
+};
+
+export const validatePresentationTitleNoOnlySpaces = (title: string): boolean => {
+  return title.trim().length > 0 || !title.includes('  ');
+};
+
+export const validatePresentationTitleUnique = (
+  title: string,
+  existingTitles: string[]
+): boolean => {
+  return !existingTitles.includes(title.toLowerCase().trim());
+};
+
+export const getPresentationValidationMessage = (
+  error: PresentationValidationError,
+  title?: string
+): string => {
+  const message = PRESENTATION_VALIDATION_MESSAGES[error];
+  return typeof message === 'function' ? message(title || '') : message;
+};
+
+export const validatePresentationTitle = (
+  title: string,
+  existingTitles: string[]
+): {
+  isValid: boolean;
+  error?: PresentationValidationError;
+  message?: string;
+} => {
+  const trimmedTitle = title.trim();
+
+  if (!validatePresentationTitleNotEmpty(title)) {
+    return { isValid: false, error: 'REQUIRED' };
+  }
+
+  if (!validatePresentationTitleNoOnlySpaces(title)) {
+    return { isValid: false, error: 'ONLY_SPACES' };
+  }
+
+  if (!validatePresentationTitleLength(trimmedTitle)) {
+    return { isValid: false, error: 'TOO_SHORT' };
+  }
+
+  if (!validatePresentationTitleMaxLength(trimmedTitle)) {
+    return { isValid: false, error: 'TOO_LONG' };
+  }
+
+  if (!validatePresentationTitleUnique(trimmedTitle, existingTitles)) {
+    return {
+      isValid: false,
+      error: 'DUPLICATE',
+      message: getPresentationValidationMessage('DUPLICATE', trimmedTitle),
+    };
   }
 
   return { isValid: true };
