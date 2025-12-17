@@ -20,38 +20,25 @@ export function useAutoSave(intervalMs = 15000) {
         setIsReady(true);
       })
       .catch(() => {
-        console.log('Пользователь не авторизован');
         setIsReady(false);
       });
   }, []);
 
   const savePresentation = useCallback(async () => {
     if (!user || isSaving || !presentationId) {
-      console.log('Не могу сохранить:', {
-        hasUser: !!user,
-        isSaving,
-        presentationId,
-      });
       return;
     }
 
     setIsSaving(true);
-    console.log('🔄 Сохраняем презентацию...', presentationId);
 
     try {
       const userName = user.name || user.email || '';
 
-      const result = await PresentationService.savePresentation(
-        presentation,
-        user.$id,
-        userName,
-        presentationId
-      );
+      await PresentationService.savePresentation(presentation, user.$id, userName, presentationId);
 
       setLastSaved(new Date());
-      console.log('✅ Сохранено успешно:', result.id);
-    } catch (error) {
-      console.error('❌ Ошибка сохранения:', error);
+    } catch {
+      // Ошибка сохранения
     } finally {
       setIsSaving(false);
     }
@@ -59,15 +46,8 @@ export function useAutoSave(intervalMs = 15000) {
 
   useEffect(() => {
     if (!user || !presentationId || !isReady) {
-      console.log('Автосохранение не активно:', {
-        hasUser: !!user,
-        hasPresentationId: !!presentationId,
-        isReady,
-      });
       return;
     }
-
-    console.log('✅ Автосохранение активно для:', presentationId);
 
     const interval = setInterval(() => {
       savePresentation();

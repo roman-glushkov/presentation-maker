@@ -1,7 +1,6 @@
 import { databases, DATABASE_ID, COLLECTION_ID, ID, DatabaseDocument } from '../client';
 import { Query } from 'appwrite';
-import { Presentation } from '../../store/types/presentation';
-import { Slide } from '../../store/types/presentation';
+import { Presentation, Slide } from '../../store/types/presentation';
 import validatePresentation from '../schemas/validator';
 
 export interface SavedPresentation extends Presentation {
@@ -11,9 +10,6 @@ export interface SavedPresentation extends Presentation {
   thumbnail?: string;
   createdAt?: string;
   updatedAt?: string;
-  isPublic?: boolean;
-  collaborators?: string[];
-  version?: number;
 }
 
 export interface StoredPresentation extends SavedPresentation {
@@ -32,128 +28,82 @@ export class PresentationService {
     userName: string,
     presentationId?: string
   ): Promise<StoredPresentation> {
-    const slidesJson = JSON.stringify(presentation.slides || []);
-    const selectedSlideIdsJson = JSON.stringify(presentation.selectedSlideIds || []);
-
-    const data: Record<string, unknown> = {
+    const data = {
       title: presentation.title || 'Без названия',
-      slides: slidesJson,
+      slides: JSON.stringify(presentation.slides || []),
       currentSlideId: presentation.currentSlideId || '',
-      selectedSlideIds: selectedSlideIdsJson,
+      selectedSlideIds: JSON.stringify(presentation.selectedSlideIds || []),
       ownerId: userId,
       ownerName: userName,
       updatedAt: new Date().toISOString(),
     };
 
-    if (presentationId) {
-      const result = await databases.updateDocument(
-        DATABASE_ID,
-        COLLECTION_ID,
-        presentationId,
-        data
-      );
-      return this.mapToStoredPresentation(result, data);
-    }
+    const doc = presentationId
+      ? await databases.updateDocument(DATABASE_ID, COLLECTION_ID, presentationId, data)
+      : await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
+          ...data,
+          createdAt: new Date().toISOString(),
+        });
 
-    const docId = ID.unique();
-    data.createdAt = new Date().toISOString();
-    const result = await databases.createDocument(DATABASE_ID, COLLECTION_ID, docId, data);
-    return this.mapToStoredPresentation(result, data);
+    return this.mapToStoredPresentation(doc, data);
   }
 
   static async getUserPresentations(userId: string): Promise<StoredPresentation[]> {
-    try {
-      const result = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-        Query.equal('ownerId', userId),
-        Query.orderDesc('$updatedAt'),
-      ]);
+    const { documents } = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+      Query.equal('ownerId', userId),
+      Query.orderDesc('$updatedAt'),
+    ]);
 
-      const presentations: StoredPresentation[] = [];
+    const presentations: StoredPresentation[] = [];
 
-      for (const doc of result.documents) {
-        const docData = doc as Record<string, unknown>;
+    for (const doc of documents) {
+      const docData = doc as Record<string, unknown>;
+      if (docData.ownerId !== userId) continue;
 
-        if (!docData.ownerId || docData.ownerId !== userId) {
-          continue;
-        }
+      const validationResult = validatePresentation(doc);
 
-        const validationResult = validatePresentation(doc);
+      if (!validationResult.isValid) {
+        console.warn(`⚠️ Документ ${doc.$id} не прошел валидацию:`, {
+          title: docData.title || 'Без названия',
+          errors: validationResult.errors,
+          formattedError: validationResult.formattedError,
+        });
 
-        if (!validationResult.isValid) {
-          continue;
-        }
+        console.log('Полные ошибки валидации:', validationResult.errors?.join('\n'));
 
-        let slides: Slide[] = [];
-        try {
-          if (validationResult.parsedData?.slides) {
-            slides = validationResult.parsedData.slides as Slide[];
-          } else {
-            slides =
-              docData.slides && typeof docData.slides === 'string'
-                ? JSON.parse(docData.slides)
-                : [];
-          }
-        } catch {
-          continue;
-        }
-
-        let selectedSlideIds: string[] = [];
-        try {
-          if (validationResult.parsedData?.selectedSlideIds) {
-            selectedSlideIds = validationResult.parsedData.selectedSlideIds as string[];
-          } else {
-            selectedSlideIds =
-              docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string'
-                ? JSON.parse(docData.selectedSlideIds)
-                : [];
-          }
-        } catch {
-          selectedSlideIds = [];
-        }
-
-        let currentSlideId =
-          typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '';
-
-        if (currentSlideId && slides.length > 0) {
-          const slideExists = slides.some((slide) => slide.id === currentSlideId);
-          if (!slideExists && slides.length > 0) {
-            currentSlideId = slides[0].id;
-          }
-        } else if (slides.length > 0 && !currentSlideId) {
-          currentSlideId = slides[0].id;
-        }
-
-        const presentation: StoredPresentation = {
-          $id: doc.$id,
-          $createdAt: doc.$createdAt,
-          $updatedAt: doc.$updatedAt,
-          $permissions: doc.$permissions,
-          $collectionId: doc.$collectionId,
-          $databaseId: doc.$databaseId,
-          id: doc.$id,
-          title: typeof docData.title === 'string' ? docData.title : 'Без названия',
-          slides: slides,
-          currentSlideId: currentSlideId,
-          selectedSlideIds: selectedSlideIds,
-          ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
-          ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
-          updatedAt: typeof docData.updatedAt === 'string' ? docData.updatedAt : '',
-          createdAt: typeof docData.createdAt === 'string' ? docData.createdAt : '',
-        };
-
-        presentations.push(presentation);
+        continue;
       }
 
-      presentations.sort((a, b) => {
-        const dateA = new Date(a.$updatedAt || a.updatedAt || 0);
-        const dateB = new Date(b.$updatedAt || b.updatedAt || 0);
-        return dateB.getTime() - dateA.getTime();
-      });
+      const slides = validationResult.parsedData?.slides as Slide[];
+      const selectedSlideIds = (validationResult.parsedData?.selectedSlideIds as string[]) || [];
 
-      return presentations;
-    } catch {
-      return [];
+      let currentSlideId = (docData.currentSlideId as string) || '';
+      if (!slides.some((s) => s.id === currentSlideId) && slides.length) {
+        currentSlideId = slides[0].id;
+      }
+
+      presentations.push({
+        $id: doc.$id,
+        $createdAt: doc.$createdAt,
+        $updatedAt: doc.$updatedAt,
+        $permissions: doc.$permissions,
+        $collectionId: doc.$collectionId,
+        $databaseId: doc.$databaseId,
+        id: doc.$id,
+        title: (docData.title as string) || 'Без названия',
+        slides,
+        currentSlideId,
+        selectedSlideIds,
+        ownerId: docData.ownerId as string,
+        ownerName: docData.ownerName as string,
+        createdAt: docData.createdAt as string,
+        updatedAt: docData.updatedAt as string,
+      });
     }
+
+    return presentations.sort(
+      (a, b) => new Date(b.$updatedAt).getTime() - new Date(a.$updatedAt).getTime()
+    );
   }
 
   static async getPresentation(id: string): Promise<StoredPresentation> {
@@ -161,98 +111,17 @@ export class PresentationService {
     const validationResult = validatePresentation(doc);
 
     if (!validationResult.isValid) {
-      const validationError = new Error(
-        `Данные презентации повреждены или имеют неверный формат.\n\n${
-          validationResult.formattedError ||
+      throw new Error(
+        validationResult.formattedError ||
           validationResult.errors?.join('\n') ||
           'Ошибка валидации данных'
-        }`
       );
-      validationError.name = 'ValidationError';
-      throw validationError;
     }
 
     const docData = doc as Record<string, unknown>;
 
-    let slides: Slide[] = [];
-    let selectedSlideIds: string[] = [];
-
-    try {
-      if (docData.slides && typeof docData.slides === 'string') {
-        const parsedSlides = validationResult.parsedData?.slides || [];
-        slides = (parsedSlides as Slide[]) || [];
-      }
-    } catch {
-      slides = [];
-    }
-
-    try {
-      if (docData.selectedSlideIds && typeof docData.selectedSlideIds === 'string') {
-        const parsedIds = validationResult.parsedData?.selectedSlideIds || [];
-        selectedSlideIds = (parsedIds as string[]) || [];
-      }
-    } catch {
-      selectedSlideIds = [];
-    }
-
-    const currentSlideId = typeof docData.currentSlideId === 'string' ? docData.currentSlideId : '';
-
-    if (currentSlideId && slides.length > 0) {
-      const slideExists = slides.some((slide) => slide.id === currentSlideId);
-      if (!slideExists) {
-        // currentSlideId не найден среди слайдов
-      }
-    }
-
-    const result: StoredPresentation = {
-      $id: doc.$id,
-      $createdAt: doc.$createdAt,
-      $updatedAt: doc.$updatedAt,
-      $permissions: doc.$permissions,
-      $collectionId: doc.$collectionId,
-      $databaseId: doc.$databaseId,
-      id: doc.$id,
-      title: typeof docData.title === 'string' ? docData.title : 'Без названия',
-      slides: slides,
-      currentSlideId: currentSlideId,
-      selectedSlideIds: selectedSlideIds,
-      ownerId: typeof docData.ownerId === 'string' ? docData.ownerId : '',
-      ownerName: typeof docData.ownerName === 'string' ? docData.ownerName : '',
-      updatedAt: typeof docData.updatedAt === 'string' ? docData.updatedAt : '',
-      createdAt: typeof docData.createdAt === 'string' ? docData.createdAt : '',
-    };
-
-    return result;
-  }
-
-  private static mapToStoredPresentation(
-    doc: DatabaseDocument,
-    data: Record<string, unknown>
-  ): StoredPresentation {
-    let slides: Slide[] = [];
-    let selectedSlideIds: string[] = [];
-
-    try {
-      slides =
-        typeof data.slides === 'string'
-          ? JSON.parse(data.slides)
-          : Array.isArray(data.slides)
-            ? data.slides
-            : [];
-    } catch {
-      slides = [];
-    }
-
-    try {
-      selectedSlideIds =
-        typeof data.selectedSlideIds === 'string'
-          ? JSON.parse(data.selectedSlideIds)
-          : Array.isArray(data.selectedSlideIds)
-            ? data.selectedSlideIds
-            : [];
-    } catch {
-      selectedSlideIds = [];
-    }
+    const slides = validationResult.parsedData?.slides as Slide[];
+    const selectedSlideIds = (validationResult.parsedData?.selectedSlideIds as string[]) || [];
 
     return {
       $id: doc.$id,
@@ -262,14 +131,37 @@ export class PresentationService {
       $collectionId: doc.$collectionId,
       $databaseId: doc.$databaseId,
       id: doc.$id,
-      title: typeof data.title === 'string' ? data.title : 'Без названия',
-      slides: slides,
-      currentSlideId: typeof data.currentSlideId === 'string' ? data.currentSlideId : '',
-      selectedSlideIds: selectedSlideIds,
-      ownerId: typeof data.ownerId === 'string' ? data.ownerId : '',
-      ownerName: typeof data.ownerName === 'string' ? data.ownerName : '',
-      updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : '',
-      createdAt: typeof data.createdAt === 'string' ? data.createdAt : '',
+      title: (docData.title as string) || 'Без названия',
+      slides,
+      currentSlideId: (docData.currentSlideId as string) || '',
+      selectedSlideIds,
+      ownerId: docData.ownerId as string,
+      ownerName: docData.ownerName as string,
+      createdAt: docData.createdAt as string,
+      updatedAt: docData.updatedAt as string,
+    };
+  }
+
+  private static mapToStoredPresentation(
+    doc: DatabaseDocument,
+    data: Record<string, unknown>
+  ): StoredPresentation {
+    return {
+      $id: doc.$id,
+      $createdAt: doc.$createdAt,
+      $updatedAt: doc.$updatedAt,
+      $permissions: doc.$permissions,
+      $collectionId: doc.$collectionId,
+      $databaseId: doc.$databaseId,
+      id: doc.$id,
+      title: data.title as string,
+      slides: JSON.parse(data.slides as string),
+      currentSlideId: (data.currentSlideId as string) || '',
+      selectedSlideIds: JSON.parse(data.selectedSlideIds as string),
+      ownerId: data.ownerId as string,
+      ownerName: data.ownerName as string,
+      createdAt: data.createdAt as string,
+      updatedAt: data.updatedAt as string,
     };
   }
 
