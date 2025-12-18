@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PresentationService, StoredPresentation } from '../services/PresentationService';
 import { account, AccountUser } from '../client';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,7 +26,8 @@ const NotificationIcons = {
   warning: '⚠️',
 };
 
-export default function PresentationList({ onSelect }: { onSelect?: () => void }) {
+export default function PresentationList() {
+  const navigate = useNavigate();
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AccountUser | null>(null);
@@ -163,7 +165,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
       );
 
       loadPresentations();
-      onSelect?.();
+      navigate(`/editor/${saved.$id}`);
     } catch {
       addNotification(
         PRESENTATION_NOTIFICATIONS.ERROR.CREATE_FAILED,
@@ -180,7 +182,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
     dispatch(setPresentationId('demo'));
     dispatch(loadDemoPresentation());
     addNotification(PRESENTATION_NOTIFICATIONS.INFO.DEMO_LOADED, 'info', NOTIFICATION_TIMEOUT.INFO);
-    onSelect?.();
+    navigate('/editor');
   };
 
   const handleLoadPresentation = async (presentation: StoredPresentation) => {
@@ -201,7 +203,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
         'success',
         NOTIFICATION_TIMEOUT.SUCCESS
       );
-      onSelect?.();
+      navigate(`/editor/${full.id || full.$id}`);
     } catch {
       addNotification(
         PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
@@ -249,7 +251,7 @@ export default function PresentationList({ onSelect }: { onSelect?: () => void }
               className="presentation-list-logout-button"
               onClick={async () => {
                 await account.deleteSession('current');
-                window.location.reload();
+                window.location.href = '/login';
               }}
             >
               Выйти

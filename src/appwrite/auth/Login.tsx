@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { account } from '../client';
 import { useNotifications } from '../hooks/useNotifications';
 import {
@@ -13,12 +14,8 @@ import {
   validateRequired,
 } from '../notifications';
 
-interface LoginProps {
-  onSuccess: () => void;
-  switchToRegister: () => void;
-}
-
-export default function Login({ onSuccess, switchToRegister }: LoginProps) {
+export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,7 +102,7 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
         NOTIFICATION_TIMEOUT.SUCCESS
       );
 
-      setTimeout(onSuccess, TRANSITION_DELAY.AFTER_SUCCESS);
+      setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
     } catch (error: any) {
       const message =
         LOGIN_NOTIFICATIONS.ERROR[error?.code as keyof typeof LOGIN_NOTIFICATIONS.ERROR] ??
@@ -119,7 +116,7 @@ export default function Login({ onSuccess, switchToRegister }: LoginProps) {
 
   const handleSwitchToRegister = (e: React.MouseEvent) => {
     e.preventDefault();
-    switchToRegister();
+    navigate('/register');
   };
 
   const emailError = getValidationMessage('email');
