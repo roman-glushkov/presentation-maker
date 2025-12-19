@@ -6,6 +6,7 @@ import Register from './appwrite/auth/Register';
 import PresentationList from './appwrite/components/PresentationList';
 import EditorLayout from './appwrite/auth/EditorLayout';
 import AuthWrapper from './appwrite/auth/AuthWrapper';
+import Player from './appwrite/auth/Player'; // Импортируем новый компонент плеера
 import './appwrite/styles/AuthStyles.css';
 import './common/view/styles.css';
 
@@ -17,6 +18,9 @@ function ProtectedRoutes() {
         <Route path="/presentations" element={<PresentationList />} />
         <Route path="/editor" element={<EditorLayout />} />
         <Route path="/editor/:presentationId" element={<EditorLayout />} />
+        <Route path="/player" element={<Player />} />
+        <Route path="/player/:presentationId" element={<Player />} />
+        {/* Добавьте другие защищенные маршруты здесь */}
       </Routes>
     </div>
   );

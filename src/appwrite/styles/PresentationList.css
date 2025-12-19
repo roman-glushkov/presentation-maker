@@ -488,3 +488,29 @@
 .presentation-list-notification--warning {
   all: unset;
 }
+
+/* Стили для кнопки с иконкой */
+.presentation-list-logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Расстояние между текстом и иконкой */
+  padding: 8px 16px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.presentation-list-logout-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Если нужно, чтобы иконка была внутри спан */
+.presentation-list-logout-button svg {
+  margin-left: 4px;
+}

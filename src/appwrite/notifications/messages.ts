@@ -64,9 +64,9 @@ export const IMAGE_NOTIFICATIONS = {
 export const PRESENTATION_NOTIFICATIONS = {
   SUCCESS: {
     LOADED: (count: number) => {
-      if (count === 1) return `Загружена ${count} валидная презентация`;
-      if (count >= 2 && count <= 4) return `Загружены ${count} валидные презентации`;
-      return `Загружено ${count} валидных презентаций`;
+      if (count === 1) return `Загружена ${count} корректная презентация`;
+      if (count >= 2 && count <= 4) return `Загружены ${count} корректных презентации`;
+      return `Загружено ${count} корректных презентаций`;
     },
     CREATED: '🎉 Презентация успешно создана',
     PRESENTATION_LOADED: (title: string) => `📂 Презентация "${title}" загружена`,
