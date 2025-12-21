@@ -71,7 +71,6 @@ export default function Register() {
     clearValidationMessages();
     let isValid = true;
 
-    // Валидация имени
     if (!validateRequired(name)) {
       addValidationMessage('name', 'Введите ваше имя', 'error');
       isValid = false;
@@ -80,7 +79,6 @@ export default function Register() {
       isValid = false;
     }
 
-    // Валидация email
     if (!validateRequired(email)) {
       addValidationMessage('email', 'Введите email адрес', 'error');
       isValid = false;
@@ -89,7 +87,6 @@ export default function Register() {
       isValid = false;
     }
 
-    // Валидация пароля
     if (!validateRequired(password)) {
       addValidationMessage('password', 'Введите пароль', 'error');
       isValid = false;
@@ -135,9 +132,14 @@ export default function Register() {
       );
 
       setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorCode =
+        typeof error === 'object' && error !== null && 'code' in error
+          ? (error as { code: string }).code
+          : undefined;
+
       const message =
-        REGISTER_NOTIFICATIONS.ERROR[error?.code as keyof typeof REGISTER_NOTIFICATIONS.ERROR] ??
+        REGISTER_NOTIFICATIONS.ERROR[errorCode as keyof typeof REGISTER_NOTIFICATIONS.ERROR] ??
         REGISTER_NOTIFICATIONS.ERROR.GENERIC;
 
       addNotification(message, 'error', NOTIFICATION_TIMEOUT.ERROR);
@@ -157,7 +159,6 @@ export default function Register() {
 
   return (
     <div className="presentation-body">
-      {/* Контейнер для уведомлений */}
       <div className="presentation-notifications-container">
         {notifications.map(({ id, message, type }) => (
           <div key={id} className={`presentation-notification presentation-notification--${type}`}>

@@ -990,9 +990,6 @@
   stroke-width: 2;
 }
 
-/* Добавить в существующие стили для форм */
-
-/* Стили для ошибок валидации */
 .presentation-form-input-error {
   border-color: #ef4444 !important;
 }
@@ -1017,7 +1014,6 @@
   color: #dc2626;
 }
 
-/* Подсказки валидации для полей */
 .presentation-form-hints {
   margin-top: 8px;
   display: flex;

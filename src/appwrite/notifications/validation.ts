@@ -1,6 +1,3 @@
-// appwrite/notifications/validation.ts
-
-// Общие сообщения валидации
 export const VALIDATION_MESSAGES = {
   REQUIRED_FIELDS: 'Все поля обязательны для заполнения',
   INVALID_EMAIL: 'Введите корректный email адрес (например: user@company.com)',
@@ -8,7 +5,6 @@ export const VALIDATION_MESSAGES = {
   NAME_TOO_SHORT: 'Имя должно содержать минимум 2 символа',
 } as const;
 
-// Сообщения валидации для логина
 export const LOGIN_VALIDATION_MESSAGES = {
   EMAIL_REQUIRED: 'Введите email адрес',
   PASSWORD_REQUIRED: 'Введите пароль',
@@ -16,7 +12,6 @@ export const LOGIN_VALIDATION_MESSAGES = {
   PASSWORD_TOO_SHORT: VALIDATION_MESSAGES.PASSWORD_TOO_SHORT,
 } as const;
 
-// Сообщения валидации для презентаций
 export const PRESENTATION_VALIDATION_MESSAGES = {
   REQUIRED: 'Введите название презентации',
   TOO_SHORT: 'Название должно содержать минимум 2 символа',
@@ -30,7 +25,6 @@ export type ValidationError = keyof typeof VALIDATION_MESSAGES;
 export type LoginValidationError = keyof typeof LOGIN_VALIDATION_MESSAGES;
 export type PresentationValidationError = keyof typeof PRESENTATION_VALIDATION_MESSAGES;
 
-// Валидационные функции для формы регистрации
 export const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
@@ -76,7 +70,6 @@ export const validateRegisterForm = (
   return { isValid: true };
 };
 
-// Валидационные функции для логина
 export const validateLoginForm = (
   email: string,
   password: string
@@ -105,7 +98,6 @@ export const getLoginValidationMessage = (error: LoginValidationError): string =
   return LOGIN_VALIDATION_MESSAGES[error];
 };
 
-// Валидационные функции для названия презентации
 export const validatePresentationTitleLength = (title: string): boolean => {
   return title.length >= 2;
 };
@@ -174,7 +166,6 @@ export const validatePresentationTitle = (
   return { isValid: true };
 };
 
-// Утилиты для валидации полей в реальном времени
 export const getFieldValidationMessage = (
   field: string,
   value: string,
@@ -193,7 +184,7 @@ export const getFieldValidationMessage = (
       if (!validateRequired(value)) return 'Введите ваше имя';
       if (!validateName(value)) return VALIDATION_MESSAGES.NAME_TOO_SHORT;
       break;
-    case 'title':
+    case 'title': {
       if (!value.trim()) return PRESENTATION_VALIDATION_MESSAGES.REQUIRED;
       const trimmedTitle = value.trim();
       if (trimmedTitle.length < 2) return PRESENTATION_VALIDATION_MESSAGES.TOO_SHORT;
@@ -202,6 +193,7 @@ export const getFieldValidationMessage = (
         return PRESENTATION_VALIDATION_MESSAGES.DUPLICATE(trimmedTitle);
       }
       break;
+    }
   }
   return undefined;
 };

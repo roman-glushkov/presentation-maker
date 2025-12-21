@@ -33,12 +33,8 @@ export function useAutoSave(intervalMs = 15000) {
 
     try {
       const userName = user.name || user.email || '';
-
       await PresentationService.savePresentation(presentation, user.$id, userName, presentationId);
-
       setLastSaved(new Date());
-    } catch {
-      // Ошибка сохранения
     } finally {
       setIsSaving(false);
     }

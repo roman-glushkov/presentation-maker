@@ -1,4 +1,3 @@
-// appwrite/notifications/messages.ts
 export const REGISTER_NOTIFICATIONS = {
   SUCCESS: {
     CREATING_SESSION: 'Создаём сессию...',
@@ -91,7 +90,6 @@ export const PRESENTATION_NOTIFICATIONS = {
   },
 } as const;
 
-// Добавляем константу для ошибок Appwrite
 export const APPWRITE_ERRORS = {
   400: 'Некорректные данные',
   409: 'Пользователь уже существует',
@@ -99,7 +97,6 @@ export const APPWRITE_ERRORS = {
   500: 'Внутренняя ошибка сервера',
 } as const;
 
-// Таймауты уведомлений
 export const NOTIFICATION_TIMEOUT = {
   SUCCESS: 3000,
   ERROR: 5000,

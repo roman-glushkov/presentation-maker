@@ -1,4 +1,3 @@
-// appwrite/notifications/index.ts
 export { REGISTER_NOTIFICATIONS } from './messages';
 export { LOGIN_NOTIFICATIONS } from './messages';
 export { GENERAL_NOTIFICATIONS } from './messages';

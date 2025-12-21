@@ -1,0 +1,122 @@
+.player-container {
+  position: fixed;
+  inset: 0;
+  background: #0f172a;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+}
+
+.player-slide-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-slide {
+  position: relative;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  background: white;
+  transition: transform 0.3s ease;
+}
+
+.player-slide-counter {
+  position: fixed;
+  top: 24px;
+  right: 32px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #e5e7eb;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.player-hint {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #e5e7eb;
+  font-size: 14px;
+  line-height: 1.4;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  opacity: 1;
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+
+.player-hint.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+}
+
+.player-loading,
+.player-error {
+  position: fixed;
+  inset: 0;
+  background: #020617;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #e5e7eb;
+}
+
+.player-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 16px;
+}
+
+.player-error button {
+  margin-top: 16px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.player-error button:hover {
+  background: #1d4ed8;
+}
+
+.player-triangle {
+  pointer-events: none;
+}
+
+.player-shape {
+  pointer-events: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}

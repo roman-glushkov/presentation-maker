@@ -1,4 +1,3 @@
-// C:\PGTU\FRONT-end\presentation maker\src\appwrite\types\presentation.ts
 export interface SlideElement {
   id: string;
   type: 'text' | 'image' | 'shape' | 'line';

@@ -1,4 +1,3 @@
-// hooks/useNotifications.ts
 import { useState, useCallback } from 'react';
 import type {
   Notification,
@@ -23,7 +22,6 @@ export const useNotifications = () => {
 
       setNotifications((prev) => [notification, ...prev]);
 
-      // Автоматическое удаление уведомления если autoClose = true
       if (notification.autoClose && timeout && timeout > 0) {
         setTimeout(() => {
           setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -43,6 +41,7 @@ export const useNotifications = () => {
         field,
         message,
         type,
+        autoClose: false,
       };
 
       setValidationMessages((prev) =>

@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account } from '../client';
@@ -32,7 +31,6 @@ export default function Login() {
     getValidationMessage,
   } = useNotifications();
 
-  // Валидация в реальном времени
   useEffect(() => {
     if (touchedFields.has('email') && email) {
       if (!validateEmail(email)) {
@@ -103,9 +101,14 @@ export default function Login() {
       );
 
       setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorCode =
+        typeof error === 'object' && error !== null && 'code' in error
+          ? (error as { code: string }).code
+          : undefined;
+
       const message =
-        LOGIN_NOTIFICATIONS.ERROR[error?.code as keyof typeof LOGIN_NOTIFICATIONS.ERROR] ??
+        LOGIN_NOTIFICATIONS.ERROR[errorCode as keyof typeof LOGIN_NOTIFICATIONS.ERROR] ??
         LOGIN_NOTIFICATIONS.ERROR.USER_NOT_FOUND;
 
       addNotification(message, 'error', NOTIFICATION_TIMEOUT.ERROR);
@@ -124,7 +127,6 @@ export default function Login() {
 
   return (
     <div className="presentation-body">
-      {/* Уведомления (popup) */}
       <div className="presentation-notifications-container">
         {notifications.map(({ id, message, type }) => (
           <div key={id} className={`presentation-notification presentation-notification--${type}`}>

@@ -1,4 +1,3 @@
-// appwrite/notifications/types.ts
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
 export interface Notification {
@@ -21,4 +20,5 @@ export interface ValidationNotification {
   type: NotificationType;
   autoClose: boolean;
   timeout?: number;
+  field: string;
 }

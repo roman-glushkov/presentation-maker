@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PresentationService, StoredPresentation } from '../services/PresentationService';
@@ -18,7 +17,6 @@ import { useNotifications } from '../hooks/useNotifications';
 import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications/messages';
 import '../styles/PresentationList.css';
 
-// Иконки для уведомлений
 const NotificationIcons = {
   success: '✅',
   info: 'ℹ️',
@@ -34,7 +32,6 @@ export default function PresentationList() {
   const [showNewPresentationModal, setShowNewPresentationModal] = useState(false);
   const [creatingNew, setCreatingNew] = useState(false);
 
-  // useRef вместо useState для избежания ререндеров
   const validationErrorDetected = useRef(false);
   const notificationsShown = useRef(false);
 
@@ -49,12 +46,10 @@ export default function PresentationList() {
       .catch(() => setUser(null));
   }, []);
 
-  // Перехватываем ошибки валидации из PresentationService
   useEffect(() => {
     const originalWarn = console.warn;
 
     console.warn = function (...args) {
-      // Проверяем, содержит ли предупреждение информацию о валидации
       if (
         args[0] &&
         typeof args[0] === 'string' &&
@@ -63,7 +58,6 @@ export default function PresentationList() {
       ) {
         validationErrorDetected.current = true;
       }
-      // Не выводим в консоль
       return;
     };
 
@@ -93,7 +87,6 @@ export default function PresentationList() {
         }
       } else {
         if (!notificationsShown.current) {
-          // Даем время для обнаружения ошибок валидации
           await new Promise((resolve) => setTimeout(resolve, 100));
 
           if (validationErrorDetected.current) {
@@ -130,7 +123,7 @@ export default function PresentationList() {
     if (user) {
       loadPresentations();
     }
-  }, [user]);
+  }, [user, loadPresentations]);
 
   const handleCreatePresentation = async (title: string) => {
     setCreatingNew(true);
