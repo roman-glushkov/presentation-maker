@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PresentationService } from '../services/presentationService';
+import { PresentationService } from '../services/PresentationService';
 import {
   Presentation,
   SlideElement,

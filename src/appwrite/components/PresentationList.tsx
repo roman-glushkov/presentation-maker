@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PresentationService, StoredPresentation } from '../services/presentationService';
+import { PresentationService, StoredPresentation } from '../services/PresentationService';
 import { account, AccountUser } from '../client';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -14,7 +14,7 @@ import {
 import { Presentation } from '../../store/types/presentation';
 import NewPresentationModal from './NewPresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
-import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications/messages';
+import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications';
 import '../styles/PresentationList.css';
 
 const NotificationIcons = {
