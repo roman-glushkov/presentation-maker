@@ -1,1 +1,2 @@
-src/appwrite/config.ts
+.env
+.env.local

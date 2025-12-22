@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "es2015",
+    "target": "es2020",
+    "module": "ES2020",
     "moduleResolution": "node",
-    "lib": ["es2016", "dom", "es5"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -12,7 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "types": ["vite/client"]
   },
-  "include": ["./src/**/*", "appwrite-config.js"]
+  "include": ["./src/**/*"]
 }
