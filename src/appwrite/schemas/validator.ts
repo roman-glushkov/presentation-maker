@@ -6,7 +6,7 @@ import {
   selectedSlideIdsSchema,
   formatValidationErrors,
   ValidationError,
-} from './PresentationSchema';
+} from './presentationSchema';
 
 const ajv = new Ajv({
   allErrors: true,

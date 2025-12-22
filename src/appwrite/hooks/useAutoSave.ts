@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { PresentationService } from '../services/PresentationService';
+import { PresentationService } from '../services/presentationService';
 import { account, AppwriteUser, AccountUser } from '../client';
 
 export function useAutoSave(intervalMs = 15000) {
