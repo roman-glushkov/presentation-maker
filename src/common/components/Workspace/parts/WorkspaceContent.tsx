@@ -9,6 +9,7 @@ import {
 import { Slide } from '../../../../store/types/presentation';
 import TextElementView from './TextElement';
 import ImageElementView from './ImageElement';
+import ShapeElementView from './ShapeElement'; // ← ДОБАВЬТЕ ИМПОРТ
 
 interface WorkspaceContentProps {
   slide: Slide;
@@ -70,6 +71,20 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
         if (el.type === 'image') {
           return (
             <ImageElementView
+              key={el.id}
+              elementId={el.id}
+              preview={!!preview}
+              selectedElementIds={selectedElementIds}
+              onElementClick={handleElementClick}
+              getAllElements={getAllElements}
+            />
+          );
+        }
+
+        // ДОБАВЬТЕ ЭТОТ КОД ДЛЯ ФИГУР
+        if (el.type === 'shape') {
+          return (
+            <ShapeElementView
               key={el.id}
               elementId={el.id}
               preview={!!preview}

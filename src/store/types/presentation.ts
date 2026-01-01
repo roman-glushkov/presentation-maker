@@ -21,7 +21,8 @@ export type Background =
   | { type: 'image'; value: string }
   | { type: 'none' };
 
-export type SlideElement = TextElement | ImageElement;
+// ДОБАВЛЯЕМ ShapeElement в union тип
+export type SlideElement = TextElement | ImageElement | ShapeElement;
 
 export type Position = {
   x: number;
@@ -58,4 +59,26 @@ export type TextElement = BaseElement & {
 export type ImageElement = BaseElement & {
   type: 'image';
   src: string;
+};
+
+export type ShapeType =
+  | 'rectangle'
+  | 'circle'
+  | 'triangle'
+  | 'line'
+  | 'arrow'
+  | 'star'
+  | 'hexagon'
+  | 'heart'
+  | 'cloud'
+  | 'callout';
+
+// НОВЫЙ ТИП ДЛЯ ФИГУР
+export type ShapeElement = BaseElement & {
+  type: 'shape';
+  shapeType: ShapeType;
+  fill: string; // цвет заливки
+  stroke: string; // цвет границы
+  strokeWidth: number; // толщина границы
+  borderRadius?: number; // для прямоугольников
 };

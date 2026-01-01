@@ -14,7 +14,7 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '|', action: 'SEPARATOR' },
 
     { label: '🔠 Размер', action: 'TEXT_SIZE' },
-    // { label: '🎨 Шрифт ❌', action: 'TEXT_FONT' },
+    { label: '🎨 Шрифт', action: 'TEXT_FONT' },
     { label: '↔️ Выравнивание', action: 'TEXT_ALIGN' },
     { label: '↕️ Интервал', action: 'TEXT_LINE_HEIGHT' },
     { label: '𝐁 Жирный', action: 'TEXT_BOLD' },
@@ -26,13 +26,14 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '🎨 Фон', action: 'SLIDE_BACKGROUND' },
     { label: '🖍️ Цвет текста', action: 'TEXT_COLOR' },
     { label: '🧱 Заливка фигуры', action: 'SHAPE_FILL' },
-
-    { label: '|', action: 'SEPARATOR' },
+    { label: '🖌️ Граница фигуры', action: 'SHAPE_STROKE' },
+    { label: '📏 Толщина границы', action: 'SHAPE_STROKE_WIDTH' },
   ],
   insert: [
     { label: '📝 Текст', action: 'ADD_TEXT' },
     { label: '🖼️ Картинка', action: 'ADD_IMAGE' },
     { label: '🔗 По ссылке', action: 'ADD_IMAGE_FROM_URL' },
+    { label: '🔷 Фигуры', action: 'ADD_SHAPE' },
     //{ label: '📊 Диаграмма ❌', action: 'ADD_CHART' },
     //{ label: '🔗 Ссылка ❌', action: 'ADD_LINK' },
   ],

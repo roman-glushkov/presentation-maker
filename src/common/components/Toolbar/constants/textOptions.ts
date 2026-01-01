@@ -46,3 +46,17 @@ export const LINE_HEIGHT_OPTIONS: TextOption[] = [
   { label: '2.5', key: '2.5' },
   { label: '3', key: '3' },
 ];
+
+export const FONT_FAMILY_OPTIONS: TextOption[] = [
+  { label: 'Arial', key: 'Arial, sans-serif' },
+  { label: 'Times New Roman', key: "'Times New Roman', serif" },
+  { label: 'Georgia', key: 'Georgia, serif' },
+  { label: 'Verdana', key: 'Verdana, sans-serif' },
+  { label: 'Tahoma', key: 'Tahoma, sans-serif' },
+  { label: 'Trebuchet MS', key: "'Trebuchet MS', sans-serif" },
+  { label: 'Courier New', key: "'Courier New', monospace" },
+  { label: 'Brush Script MT', key: "'Brush Script MT', cursive" },
+  { label: 'Impact', key: 'Impact, sans-serif' },
+  { label: 'Comic Sans MS', key: "'Comic Sans MS', sans-serif" },
+  { label: 'Lucida Console', key: "'Lucida Console', monospace" },
+];

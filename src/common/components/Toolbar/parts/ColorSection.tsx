@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction } from '../../../../store/editorSlice';
 
 interface Props {
-  type: 'text' | 'fill' | 'background';
+  type: 'text' | 'fill' | 'stroke' | 'background'; // ← ДОБАВИЛИ 'stroke'
 }
 
 export default function ColorSection({ type }: Props) {
@@ -19,6 +19,9 @@ export default function ColorSection({ type }: Props) {
         break;
       case 'fill':
         if (selectedElementId) dispatch(handleAction(`SHAPE_FILL:${color}`));
+        break;
+      case 'stroke':
+        if (selectedElementId) dispatch(handleAction(`SHAPE_STROKE:${color}`));
         break;
       case 'background':
         dispatch(handleAction(`SLIDE_BACKGROUND: ${color}`));

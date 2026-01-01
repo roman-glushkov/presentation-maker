@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Presentation, Slide, Background, SlideElement } from './types/presentation';
+import { Presentation, Slide, Background, SlideElement, ShapeType } from './types/presentation';
+
 import * as func from './functions/presentation';
 import * as temp from './templates/presentation';
 import * as sld from './templates/slide';
@@ -453,6 +454,83 @@ export const editorSlice = createSlice({
         state.selectedSlideId = newSlide.id;
         state.selectedSlideIds = [newSlide.id];
         state.selectedElementIds = [];
+        return;
+      }
+
+      if (act.startsWith('TEXT_FONT:')) {
+        const fontFamily = act.split(':')[1].trim();
+        if (slide && elId) {
+          pushToPast(state, 'editor/handleAction/TEXT_FONT');
+          state.presentation.slides = state.presentation.slides.map((s) =>
+            s.id === slide.id ? func.changeTextFont(s, elId, fontFamily) : s
+          );
+        }
+        return;
+      }
+
+      if (act.startsWith('ADD_SHAPE:')) {
+        const shapeType = act.split(':')[1].trim() as ShapeType;
+        console.log('Добавление фигуры:', shapeType); // ← ДОБАВЬТЕ
+        console.log('Текущий слайд:', slide?.id); // ← ДОБАВЬТЕ
+
+        if (slide) {
+          pushToPast(state, 'editor/handleAction/ADD_SHAPE');
+          // Используем через temp
+          const shapeElement = temp.createShapeElement(shapeType);
+          console.log('Созданная фигура:', shapeElement); // ← ДОБАВЬТЕ
+
+          state.presentation.slides = state.presentation.slides.map((s) =>
+            s.id === slide.id ? func.addShape(s, shapeElement) : s
+          );
+
+          console.log(
+            'Фигура добавлена, элементы слайда:',
+            state.presentation.slides.find((s) => s.id === slide.id)?.elements
+          ); // ← ДОБАВЬТЕ
+        }
+        return;
+      }
+
+      if (act.startsWith('SHAPE_FILL:')) {
+        const color = act.split(':')[1].trim();
+        if (slide && elId) {
+          pushToPast(state, 'editor/handleAction/SHAPE_FILL');
+          // Проверяем тип элемента
+          const element = slide.elements.find((el) => el.id === elId);
+          if (element?.type === 'shape') {
+            // Для фигур используем новую функцию
+            state.presentation.slides = state.presentation.slides.map((s) =>
+              s.id === slide.id ? func.changeShapeFill(s, elId, color) : s
+            );
+          } else if (element?.type === 'text') {
+            // Для текста используем существующую
+            state.presentation.slides = state.presentation.slides.map((s) =>
+              s.id === slide.id ? func.changeTextBackgroundColor(s, elId, color) : s
+            );
+          }
+        }
+        return;
+      }
+
+      if (act.startsWith('SHAPE_STROKE:')) {
+        const color = act.split(':')[1].trim();
+        if (slide && elId) {
+          pushToPast(state, 'editor/handleAction/SHAPE_STROKE');
+          state.presentation.slides = state.presentation.slides.map((s) =>
+            s.id === slide.id ? func.changeShapeStroke(s, elId, color) : s
+          );
+        }
+        return;
+      }
+
+      if (act.startsWith('SHAPE_STROKE_WIDTH:')) {
+        const width = parseInt(act.split(':')[1].trim(), 10);
+        if (slide && elId) {
+          pushToPast(state, 'editor/handleAction/SHAPE_STROKE_WIDTH');
+          state.presentation.slides = state.presentation.slides.map((s) =>
+            s.id === slide.id ? func.changeShapeStrokeWidth(s, elId, width) : s
+          );
+        }
         return;
       }
 

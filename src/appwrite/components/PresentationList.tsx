@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PresentationService, StoredPresentation } from '../services/PresentationService';
+import { PresentationService, StoredPresentation } from '../services/presentationService';
 import { account, AccountUser } from '../client';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';

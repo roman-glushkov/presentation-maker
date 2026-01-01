@@ -3,12 +3,15 @@ import ColorSection from './ColorSection';
 import TextOptionsPopup from './TextOptionsPopup';
 import TextAlignPopup from './TextAlignPopup';
 import TemplatePopup from './TemplatePopup';
+import FontPopup from './FontPopup';
+import ShapePopup from './ShapePopup'; // ← НОВЫЙ ИМПОРТ
+import StrokeWidthPopup from './StrokeWidthPopup'; // ← НОВЫЙ ИМПОРТ
 import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
 import { useRef, useState, useEffect } from 'react';
-import { ImageService } from '../../../../appwrite/services/ImageService';
+import { ImageService } from '../../../../appwrite/services/imageService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import React from 'react';
@@ -52,10 +55,14 @@ export default function ToolbarGroup() {
         'ADD_SLIDE',
         'TEXT_COLOR',
         'SHAPE_FILL',
+        'SHAPE_STROKE', // ← ДОБАВИЛИ
+        'SHAPE_STROKE_WIDTH', // ← ДОБАВИЛИ
         'SLIDE_BACKGROUND',
         'TEXT_SIZE',
+        'TEXT_FONT',
         'TEXT_ALIGN',
         'TEXT_LINE_HEIGHT',
+        'ADD_SHAPE', // ← ДОБАВИЛИ
       ].includes(action)
     ) {
       dispatch(setActiveTextOption(activeTextOption === action ? null : action));
@@ -225,11 +232,42 @@ export default function ToolbarGroup() {
 
             {/* Попапы для различных опций */}
             {btn.action === 'ADD_SLIDE' && activeTextOption === 'ADD_SLIDE' && <TemplatePopup />}
+
+            {btn.action === 'TEXT_FONT' && activeTextOption === 'TEXT_FONT' && (
+              <FontPopup
+                onSelect={(key: string) => {
+                  dispatch(handleAction(`TEXT_FONT:${key}`));
+                  dispatch(setActiveTextOption(null));
+                }}
+              />
+            )}
+
+            {btn.action === 'ADD_SHAPE' && activeTextOption === 'ADD_SHAPE' && (
+              <ShapePopup
+                onSelect={(shapeType: string) => {
+                  dispatch(handleAction(`ADD_SHAPE:${shapeType}`));
+                  dispatch(setActiveTextOption(null));
+                }}
+              />
+            )}
+
+            {btn.action === 'SHAPE_STROKE_WIDTH' && activeTextOption === 'SHAPE_STROKE_WIDTH' && (
+              <StrokeWidthPopup
+                onSelect={(width: number) => {
+                  dispatch(handleAction(`SHAPE_STROKE_WIDTH:${width}`));
+                  dispatch(setActiveTextOption(null));
+                }}
+              />
+            )}
+
             {btn.action === 'TEXT_COLOR' && activeTextOption === 'TEXT_COLOR' && (
               <ColorSection type="text" />
             )}
             {btn.action === 'SHAPE_FILL' && activeTextOption === 'SHAPE_FILL' && (
               <ColorSection type="fill" />
+            )}
+            {btn.action === 'SHAPE_STROKE' && activeTextOption === 'SHAPE_STROKE' && (
+              <ColorSection type="stroke" />
             )}
             {btn.action === 'SLIDE_BACKGROUND' && activeTextOption === 'SLIDE_BACKGROUND' && (
               <ColorSection type="background" />

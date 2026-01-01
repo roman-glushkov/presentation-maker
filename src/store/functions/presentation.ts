@@ -4,8 +4,11 @@ import {
   TextElement,
   ImageElement,
   Background,
+  ShapeElement,
+  ShapeType,
   Size,
 } from '../types/presentation';
+import { createShapeElement } from '../templates/presentation';
 
 export function changeTitle(presentation: Presentation, newTitle: string): Presentation {
   return { ...presentation, title: newTitle };
@@ -161,6 +164,50 @@ export function toggleTextUnderline(slide: Slide, elementId: string): Slide {
     ...slide,
     elements: slide.elements.map((el) =>
       el.type === 'text' && el.id === elementId ? { ...el, underline: !el.underline } : el
+    ),
+  };
+}
+
+// Функция для добавления фигуры
+export function addShape(slide: Slide, shapeElement: ShapeElement): Slide {
+  return { ...slide, elements: [...slide.elements, { ...shapeElement }] };
+}
+
+// Функция для создания базовой фигуры (теперь используем шаблон)
+export function createBasicShape(shapeType: ShapeType): ShapeElement {
+  return createShapeElement(shapeType);
+}
+
+// Функция для изменения заливки фигуры
+export function changeShapeFill(slide: Slide, elementId: string, fill: string): Slide {
+  return {
+    ...slide,
+    elements: slide.elements.map((el) =>
+      el.type === 'shape' && el.id === elementId ? { ...el, fill } : el
+    ),
+  };
+}
+
+// Функция для изменения цвета границы фигуры
+export function changeShapeStroke(slide: Slide, elementId: string, stroke: string): Slide {
+  return {
+    ...slide,
+    elements: slide.elements.map((el) =>
+      el.type === 'shape' && el.id === elementId ? { ...el, stroke } : el
+    ),
+  };
+}
+
+// Функция для изменения толщины границы фигуры
+export function changeShapeStrokeWidth(
+  slide: Slide,
+  elementId: string,
+  strokeWidth: number
+): Slide {
+  return {
+    ...slide,
+    elements: slide.elements.map((el) =>
+      el.type === 'shape' && el.id === elementId ? { ...el, strokeWidth } : el
     ),
   };
 }

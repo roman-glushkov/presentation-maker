@@ -26,6 +26,7 @@ export default function NewPresentationModal({
   const [loading, setLoading] = useState(false);
   const [existingTitles, setExistingTitles] = useState<string[]>([]);
   const [touched, setTouched] = useState(false);
+  const [nextPresentationNumber, setNextPresentationNumber] = useState(1);
 
   const {
     addValidationMessage,
@@ -43,9 +44,31 @@ export default function NewPresentationModal({
         .then((presentations) => {
           const titles = presentations.map((p) => p.title?.toLowerCase().trim() || '');
           setExistingTitles(titles.filter((t) => t));
+
+          // Найти максимальный номер в существующих презентациях
+          const baseName = 'моя презентация';
+          let maxNumber = 0;
+
+          titles.forEach((title) => {
+            const lowerTitle = title.toLowerCase();
+            if (lowerTitle.startsWith(baseName)) {
+              const match = lowerTitle.match(new RegExp(`^${baseName}\\s*(\\d+)$`));
+              if (match && match[1]) {
+                const num = parseInt(match[1], 10);
+                if (num > maxNumber) {
+                  maxNumber = num;
+                }
+              }
+            }
+          });
+
+          // Установить следующий номер
+          setNextPresentationNumber(maxNumber + 1);
+
+          // Установить имя по умолчанию
+          setTitle(`Моя презентация ${maxNumber + 1}`);
         });
 
-      setTitle('');
       clearValidationMessages();
       setTouched(false);
     }
@@ -83,14 +106,14 @@ export default function NewPresentationModal({
     setLoading(true);
     await onCreate(trimmedTitle);
     onClose();
-    setTitle('');
+    // Не сбрасываем состояние следующего номера, чтобы сохранить прогрессию
     clearValidationMessages();
     setTouched(false);
     setLoading(false);
   };
 
   const handleCancel = () => {
-    setTitle('');
+    // Не сбрасываем title при отмене, чтобы сохранить прогрессию для следующего открытия
     clearValidationMessages();
     setTouched(false);
     onCancel();
@@ -116,7 +139,6 @@ export default function NewPresentationModal({
               type="text"
               value={title}
               onChange={handleTitleChange}
-              placeholder="Моя новая презентация"
               className={`new-presentation-modal-input ${titleError ? 'error' : ''}`}
               autoFocus
               disabled={loading}

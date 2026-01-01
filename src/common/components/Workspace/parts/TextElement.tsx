@@ -70,6 +70,17 @@ export default function TextElementView({
     startDrag(e, element, selectedElementIds, getAllElements);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      (e.currentTarget as HTMLTextAreaElement).blur();
+    }
+    // Enter теперь обрабатывается нативно textarea как перенос строки
+    // Ctrl/Cmd + Enter для выхода из режима редактирования
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      (e.currentTarget as HTMLTextAreaElement).blur();
+    }
+  };
+
   return (
     <div
       className={`element ${isSelected ? 'selected' : ''}`}
@@ -110,7 +121,7 @@ export default function TextElementView({
       {preview ? (
         element.content
       ) : isEditing ? (
-        <input
+        <textarea
           autoFocus
           value={localContent}
           placeholder={element.placeholder}
@@ -124,11 +135,7 @@ export default function TextElementView({
               })
             );
           }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.currentTarget.blur();
-            }
-          }}
+          onKeyDown={handleKeyDown}
           onBlur={() => setIsEditing(false)}
           style={{
             width: '100%',
@@ -144,6 +151,10 @@ export default function TextElementView({
             fontWeight: element.bold ? 'bold' : 'normal',
             fontStyle: element.italic ? 'italic' : 'normal',
             textDecoration: element.underline ? 'underline' : 'none',
+            resize: 'none',
+            overflow: 'hidden',
+            padding: 0,
+            margin: 0,
           }}
         />
       ) : showPlaceholder ? (
