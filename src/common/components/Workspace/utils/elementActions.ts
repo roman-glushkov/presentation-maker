@@ -52,4 +52,19 @@ export class ElementActions {
       dispatch(removeSlide(slideId));
     });
   }
+
+  static bringToFront(selectedElementIds: string[], dispatch: AppDispatch) {
+    if (selectedElementIds.length === 0) return;
+
+    // Вызываем action с порядком 'front'
+    dispatch(handleAction('BRING_TO_FRONT'));
+  }
+
+  // ПЕРЕМЕСТИТЬ НА ЗАДНИЙ ПЛАН
+  static sendToBack(selectedElementIds: string[], dispatch: AppDispatch) {
+    if (selectedElementIds.length === 0) return;
+
+    // Вызываем action с порядком 'back'
+    dispatch(handleAction('SEND_TO_BACK'));
+  }
 }

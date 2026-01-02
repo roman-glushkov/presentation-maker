@@ -434,6 +434,7 @@ export const editorSlice = createSlice({
       const slideId = state.selectedSlideId;
       const slide = state.presentation.slides.find((s) => s.id === slideId);
       const elId = state.selectedElementIds[0];
+      const currentSelectedElementIds = [...state.selectedElementIds]; // ← ДОБАВЬТЕ ЭТУ СТРОКУ
 
       const slideMap: Record<string, Slide> = {
         ADD_TITLE_SLIDE: sld.slideTitle,
@@ -446,6 +447,49 @@ export const editorSlice = createSlice({
         ADD_OBJECT_WITH_SIGNATURE_SLIDE: sld.slideObjectWithSignature,
         ADD_DRAWING_WITH_CAPTION_SLIDE: sld.slideDrawingWithCaption,
       };
+
+      // ДОБАВЛЯЕМ ОБРАБОТКУ ПЕРЕДНЕГО/ЗАДНЕГО ПЛАНА
+      if (act === 'BRING_TO_FRONT' && slide && currentSelectedElementIds.length > 0) {
+        pushToPast(state, 'editor/handleAction/BRING_TO_FRONT');
+
+        // Получаем элементы слайда
+        const elements = [...slide.elements];
+
+        // Фильтруем выбранные элементы
+        const selectedElements = elements.filter((el) => currentSelectedElementIds.includes(el.id));
+
+        // Фильтруем невыбранные элементы
+        const otherElements = elements.filter((el) => !currentSelectedElementIds.includes(el.id));
+
+        // Помещаем выбранные элементы в конец (на передний план)
+        const newElements = [...otherElements, ...selectedElements];
+
+        state.presentation.slides = state.presentation.slides.map((s) =>
+          s.id === slide.id ? { ...s, elements: newElements } : s
+        );
+        return;
+      }
+
+      if (act === 'SEND_TO_BACK' && slide && currentSelectedElementIds.length > 0) {
+        pushToPast(state, 'editor/handleAction/SEND_TO_BACK');
+
+        // Получаем элементы слайда
+        const elements = [...slide.elements];
+
+        // Фильтруем выбранные элементы
+        const selectedElements = elements.filter((el) => currentSelectedElementIds.includes(el.id));
+
+        // Фильтруем невыбранные элементы
+        const otherElements = elements.filter((el) => !currentSelectedElementIds.includes(el.id));
+
+        // Помещаем выбранные элементы в начало (на задний план)
+        const newElements = [...selectedElements, ...otherElements];
+
+        state.presentation.slides = state.presentation.slides.map((s) =>
+          s.id === slide.id ? { ...s, elements: newElements } : s
+        );
+        return;
+      }
 
       if (slideMap[act]) {
         pushToPast(state, 'editor/handleAction');

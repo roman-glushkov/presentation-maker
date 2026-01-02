@@ -86,12 +86,16 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   }, [dispatch, selectedElementIds, selectedSlideIds]);
 
   const handleBringToFront = useCallback(() => {
-    // Логика перемещения на передний план
-  }, []);
+    if (selectedElementIds.length > 0) {
+      ElementActions.bringToFront(selectedElementIds, dispatch);
+    }
+  }, [dispatch, selectedElementIds]);
 
   const handleSendToBack = useCallback(() => {
-    // Логика перемещения на задний план
-  }, []);
+    if (selectedElementIds.length > 0) {
+      ElementActions.sendToBack(selectedElementIds, dispatch);
+    }
+  }, [dispatch, selectedElementIds]);
 
   const handleChangeBackground = useCallback(() => {
     // Логика изменения фона
