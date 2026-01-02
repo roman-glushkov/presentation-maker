@@ -10,8 +10,6 @@ export const SHAPE_OPTIONS: ShapeOption[] = [
   { label: 'Прямоугольник', type: 'rectangle', icon: '▭' },
   { label: 'Круг', type: 'circle', icon: '○' },
   { label: 'Треугольник', type: 'triangle', icon: '△' },
-  { label: 'Линия', type: 'line', icon: '━' },
-  { label: 'Стрелка', type: 'arrow', icon: '→' },
   { label: 'Звезда', type: 'star', icon: '★' },
   { label: 'Шестиугольник', type: 'hexagon', icon: '⬢' },
   { label: 'Сердце', type: 'heart', icon: '♥' },

@@ -9,10 +9,7 @@ export interface GroupButton {
 export const GROUPS: Record<GroupKey, GroupButton[]> = {
   main: [
     { label: '➕ Слайд', action: 'ADD_SLIDE' },
-
-    // Разделитель (визуальный)
     { label: '|', action: 'SEPARATOR' },
-
     { label: '🔠 Размер', action: 'TEXT_SIZE' },
     { label: '🎨 Шрифт', action: 'TEXT_FONT' },
     { label: '↔️ Выравнивание', action: 'TEXT_ALIGN' },
@@ -20,14 +17,6 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '𝐁 Жирный', action: 'TEXT_BOLD' },
     { label: '𝑰 Курсив', action: 'TEXT_ITALIC' },
     { label: 'U Подчеркнутый', action: 'TEXT_UNDERLINE' },
-
-    { label: '|', action: 'SEPARATOR' },
-
-    { label: '🎨 Фон', action: 'SLIDE_BACKGROUND' },
-    { label: '🖍️ Цвет текста', action: 'TEXT_COLOR' },
-    { label: '🧱 Заливка фигуры', action: 'SHAPE_FILL' },
-    { label: '🖌️ Граница фигуры', action: 'SHAPE_STROKE' },
-    { label: '📏 Толщина границы', action: 'SHAPE_STROKE_WIDTH' },
   ],
   insert: [
     { label: '📝 Текст', action: 'ADD_TEXT' },
@@ -38,13 +27,11 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     //{ label: '🔗 Ссылка ❌', action: 'ADD_LINK' },
   ],
   design: [
-    /*
-    { label: '🎭 Тема ❌', action: 'CHANGE_THEME' },
-    { label: '🌈 Градиенты ❌', action: 'APPLY_GRADIENT' },
-    { label: '🔲 Тень/границы ❌', action: 'ELEMENT_STYLE' },
-    { label: '🖼️ Фильтры ❌', action: 'IMAGE_FILTERS' },
-    { label: '📐 Сетка ❌', action: 'SHOW_GRID' },
-     */
+    { label: '🎨 Фон', action: 'SLIDE_BACKGROUND' },
+    { label: '🖍️ Цвет текста', action: 'TEXT_COLOR' },
+    { label: '🧱 Заливка фигуры', action: 'SHAPE_FILL' },
+    { label: '🖌️ Граница фигуры', action: 'SHAPE_STROKE' },
+    { label: '📏 Толщина границы', action: 'SHAPE_STROKE_WIDTH' },
   ],
   transitions: [
     /*
@@ -69,7 +56,7 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
 export const TAB_TITLES: { key: GroupKey; name: string }[] = [
   { key: 'main', name: 'Главная' },
   { key: 'insert', name: 'Вставка' },
-  //{ key: 'design', name: 'Дизайн' },
+  { key: 'design', name: 'Дизайн' },
   //{ key: 'transitions', name: 'Переходы' },
   //{ key: 'view', name: 'Вид' },
 ];

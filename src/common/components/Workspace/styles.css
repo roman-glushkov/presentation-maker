@@ -124,3 +124,43 @@
   transform: translateY(-50%);
   cursor: ew-resize;
 }
+
+/* Стили для фигур */
+.element[type='shape'] {
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+}
+
+.element[type='shape']:hover {
+  border-color: #3b82f6;
+}
+
+/* Для линии отдельные стили */
+.element[type='shape'][data-shape-type='line'] {
+  border: none;
+  background-color: #000000;
+}
+
+/* Для круга */
+.element[type='shape'][data-shape-type='circle'] {
+  border-radius: 50%;
+}
+
+/* Для стрелки (упрощенная версия) */
+.element[type='shape'][data-shape-type='arrow'] {
+  border: none;
+  background: transparent;
+  position: relative;
+}
+
+.element[type='shape'][data-shape-type='arrow']::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 30px solid currentColor;
+  top: 50%;
+  left: 50%;
+}

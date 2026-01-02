@@ -53,75 +53,158 @@ export default function ShapeElementView({
     startDrag(e, element, selectedElementIds, getAllElements);
   };
 
-  // Функция для получения стилей формы
-  const getShapeStyles = () => {
-    const baseStyles = {
-      position: 'absolute',
-      left: element.position.x,
-      top: element.position.y,
-      width: element.size.width,
-      height: element.size.height,
-      backgroundColor: element.fill,
-      border: `${element.strokeWidth}px solid ${element.stroke}`,
-      cursor: preview ? 'default' : 'grab',
-      userSelect: 'none',
-      pointerEvents: 'auto',
-      boxSizing: 'border-box' as const,
-    };
+  // Вспомогательные функции для создания фигур
+  const renderShape = () => {
+    const { width: w, height: h } = element.size;
+    const sw = element.strokeWidth;
+    const fill = element.fill;
+    const stroke = element.stroke;
+    const radius = Math.min(w, h) / 2;
 
     switch (element.shapeType) {
-      case 'circle':
-        return {
-          ...baseStyles,
-          borderRadius: '50%',
-        };
-      case 'triangle':
-        return {
-          ...baseStyles,
-          backgroundColor: 'transparent',
-          border: 'none',
-          clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-          background: element.fill,
-        };
-      case 'star':
-        return {
-          ...baseStyles,
-          clipPath:
-            'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
-        };
-      case 'heart':
-        return {
-          ...baseStyles,
-          clipPath:
-            'path("M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z")',
-        };
-      case 'line':
-        return {
-          ...baseStyles,
-          width: Math.max(element.size.width, element.strokeWidth),
-          height: Math.max(element.size.height, element.strokeWidth),
-          backgroundColor: element.stroke,
-          border: 'none',
-          transform: `rotate(${Math.atan2(element.size.height, element.size.width)}rad)`,
-        };
-      case 'arrow':
-        return {
-          ...baseStyles,
-          position: 'absolute',
-          borderLeft: `${element.size.height / 2}px solid transparent`,
-          borderRight: `${element.size.height / 2}px solid transparent`,
-          borderBottom: `${element.size.width}px solid ${element.fill}`,
-          backgroundColor: 'transparent',
-          border: 'none',
-          width: 0,
-          height: 0,
-        };
       case 'rectangle':
+        return (
+          <rect
+            x={sw / 2}
+            y={sw / 2}
+            width={w - sw}
+            height={h - sw}
+            rx={element.borderRadius || 0}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
+        );
+
+      case 'circle':
+        return (
+          <circle
+            cx={w / 2}
+            cy={h / 2}
+            r={radius - sw / 2}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
+        );
+
+      case 'triangle':
+        return (
+          <polygon
+            points={`${sw},${h - sw} ${w / 2},${sw} ${w - sw},${h - sw}`}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+            strokeLinejoin="round"
+          />
+        );
+
+      case 'star': {
+        const points = [];
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 === 0 ? radius * 0.6 : radius * 0.3;
+          const angle = (Math.PI / 5) * i;
+          points.push(`${w / 2 + r * Math.sin(angle)},${h / 2 + r * Math.cos(angle)}`);
+        }
+        return (
+          <polygon
+            points={points.join(' ')}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+            strokeLinejoin="round"
+          />
+        );
+      }
+
+      case 'hexagon': {
+        const points = [];
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i;
+          points.push(`${w / 2 + radius * Math.sin(angle)},${h / 2 + radius * Math.cos(angle)}`);
+        }
+        return (
+          <polygon
+            points={points.join(' ')}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+            strokeLinejoin="round"
+          />
+        );
+      }
+
+      case 'heart':
+        return (
+          <path
+            d={`M ${w / 2} ${h * 0.3}
+               Q ${w * 0.7} ${h * 0.1} ${w * 0.8} ${h * 0.3}
+               Q ${w * 0.9} ${h * 0.5} ${w / 2} ${h * 0.8}
+               Q ${w * 0.1} ${h * 0.5} ${w * 0.2} ${h * 0.3}
+               Q ${w * 0.3} ${h * 0.1} ${w / 2} ${h * 0.3} Z`}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+            strokeLinejoin="round"
+          />
+        );
+
+      case 'cloud':
+        return (
+          <path
+            d={`M ${w * 0.25} ${h * 0.6}
+               C ${w * 0.15} ${h * 0.6} ${w * 0.15} ${h * 0.45} ${w * 0.28} ${h * 0.45}
+               C ${w * 0.3} ${h * 0.3} ${w * 0.45} ${h * 0.28} ${w * 0.5} ${h * 0.4}
+               C ${w * 0.58} ${h * 0.25} ${w * 0.78} ${h * 0.3} ${w * 0.78} ${h * 0.45}
+               C ${w * 0.9} ${h * 0.48} ${w * 0.88} ${h * 0.65} ${w * 0.72} ${h * 0.65}
+               H ${w * 0.28}
+               C ${w * 0.26} ${h * 0.65} ${w * 0.25} ${h * 0.62} ${w * 0.25} ${h * 0.6} Z`}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+            strokeLinejoin="round"
+          />
+        );
+
+      case 'callout': {
+        const bodyHeight = h - 16 - sw;
+        const cx = w / 2;
+        const r = 12;
+
+        return (
+          <path
+            d={`M ${r} ${sw / 2}
+               H ${w - r}
+               Q ${w} ${sw / 2} ${w} ${r}
+               V ${bodyHeight - r}
+               Q ${w} ${bodyHeight} ${w - r} ${bodyHeight}
+               H ${cx + 12}
+               L ${cx} ${bodyHeight + 16}
+               L ${cx - 12} ${bodyHeight}
+               H ${r}
+               Q ${sw / 2} ${bodyHeight} ${sw / 2} ${bodyHeight - r}
+               V ${r}
+               Q ${sw / 2} ${sw / 2} ${r} ${sw / 2} Z`}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+            strokeLinejoin="round"
+          />
+        );
+      }
+
       default:
-        return {
-          ...baseStyles,
-          borderRadius: element.borderRadius ? `${element.borderRadius}px` : '0',
-        };
+        return (
+          <rect
+            x={sw / 2}
+            y={sw / 2}
+            width={w - sw}
+            height={h - sw}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
+        );
     }
   };
 
@@ -131,10 +214,22 @@ export default function ShapeElementView({
       onClick={(e) => onElementClick(e, elementId)}
       onPointerDown={handlePointerDown}
       style={{
-        ...getShapeStyles(),
-        border: isSelected && !preview ? '2px solid #3b82f6' : undefined,
+        position: 'absolute',
+        left: element.position.x,
+        top: element.position.y,
+        width: element.size.width,
+        height: element.size.height,
+        cursor: preview ? 'default' : 'move',
+        userSelect: 'none',
+        padding: 0,
+        boxSizing: 'border-box',
       }}
+      data-type="shape"
     >
+      <svg width={element.size.width} height={element.size.height} style={{ display: 'block' }}>
+        {renderShape()}
+      </svg>
+
       {isSelected && !preview && (
         <>
           {(['nw', 'ne', 'sw', 'se', 'n', 's', 'e', 'w'] as const).map((c) => (
