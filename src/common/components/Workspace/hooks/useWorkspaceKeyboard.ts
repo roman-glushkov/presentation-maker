@@ -1,7 +1,8 @@
+// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\hooks\useWorkspaceKeyboard.ts
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
-import { handleAction, removeSlide } from '../../../../store/editorSlice';
+import { ElementActions } from '../utils/elementActions';
 
 export default function useWorkspaceKeyboard(preview?: boolean) {
   const dispatch = useDispatch();
@@ -13,17 +14,42 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (preview) return;
 
-      if (e.key === 'Delete' && !e.ctrlKey && !e.metaKey && selectedElementIds.length > 0) {
+      const isCtrl = e.ctrlKey || e.metaKey;
+      const isTextInputFocused =
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.hasAttribute('contenteditable');
+
+      if (isTextInputFocused) return;
+
+      // Ctrl+X - ВЫРЕЗАТЬ
+      if (isCtrl && e.key === 'x' && selectedElementIds.length > 0) {
         e.preventDefault();
-        dispatch(handleAction('DELETE_SELECTED'));
+        ElementActions.cut(selectedElementIds, dispatch);
       }
 
-      if (e.key === 'Delete' && (e.ctrlKey || e.metaKey) && selectedSlideIds.length > 0) {
+      // Ctrl+C - КОПИРОВАТЬ
+      if (isCtrl && e.key === 'c' && selectedElementIds.length > 0) {
         e.preventDefault();
+        ElementActions.copy(selectedElementIds);
+      }
 
-        selectedSlideIds.forEach((slideId: string) => {
-          dispatch(removeSlide(slideId));
-        });
+      // Ctrl+V - ВСТАВИТЬ
+      if (isCtrl && e.key === 'v') {
+        e.preventDefault();
+        ElementActions.paste(selectedElementIds, dispatch);
+      }
+
+      // Ctrl+D - ДУБЛИРОВАТЬ
+      if (isCtrl && e.key === 'd' && selectedElementIds.length > 0) {
+        e.preventDefault();
+        ElementActions.duplicate(selectedElementIds, dispatch);
+      }
+
+      // Delete - УДАЛИТЬ ЭЛЕМЕНТЫ
+      if (e.key === 'Delete' && !isCtrl && selectedElementIds.length > 0) {
+        e.preventDefault();
+        ElementActions.deleteElements(selectedElementIds, dispatch);
       }
     };
 

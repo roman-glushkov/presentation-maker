@@ -4,22 +4,32 @@ import TextOptionsPopup from './TextOptionsPopup';
 import TextAlignPopup from './TextAlignPopup';
 import TemplatePopup from './TemplatePopup';
 import FontPopup from './FontPopup';
-import ShapePopup from './ShapePopup'; // ← НОВЫЙ ИМПОРТ
-import StrokeWidthPopup from './StrokeWidthPopup'; // ← НОВЫЙ ИМПОРТ
+import ShapePopup from './ShapePopup';
+import StrokeWidthPopup from './StrokeWidthPopup';
 import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { ImageService } from '../../../../appwrite/services/imageService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import React from 'react';
 
+// Импортируем уведомления
+import { useNotifications } from '../../../../appwrite/hooks/useNotifications';
+import {
+  IMAGE_NOTIFICATIONS,
+  NOTIFICATION_TIMEOUT,
+} from '../../../../appwrite/notifications/messages';
+
 export default function ToolbarGroup() {
   const dispatch = useAppDispatch();
   const activeGroup = useAppSelector((state) => state.toolbar.activeGroup) as GroupKey;
   const activeTextOption = useAppSelector((state) => state.toolbar.activeTextOption);
+
+  // Используем систему уведомлений
+  const { addNotification } = useNotifications();
 
   // Для загрузки изображений
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,21 +41,9 @@ export default function ToolbarGroup() {
 
   const currentSlideId = useSelector((state: RootState) => state.editor.selectedSlideId);
 
-  // Исправленный useEffect - всегда вызывается
-  useEffect(() => {
-    if (uploading) {
-      // Автоматически скрываем через 5 секунд на всякий случай
-      const timer = setTimeout(() => {
-        setUploading(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [uploading]);
-
   // Проверяем, что GROUPS[activeGroup] существует
   if (!GROUPS[activeGroup]) {
     console.error(`Неизвестная группа: ${activeGroup}`);
-    // Вместо рендера ошибки, возвращаем пустой div
     return <div className="toolbar-group" />;
   }
 
@@ -55,53 +53,53 @@ export default function ToolbarGroup() {
         'ADD_SLIDE',
         'TEXT_COLOR',
         'SHAPE_FILL',
-        'SHAPE_STROKE', // ← ДОБАВИЛИ
-        'SHAPE_STROKE_WIDTH', // ← ДОБАВИЛИ
+        'SHAPE_STROKE',
+        'SHAPE_STROKE_WIDTH',
         'SLIDE_BACKGROUND',
         'TEXT_SIZE',
         'TEXT_FONT',
         'TEXT_ALIGN',
         'TEXT_LINE_HEIGHT',
-        'ADD_SHAPE', // ← ДОБАВИЛИ
+        'ADD_SHAPE',
       ].includes(action)
     ) {
       dispatch(setActiveTextOption(activeTextOption === action ? null : action));
-    }
-    // ОСОБАЯ ОБРАБОТКА ДЛЯ КНОПКИ "КАРТИНКА"
-    else if (action === 'ADD_IMAGE') {
+    } else if (action === 'ADD_IMAGE') {
       handleImageButtonClick();
-    }
-    // ОСОБАЯ ОБРАБОТКА ДЛЯ КНОПКИ "ПО ССЫЛКЕ"
-    else if (action === 'ADD_IMAGE_FROM_URL') {
+    } else if (action === 'ADD_IMAGE_FROM_URL') {
       handleImageFromUrlButtonClick();
     } else {
       dispatch(handleAction(action));
     }
   };
 
-  // Функция для кнопки "Картинка" - сразу открывает диалог выбора файла
+  // Функция для кнопки "Картинка"
   const handleImageButtonClick = () => {
     if (!currentSlideId) {
-      alert('Выберите слайд для добавления изображения');
+      addNotification(
+        IMAGE_NOTIFICATIONS.ERROR.NO_SLIDE_SELECTED,
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
       return;
     }
 
-    // Сбрасываем URL инпут если он был открыт
     setShowUrlInput(false);
-
-    // Открываем диалог выбора файла
     fileInputRef.current?.click();
   };
 
-  // Функция для кнопки "По ссылке" - открывает поле для ввода URL
+  // Функция для кнопки "По ссылке"
   const handleImageFromUrlButtonClick = () => {
     if (!currentSlideId) {
-      alert('Выберите слайд для добавления изображения');
+      addNotification(
+        IMAGE_NOTIFICATIONS.ERROR.NO_SLIDE_SELECTED,
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
       return;
     }
 
     setShowUrlInput(true);
-    // Фокусируемся на поле ввода URL
     setTimeout(() => {
       urlInputRef.current?.focus();
     }, 10);
@@ -113,30 +111,30 @@ export default function ToolbarGroup() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Пожалуйста, выберите файл изображения');
+      addNotification(IMAGE_NOTIFICATIONS.ERROR.NOT_AN_IMAGE, 'error', NOTIFICATION_TIMEOUT.ERROR);
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      alert('Изображение должно быть меньше 10MB');
+      addNotification(IMAGE_NOTIFICATIONS.ERROR.TOO_LARGE, 'error', NOTIFICATION_TIMEOUT.ERROR);
       return;
     }
 
     setUploading(true);
     setProgress(0);
 
+    addNotification(IMAGE_NOTIFICATIONS.INFO.UPLOADING, 'info', NOTIFICATION_TIMEOUT.INFO);
+
     const progressInterval = setInterval(() => {
       setProgress((prev) => Math.min(prev + 20, 90));
     }, 300);
 
     try {
-      // Получаем URL и размеры изображения через Appwrite
       const imageData = await ImageService.uploadImage(file);
 
       clearInterval(progressInterval);
       setProgress(100);
 
-      // Добавляем изображение с размерами
       dispatch(
         addImageWithUrl({
           url: imageData.url,
@@ -145,13 +143,19 @@ export default function ToolbarGroup() {
         })
       );
 
-      setTimeout(() => {
-        alert('✅ Изображение успешно загружено!');
-      }, 100);
+      addNotification(
+        IMAGE_NOTIFICATIONS.SUCCESS.UPLOADED,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Не удалось загрузить изображение';
-      alert(`❌ Ошибка: ${errorMessage}`);
+      addNotification(
+        `${IMAGE_NOTIFICATIONS.ERROR.UPLOAD_FAILED}: ${errorMessage}`,
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
     } finally {
       clearInterval(progressInterval);
       setUploading(false);
@@ -168,7 +172,11 @@ export default function ToolbarGroup() {
       dispatch(addImageWithUrl(imageUrl.trim()));
       setImageUrl('');
       setShowUrlInput(false);
-      alert('✅ Изображение добавлено по ссылке!');
+      addNotification(
+        IMAGE_NOTIFICATIONS.SUCCESS.UPLOADED,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
     }
   };
 
@@ -180,7 +188,6 @@ export default function ToolbarGroup() {
 
   return (
     <div className="toolbar-group">
-      {/* Скрытый input для выбора файла */}
       <input
         type="file"
         ref={fileInputRef}
@@ -190,7 +197,6 @@ export default function ToolbarGroup() {
       />
 
       {GROUPS[activeGroup].map((btn: GroupButton) => {
-        // Если это разделитель, отображаем его по-другому
         if (btn.action === 'SEPARATOR') {
           return (
             <div key={`separator-${Date.now()}-${Math.random()}`} className="toolbar-separator">
@@ -199,7 +205,6 @@ export default function ToolbarGroup() {
           );
         }
 
-        // Если это кнопка загрузки изображения и идет загрузка, показываем индикатор
         const isImageButton = btn.action === 'ADD_IMAGE';
 
         return (
@@ -303,7 +308,7 @@ export default function ToolbarGroup() {
               />
             )}
 
-            {/* Поле для ввода URL (появляется рядом с кнопкой "По ссылке") */}
+            {/* Поле для ввода URL */}
             {btn.action === 'ADD_IMAGE_FROM_URL' && showUrlInput && (
               <div className="url-upload-popup">
                 <div className="url-input-group">
@@ -323,19 +328,7 @@ export default function ToolbarGroup() {
                   >
                     Вставить
                   </button>
-                  <button
-                    onClick={() => setShowUrlInput(false)}
-                    className="url-cancel-button"
-                    style={{
-                      padding: '6px 12px',
-                      background: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                    }}
-                  >
+                  <button onClick={() => setShowUrlInput(false)} className="url-cancel-button">
                     ✕
                   </button>
                 </div>

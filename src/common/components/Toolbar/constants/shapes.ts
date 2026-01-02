@@ -25,5 +25,4 @@ export const DEFAULT_SHAPE_SIZE = {
 export const DEFAULT_SHAPE_STYLES = {
   fill: '#ffffff',
   stroke: '#000000',
-  strokeWidth: 2,
 };

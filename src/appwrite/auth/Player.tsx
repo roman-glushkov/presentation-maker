@@ -6,6 +6,7 @@ import {
   SlideElement,
   TextElement,
   ImageElement,
+  ShapeElement,
 } from '../../store/types/presentation';
 import '../styles/Player.css';
 
@@ -47,10 +48,8 @@ export default function Player() {
   }, [presentation, presentationId]);
 
   useEffect(() => {
-    const handleResize = () => {
+    const handleResize = () =>
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -61,23 +60,14 @@ export default function Player() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
-        if (currentSlideIndex < presentation.slides.length - 1) {
-          setCurrentSlideIndex((i) => i + 1);
-        } else {
-          navigate(presentationId ? `/editor/${presentationId}` : '/editor');
-        }
+        if (currentSlideIndex < presentation.slides.length - 1) setCurrentSlideIndex((i) => i + 1);
+        else navigate(presentationId ? `/editor/${presentationId}` : '/editor');
       }
-
       if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        if (currentSlideIndex > 0) {
-          setCurrentSlideIndex((i) => i - 1);
-        }
+        if (currentSlideIndex > 0) setCurrentSlideIndex((i) => i - 1);
       }
-
-      if (e.key === 'Escape') {
-        navigate(presentationId ? `/editor/${presentationId}` : '/editor');
-      }
+      if (e.key === 'Escape') navigate(presentationId ? `/editor/${presentationId}` : '/editor');
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -86,41 +76,159 @@ export default function Player() {
 
   const handleClick = () => {
     if (!presentation) return;
-    if (currentSlideIndex < presentation.slides.length - 1) {
-      setCurrentSlideIndex((i) => i + 1);
-    } else {
-      navigate(presentationId ? `/editor/${presentationId}` : '/editor');
-    }
+    if (currentSlideIndex < presentation.slides.length - 1) setCurrentSlideIndex((i) => i + 1);
+    else navigate(presentationId ? `/editor/${presentationId}` : '/editor');
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (currentSlideIndex > 0) {
-      setCurrentSlideIndex((i) => i - 1);
-    }
+    if (currentSlideIndex > 0) setCurrentSlideIndex((i) => i - 1);
   };
 
   const scaleX = windowSize.width / EDITOR_SLIDE_WIDTH;
   const scaleY = windowSize.height / EDITOR_SLIDE_HEIGHT;
   const scale = Math.min(scaleX, scaleY);
 
-  if (loading) {
+  const renderShape = (el: ShapeElement) => {
+    const w = el.size.width * scale;
+    const h = el.size.height * scale;
+    const sw = el.strokeWidth * scale;
+    const fill = el.fill;
+    const stroke = el.stroke;
+    const radius = Math.min(w, h) / 2;
+
+    const polygon = (points: string) => (
+      <polygon
+        points={points}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={sw}
+        strokeLinejoin="round"
+      />
+    );
+    const path = (d: string) => (
+      <path
+        d={d}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={sw}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    );
+
+    switch (el.shapeType) {
+      case 'rectangle':
+        return (
+          <rect
+            x={sw / 2}
+            y={sw / 2}
+            width={w - sw}
+            height={h - sw}
+            rx={el.borderRadius || 0}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
+        );
+      case 'circle':
+        return (
+          <circle
+            cx={w / 2}
+            cy={h / 2}
+            r={radius - sw / 2}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
+        );
+      case 'triangle':
+        return polygon(`${sw},${h - sw} ${w / 2},${sw} ${w - sw},${h - sw}`);
+      case 'star': {
+        const points: string[] = [];
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 === 0 ? radius * 0.6 : radius * 0.3;
+          const angle = (Math.PI / 5) * i;
+          points.push(`${w / 2 + r * Math.sin(angle)},${h / 2 + r * Math.cos(angle)}`);
+        }
+        return polygon(points.join(' '));
+      }
+      case 'hexagon': {
+        const points: string[] = [];
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i;
+          points.push(`${w / 2 + radius * Math.sin(angle)},${h / 2 + radius * Math.cos(angle)}`);
+        }
+        return polygon(points.join(' '));
+      }
+      case 'heart':
+        return path(`
+          M ${w / 2} ${h * 0.3}
+          Q ${w * 0.7} ${h * 0.1} ${w * 0.8} ${h * 0.3}
+          Q ${w * 0.9} ${h * 0.5} ${w / 2} ${h * 0.8}
+          Q ${w * 0.1} ${h * 0.5} ${w * 0.2} ${h * 0.3}
+          Q ${w * 0.3} ${h * 0.1} ${w / 2} ${h * 0.3} Z
+        `);
+      case 'cloud':
+        return path(`
+          M ${w * 0.25} ${h * 0.6}
+          C ${w * 0.15} ${h * 0.6} ${w * 0.15} ${h * 0.45} ${w * 0.28} ${h * 0.45}
+          C ${w * 0.3} ${h * 0.3} ${w * 0.45} ${h * 0.28} ${w * 0.5} ${h * 0.4}
+          C ${w * 0.58} ${h * 0.25} ${w * 0.78} ${h * 0.3} ${w * 0.78} ${h * 0.45}
+          C ${w * 0.9} ${h * 0.48} ${w * 0.88} ${h * 0.65} ${w * 0.72} ${h * 0.65}
+          H ${w * 0.28}
+          C ${w * 0.26} ${h * 0.65} ${w * 0.25} ${h * 0.62} ${w * 0.25} ${h * 0.6} Z
+        `);
+      case 'callout': {
+        const bodyHeight = h - 16 * scale - sw;
+        const cx = w / 2;
+        const r = 12 * scale;
+        const tailW = 24 * scale;
+        const tailH = 16 * scale;
+        return path(`
+          M ${r} ${sw / 2}
+          H ${w - r}
+          Q ${w} ${sw / 2} ${w} ${r}
+          V ${bodyHeight - r}
+          Q ${w} ${bodyHeight} ${w - r} ${bodyHeight}
+          H ${cx + tailW / 2}
+          L ${cx} ${bodyHeight + tailH}
+          L ${cx - tailW / 2} ${bodyHeight}
+          H ${r}
+          Q ${sw / 2} ${bodyHeight} ${sw / 2} ${bodyHeight - r}
+          V ${r}
+          Q ${sw / 2} ${sw / 2} ${r} ${sw / 2} Z
+        `);
+      }
+      default:
+        return (
+          <rect
+            x={sw / 2}
+            y={sw / 2}
+            width={w - sw}
+            height={h - sw}
+            fill={fill}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
+        );
+    }
+  };
+
+  if (loading)
     return (
       <div className="player-loading">
         <div className="player-spinner"></div>
         <p>Загружаем презентацию...</p>
       </div>
     );
-  }
-
-  if (error || !presentation) {
+  if (error || !presentation)
     return (
       <div className="player-error">
         <p>{error || 'Презентация не найдена'}</p>
         <button onClick={() => navigate('/presentations')}>Назад к презентациям</button>
       </div>
     );
-  }
 
   const slide = presentation.slides[currentSlideIndex];
 
@@ -129,11 +237,9 @@ export default function Player() {
       <div className="player-slide-counter">
         {currentSlideIndex + 1} / {presentation.slides.length}
       </div>
-
       <div className="player-hint">
         <span>Кликните для следующего слайда • Правый клик для предыдущего • Esc для выхода</span>
       </div>
-
       <div className="player-slide-container">
         <div
           className="player-slide"
@@ -143,16 +249,17 @@ export default function Player() {
             backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
             backgroundImage:
               slide.background.type === 'image' ? `url(${slide.background.value})` : 'none',
-            backgroundSize: slide.background.type === 'image' ? 'cover' : 'auto',
+            backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
+            position: 'relative',
           }}
         >
           {slide.elements.map((el: SlideElement) => {
-            const x = el.position?.x || 0;
-            const y = el.position?.y || 0;
-            const width = el.size?.width || 0;
-            const height = el.size?.height || 0;
+            const x = (el.position?.x || 0) * scale;
+            const y = (el.position?.y || 0) * scale;
+            const width = (el.size?.width || 0) * scale;
+            const height = (el.size?.height || 0) * scale;
 
             switch (el.type) {
               case 'text': {
@@ -162,10 +269,10 @@ export default function Player() {
                     key={textEl.id}
                     style={{
                       position: 'absolute',
-                      left: x * scale,
-                      top: y * scale,
-                      width: width * scale,
-                      height: height * scale,
+                      left: x,
+                      top: y,
+                      width,
+                      height,
                       fontFamily: textEl.font || 'Arial, sans-serif',
                       fontSize: `${textEl.fontSize * scale}px`,
                       color: textEl.color,
@@ -194,7 +301,6 @@ export default function Player() {
                   />
                 );
               }
-
               case 'image': {
                 const imgEl = el as ImageElement;
                 return (
@@ -202,10 +308,10 @@ export default function Player() {
                     key={imgEl.id}
                     style={{
                       position: 'absolute',
-                      left: x * scale,
-                      top: y * scale,
-                      width: width * scale,
-                      height: height * scale,
+                      left: x,
+                      top: y,
+                      width,
+                      height,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -228,7 +334,19 @@ export default function Player() {
                   </div>
                 );
               }
-
+              case 'shape': {
+                const shapeEl = el as ShapeElement;
+                return (
+                  <svg
+                    key={shapeEl.id}
+                    width={width}
+                    height={height}
+                    style={{ position: 'absolute', left: x, top: y }}
+                  >
+                    {renderShape(shapeEl)}
+                  </svg>
+                );
+              }
               default:
                 return null;
             }

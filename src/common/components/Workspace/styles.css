@@ -164,3 +164,55 @@
   top: 50%;
   left: 50%;
 }
+/* C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\parts\WorkspaceContextMenu.css */
+.workspace-context-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  z-index: 1000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.workspace-context-menu .context-menu-item {
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.workspace-context-menu .context-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.workspace-context-menu .context-menu-item:active {
+  background-color: #e8e8e8;
+}
+
+.workspace-context-menu .menu-icon {
+  margin-right: 10px;
+  font-size: 16px;
+  width: 20px;
+  display: inline-block;
+  text-align: center;
+}
+
+.workspace-context-menu .context-menu-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 6px 0;
+  width: 100%;
+}

@@ -5,7 +5,7 @@ interface Props {
   currentWidth?: number;
 }
 
-export default function StrokeWidthPopup({ onSelect, currentWidth = 2 }: Props) {
+export default function StrokeWidthPopup({ onSelect }: Props) {
   const strokeWidthOptions = [1, 2, 3, 4, 5, 6, 8, 10];
 
   return (
@@ -32,7 +32,7 @@ export default function StrokeWidthPopup({ onSelect, currentWidth = 2 }: Props) 
               borderRadius: '1px',
             }}
           />
-          {width}px {currentWidth === width ? '✓' : ''}
+          {width}px
         </button>
       ))}
     </div>
