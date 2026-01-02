@@ -1,4 +1,3 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\index.tsx
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -21,17 +20,16 @@ export default function Workspace({ preview }: Props) {
 
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
 
-  // Находим выбранный элемент (берем первый, если выбрано несколько)
   const selectedElement = useSelector((state: RootState) => {
-    if (selectedElementIds.length === 0) return null;
+    if (selectedElementIds.length === 0) return undefined;
 
     const currentSlide = state.editor.presentation.slides.find(
       (s) => s.id === state.editor.selectedSlideId
     );
 
-    if (!currentSlide) return null;
+    if (!currentSlide) return undefined;
 
-    return currentSlide.elements.find((el) => el.id === selectedElementIds[0]) || null;
+    return currentSlide.elements.find((el) => el.id === selectedElementIds[0]);
   });
 
   const {
@@ -53,16 +51,13 @@ export default function Workspace({ preview }: Props) {
 
   useWorkspaceKeyboard(preview);
 
-  // Обработчик контекстного меню для всего workspace
   const handleWorkspaceContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    // Определяем, был ли клик по элементу или по фону слайда
     let targetType: 'text' | 'image' | 'shape' | 'slide' | 'none' = 'none';
-    let targetElement: SlideElement | null = null;
+    let targetElement: SlideElement | undefined = undefined;
 
     if (selectedElement && selectedElementIds.length > 0) {
-      // Если есть выбранный элемент, показываем меню для него
       targetElement = selectedElement;
       switch (selectedElement.type) {
         case 'text':
@@ -78,11 +73,9 @@ export default function Workspace({ preview }: Props) {
           targetType = 'none';
       }
     } else {
-      // Если нет выбранного элемента, показываем меню для слайда
       targetType = 'slide';
     }
 
-    // Вызываем обновленный handleContextMenu
     handleContextMenu(e, targetElement, targetType === 'slide');
   };
 
@@ -90,16 +83,7 @@ export default function Workspace({ preview }: Props) {
     <div className="workspace-panel">
       <div className="workspace" onContextMenu={handleWorkspaceContextMenu}>
         {slide ? (
-          <WorkspaceContent
-            slide={slide}
-            preview={preview}
-            onElementContextMenu={(e, element) => {
-              // Обработка контекстного меню для конкретного элемента
-              e.preventDefault();
-              e.stopPropagation();
-              handleContextMenu(e, element, false);
-            }}
-          />
+          <WorkspaceContent slide={slide} preview={preview} />
         ) : (
           <div className="no-slide-selected">
             <p>Выберите слайд</p>
