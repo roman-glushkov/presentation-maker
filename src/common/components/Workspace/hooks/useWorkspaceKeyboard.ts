@@ -22,13 +22,6 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
 
       if (isTextInputFocused) return;
 
-      // Ctrl+X - ВЫРЕЗАТЬ (работает в любой раскладке)
-      if (isCtrl && e.code === 'KeyX' && selectedElementIds.length > 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        ElementActions.cut(selectedElementIds, dispatch);
-      }
-
       // Ctrl+C - КОПИРОВАТЬ (работает в любой раскладке)
       if (isCtrl && e.code === 'KeyC' && selectedElementIds.length > 0) {
         e.preventDefault();

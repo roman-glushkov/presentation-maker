@@ -7,7 +7,6 @@ interface WorkspaceContextMenuProps {
   y: number;
   slideAreaHeight: number;
   onClose: () => void;
-  onCut: () => void;
   onCopy: () => void;
   onPaste: () => void;
   onDuplicate: () => void;
@@ -26,7 +25,6 @@ export default function WorkspaceContextMenu({
   x,
   y,
   onClose,
-  onCut,
   onCopy,
   onPaste,
   onDuplicate,
@@ -128,16 +126,6 @@ export default function WorkspaceContextMenu({
         zIndex: 1000,
       }}
     >
-      <button
-        onClick={() => {
-          onCut();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">✂️</span> Вырезать
-      </button>
-
       <button
         onClick={() => {
           onCopy();

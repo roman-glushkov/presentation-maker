@@ -21,7 +21,6 @@ export default function Workspace({ preview }: Props) {
   const {
     menu,
     handleContextMenu,
-    handleCut,
     handleCopy,
     handlePaste,
     handleDuplicate,
@@ -63,7 +62,6 @@ export default function Workspace({ preview }: Props) {
         y={menu.y}
         slideAreaHeight={600}
         onClose={closeMenu}
-        onCut={handleCut}
         onCopy={handleCopy}
         onPaste={handlePaste}
         onDuplicate={handleDuplicate}

@@ -13,7 +13,6 @@ export interface MenuState {
 export interface ContextMenuHandlers {
   menu: MenuState;
   handleContextMenu: (e: React.MouseEvent, slideRect?: DOMRect) => void;
-  handleCut: () => void;
   handleCopy: () => void;
   handlePaste: () => void;
   handleDuplicate: () => void;
@@ -61,11 +60,6 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
       });
     }
   }, []);
-
-  // ВЫРЕЗАТЬ (Ctrl+X)
-  const handleCut = useCallback(() => {
-    ElementActions.cut(selectedElementIds, dispatch);
-  }, [dispatch, selectedElementIds]);
 
   // КОПИРОВАТЬ (Ctrl+C)
   const handleCopy = useCallback(() => {
@@ -126,7 +120,6 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   return {
     menu,
     handleContextMenu,
-    handleCut,
     handleCopy,
     handlePaste,
     handleDuplicate,
