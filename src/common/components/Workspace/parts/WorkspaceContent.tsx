@@ -48,9 +48,7 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
     <div
       className="workspace-content"
       style={{
-        backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
-        position: 'relative',
-        overflow: 'hidden',
+        backgroundColor: slide.background.type === 'color' ? slide.background.value : '#fff',
       }}
       onClick={handleWorkspaceClick}
     >
@@ -81,7 +79,6 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
           );
         }
 
-        // ДОБАВЬТЕ ЭТОТ КОД ДЛЯ ФИГУР
         if (el.type === 'shape') {
           return (
             <ShapeElementView

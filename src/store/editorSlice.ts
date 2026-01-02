@@ -645,7 +645,7 @@ export const editorSlice = createSlice({
       }
 
       if (act.startsWith('SLIDE_BACKGROUND:')) {
-        const color = act.split(': ')[1];
+        const color = act.split(':')[1]; // Теперь просто [1]
         if (slide) {
           pushToPast(state, 'editor/handleAction/SLIDE_BACKGROUND');
           state.presentation.slides = state.presentation.slides.map((s) =>

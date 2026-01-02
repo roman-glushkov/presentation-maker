@@ -137,7 +137,7 @@ export default function WorkspaceContextMenu({
     };
 
     if (shouldShowMenu || showColorPicker) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('click', handleClickOutside);
       document.addEventListener('keydown', handleEsc);
       window.addEventListener('scroll', handleScroll, true);
     }

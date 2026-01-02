@@ -95,26 +95,16 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
     (e: React.MouseEvent, element?: SlideElement, isSlideArea?: boolean) => {
       e.preventDefault();
 
+      if (element) {
+        dispatch(handleAction(`SELECT_ELEMENT:${element.id}`));
+      }
+
       let targetType: 'text' | 'image' | 'shape' | 'slide' | 'none' = 'none';
-      let selectedElement: SlideElement | null = null;
 
       if (isSlideArea) {
         targetType = 'slide';
       } else if (element) {
-        selectedElement = element;
-        switch (element.type) {
-          case 'text':
-            targetType = 'text';
-            break;
-          case 'image':
-            targetType = 'image';
-            break;
-          case 'shape':
-            targetType = 'shape';
-            break;
-          default:
-            targetType = 'none';
-        }
+        targetType = element.type;
       }
 
       setMenu({
@@ -122,10 +112,10 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
         x: e.clientX,
         y: e.clientY,
         targetType,
-        selectedElement,
+        selectedElement: element ?? null,
       });
     },
-    []
+    [dispatch]
   );
 
   // КОПИРОВАТЬ (Ctrl+C)
@@ -222,9 +212,10 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
 
       // Находим выбранный элемент
       const selectedElement =
-        selectedElementIds.length > 0 && currentSlide
+        menu.selectedElement ??
+        (selectedElementIds.length > 0 && currentSlide
           ? currentSlide.elements.find((el) => el.id === selectedElementIds[0])
-          : null;
+          : null);
 
       console.log('📌 Найденный элемент:', selectedElement);
 
@@ -259,9 +250,8 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
         case 'background':
           if (currentSlideId) {
             console.log('✅ Применяем цвет фона слайда:', color);
-            dispatch(handleAction(`SLIDE_BACKGROUND: ${color}`));
-          } else {
-            console.log('❌ Нельзя применить цвет фона: слайд не выбран');
+            // Удалите 'color:' из строки
+            dispatch(handleAction(`SLIDE_BACKGROUND:${color}`));
           }
           break;
       }
