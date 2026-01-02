@@ -1,5 +1,5 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\parts\WorkspaceContextMenu.tsx
 import React, { useRef, useEffect, useState } from 'react';
+import { SlideElement } from '../../../../store/types/presentation'; // Импортируем тип
 
 interface WorkspaceContextMenuProps {
   visible: boolean;
@@ -18,6 +18,9 @@ interface WorkspaceContextMenuProps {
   onChangeFill: () => void;
   onChangeBorderColor: () => void;
   onChangeBorderWidth: () => void;
+  // Добавляем новые пропсы
+  targetType?: 'text' | 'image' | 'shape' | 'slide' | 'none';
+  selectedElement?: SlideElement | null;
 }
 
 export default function WorkspaceContextMenu({
@@ -36,12 +39,29 @@ export default function WorkspaceContextMenu({
   onChangeFill,
   onChangeBorderColor,
   onChangeBorderWidth,
+  // Новые пропсы с значениями по умолчанию
+  targetType = 'none',
 }: WorkspaceContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
+  // Определяем, какие пункты меню показывать
+  const showTextColor = targetType === 'text';
+  const showFill = targetType === 'text' || targetType === 'shape';
+  const showBorderColor = targetType === 'shape';
+  const showBorderWidth = targetType === 'shape';
+  const showSlideBackground = targetType === 'slide';
+
+  // Общие пункты, которые показываются всегда (если есть выбранные элементы)
+  const showCommonItems = targetType !== 'slide' && targetType !== 'none';
+  const showLayersItems = targetType !== 'slide' && targetType !== 'none';
+
+  // Показывать ли меню вообще
+  const shouldShowMenu = visible && targetType !== 'none';
+
   useEffect(() => {
-    if (visible && menuRef.current) {
+    if (shouldShowMenu && menuRef.current) {
+      // ... существующий код позиционирования ...
       const menuHeight = menuRef.current.offsetHeight;
       const menuWidth = menuRef.current.offsetWidth;
       const viewportHeight = window.innerHeight;
@@ -83,7 +103,7 @@ export default function WorkspaceContextMenu({
 
       setPosition({ x: adjustedX, y: adjustedY });
     }
-  }, [visible, x, y]);
+  }, [shouldShowMenu, x, y]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -100,7 +120,7 @@ export default function WorkspaceContextMenu({
       onClose();
     };
 
-    if (visible) {
+    if (shouldShowMenu) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEsc);
       window.addEventListener('scroll', handleScroll, true);
@@ -111,9 +131,9 @@ export default function WorkspaceContextMenu({
       document.removeEventListener('keydown', handleEsc);
       window.removeEventListener('scroll', handleScroll, true);
     };
-  }, [visible, onClose]);
+  }, [shouldShowMenu, onClose]);
 
-  if (!visible) return null;
+  if (!shouldShowMenu) return null;
 
   return (
     <div
@@ -126,121 +146,147 @@ export default function WorkspaceContextMenu({
         zIndex: 1000,
       }}
     >
-      <button
-        onClick={() => {
-          onCopy();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">📋</span> Копировать
-      </button>
+      {/* Общие пункты меню (копировать, вставить и т.д.) */}
+      {showCommonItems && (
+        <>
+          <button
+            onClick={() => {
+              onCopy();
+              onClose();
+            }}
+            className="context-menu-item"
+          >
+            <span className="menu-icon">📋</span> Копировать
+          </button>
 
-      <button
-        onClick={() => {
-          onPaste();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">📝</span> Вставить
-      </button>
+          <button
+            onClick={() => {
+              onPaste();
+              onClose();
+            }}
+            className="context-menu-item"
+          >
+            <span className="menu-icon">📝</span> Вставить
+          </button>
 
-      <button
-        onClick={() => {
-          onDuplicate();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">⎘</span> Дублировать
-      </button>
+          <button
+            onClick={() => {
+              onDuplicate();
+              onClose();
+            }}
+            className="context-menu-item"
+          >
+            <span className="menu-icon">⎘</span> Дублировать
+          </button>
 
-      <button
-        onClick={() => {
-          onDelete();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">🗑️</span> Удалить
-      </button>
+          <button
+            onClick={() => {
+              onDelete();
+              onClose();
+            }}
+            className="context-menu-item"
+          >
+            <span className="menu-icon">🗑️</span> Удалить
+          </button>
 
-      <div className="context-menu-divider" />
+          <div className="context-menu-divider" />
+        </>
+      )}
 
-      <button
-        onClick={() => {
-          onBringToFront();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">⬆️</span> На передний план
-      </button>
+      {/* Слой/порядок */}
+      {showLayersItems && (
+        <>
+          <button
+            onClick={() => {
+              onBringToFront();
+              onClose();
+            }}
+            className="context-menu-item"
+          >
+            <span className="menu-icon">⬆️</span> На передний план
+          </button>
 
-      <button
-        onClick={() => {
-          onSendToBack();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">⬇️</span> На задний план
-      </button>
+          <button
+            onClick={() => {
+              onSendToBack();
+              onClose();
+            }}
+            className="context-menu-item"
+          >
+            <span className="menu-icon">⬇️</span> На задний план
+          </button>
 
-      <div className="context-menu-divider" />
+          <div className="context-menu-divider" />
+        </>
+      )}
 
-      <button
-        onClick={() => {
-          onChangeBackground();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">🎨</span> Фон слайда
-      </button>
+      {/* Фон слайда (только для слайда) */}
+      {showSlideBackground && (
+        <button
+          onClick={() => {
+            onChangeBackground();
+            onClose();
+          }}
+          className="context-menu-item"
+        >
+          <span className="menu-icon">🎨</span> Фон слайда
+        </button>
+      )}
 
-      <div className="context-menu-divider" />
+      {/* Цвет текста (только для текста) */}
+      {showTextColor && (
+        <button
+          onClick={() => {
+            onChangeTextColor();
+            onClose();
+          }}
+          className="context-menu-item"
+        >
+          <span className="menu-icon">🅰️</span> Цвет текста
+        </button>
+      )}
 
-      <button
-        onClick={() => {
-          onChangeTextColor();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">🅰️</span> Цвет текста
-      </button>
+      {/* Заливка (для текста и фигур) */}
+      {showFill && (
+        <button
+          onClick={() => {
+            onChangeFill();
+            onClose();
+          }}
+          className="context-menu-item"
+        >
+          <span className="menu-icon">🎨</span> Заливка
+        </button>
+      )}
 
-      <button
-        onClick={() => {
-          onChangeFill();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">🎨</span> Заливка
-      </button>
+      {/* Границы (только для фигур) */}
+      {(showBorderColor || showBorderWidth) && (
+        <>
+          {showBorderColor && (
+            <button
+              onClick={() => {
+                onChangeBorderColor();
+                onClose();
+              }}
+              className="context-menu-item"
+            >
+              <span className="menu-icon">🟦</span> Цвет границы
+            </button>
+          )}
 
-      <button
-        onClick={() => {
-          onChangeBorderColor();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">🟦</span> Цвет границы
-      </button>
-
-      <button
-        onClick={() => {
-          onChangeBorderWidth();
-          onClose();
-        }}
-        className="context-menu-item"
-      >
-        <span className="menu-icon">📏</span> Толщина границы
-      </button>
+          {showBorderWidth && (
+            <button
+              onClick={() => {
+                onChangeBorderWidth();
+                onClose();
+              }}
+              className="context-menu-item"
+            >
+              <span className="menu-icon">📏</span> Толщина границы
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
