@@ -1,5 +1,5 @@
 // C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\hooks\useWorkspaceContextMenu.ts
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { SlideElement } from '../../../../store/types/presentation';
@@ -23,12 +23,21 @@ export interface ContextMenuHandlers {
   handleDelete: () => void;
   handleBringToFront: () => void;
   handleSendToBack: () => void;
+  // Убираем параметры color - они не нужны, так как выбор цвета будет в контекстном меню
   handleChangeBackground: () => void;
   handleChangeTextColor: () => void;
   handleChangeFill: () => void;
   handleChangeBorderColor: () => void;
   handleChangeBorderWidth: () => void;
   closeMenu: () => void;
+  currentColors: {
+    slideBackground?: string;
+    textColor?: string;
+    fillColor?: string;
+    borderColor?: string;
+  };
+  // Добавляем функцию для применения цвета
+  applyColor: (color: string, type: 'text' | 'fill' | 'stroke' | 'background') => void;
 }
 
 export default function useWorkspaceContextMenu(): ContextMenuHandlers {
@@ -42,8 +51,45 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
 
   const dispatch = useDispatch();
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
-
   const currentSlideId = useSelector((state: RootState) => state.editor.selectedSlideId);
+
+  // Получаем текущий слайд и его элементы
+  const currentSlide = useSelector((state: RootState) =>
+    state.editor.presentation.slides.find((s) => s.id === state.editor.selectedSlideId)
+  );
+
+  // Вычисляем текущие цвета для отображения в меню
+  const currentColors = useMemo(() => {
+    const colors: {
+      slideBackground?: string;
+      textColor?: string;
+      fillColor?: string;
+      borderColor?: string;
+    } = {};
+
+    // Цвет фона слайда
+    if (currentSlide?.background?.type === 'color') {
+      colors.slideBackground = currentSlide.background.value;
+    } else {
+      colors.slideBackground = '#ffffff'; // дефолтный цвет
+    }
+
+    // Цвета выбранного элемента
+    if (menu.selectedElement) {
+      switch (menu.selectedElement.type) {
+        case 'text':
+          colors.textColor = menu.selectedElement.color || '#000000';
+          colors.fillColor = menu.selectedElement.backgroundColor || 'transparent';
+          break;
+        case 'shape':
+          colors.fillColor = menu.selectedElement.fill || 'transparent';
+          colors.borderColor = menu.selectedElement.stroke || '#000000';
+          break;
+      }
+    }
+
+    return colors;
+  }, [currentSlide, menu.selectedElement]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent, element?: SlideElement, isSlideArea?: boolean) => {
@@ -53,10 +99,8 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
       let selectedElement: SlideElement | null = null;
 
       if (isSlideArea) {
-        // Клик по области слайда (не по элементу)
         targetType = 'slide';
       } else if (element) {
-        // Клик по элементу
         selectedElement = element;
         switch (element.type) {
           case 'text':
@@ -114,9 +158,9 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
     if (menu.targetType === 'slide') {
       // Удалить слайд
       if (currentSlideId) {
-        // Нужно импортировать removeSlide или использовать handleAction
+        // Здесь нужно использовать removeSlide action
+        console.log('Удалить слайд:', currentSlideId);
         // dispatch(removeSlide(currentSlideId));
-        // Или создать action для удаления через handleAction
       }
     } else if (selectedElementIds.length > 0) {
       // Удалить элементы
@@ -136,38 +180,101 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
     }
   }, [dispatch, selectedElementIds]);
 
+  // Эти функции теперь просто отмечают, что нужно открыть палитру
   const handleChangeBackground = useCallback(() => {
-    if (menu.targetType === 'slide' && currentSlideId) {
-      // Здесь можно открыть модалку для выбора цвета фона
-      // Пока просто тестовый цвет
-      dispatch(handleAction(`SLIDE_BACKGROUND: #f0f0f0`));
-    }
-  }, [dispatch, menu.targetType, currentSlideId]);
+    console.log('Открыть палитру для фона слайда');
+    // Логика открытия палитры будет в WorkspaceContextMenu
+  }, []);
 
   const handleChangeTextColor = useCallback(() => {
-    if (menu.targetType === 'text' && menu.selectedElement?.id) {
-      // Здесь можно открыть палитру цветов
-      dispatch(handleAction(`TEXT_COLOR: #000000`));
-    }
-  }, [dispatch, menu.targetType, menu.selectedElement]);
+    console.log('Открыть палитру для цвета текста');
+    // Логика открытия палитры будет в WorkspaceContextMenu
+  }, []);
 
   const handleChangeFill = useCallback(() => {
-    if ((menu.targetType === 'text' || menu.targetType === 'shape') && menu.selectedElement?.id) {
-      dispatch(handleAction(`SHAPE_FILL: #ffffff`));
-    }
-  }, [dispatch, menu.targetType, menu.selectedElement]);
+    console.log('Открыть палитру для заливки');
+    // Логика открытия палитры будет в WorkspaceContextMenu
+  }, []);
 
   const handleChangeBorderColor = useCallback(() => {
-    if (menu.targetType === 'shape' && menu.selectedElement?.id) {
-      dispatch(handleAction(`SHAPE_STROKE: #000000`));
-    }
-  }, [dispatch, menu.targetType, menu.selectedElement]);
+    console.log('Открыть палитру для цвета границы');
+    // Логика открытия палитры будет в WorkspaceContextMenu
+  }, []);
 
   const handleChangeBorderWidth = useCallback(() => {
     if (menu.targetType === 'shape' && menu.selectedElement?.id) {
-      dispatch(handleAction(`SHAPE_STROKE_WIDTH: 2`));
+      // Для примера устанавливаем 2px
+      dispatch(handleAction(`SHAPE_STROKE_WIDTH:2`));
     }
   }, [dispatch, menu.targetType, menu.selectedElement]);
+
+  // Функция для применения выбранного цвета
+  const applyColor = useCallback(
+    (color: string, type: 'text' | 'fill' | 'stroke' | 'background') => {
+      console.log('🎨 applyColor вызван:', {
+        color,
+        type,
+        selectedElementIds,
+        currentSlideId,
+        menuTargetType: menu.targetType,
+        selectedElement: menu.selectedElement,
+      });
+
+      // Находим выбранный элемент
+      const selectedElement =
+        selectedElementIds.length > 0 && currentSlide
+          ? currentSlide.elements.find((el) => el.id === selectedElementIds[0])
+          : null;
+
+      console.log('📌 Найденный элемент:', selectedElement);
+
+      switch (type) {
+        case 'text':
+          if (selectedElement?.type === 'text') {
+            console.log('✅ Применяем цвет текста:', color);
+            dispatch(handleAction(`TEXT_COLOR:${color}`));
+          } else {
+            console.log('❌ Нельзя применить цвет текста: элемент не найден или не текст');
+          }
+          break;
+        case 'fill':
+          if (
+            selectedElement &&
+            (selectedElement.type === 'text' || selectedElement.type === 'shape')
+          ) {
+            console.log('✅ Применяем цвет заливки:', color);
+            dispatch(handleAction(`SHAPE_FILL:${color}`));
+          } else {
+            console.log('❌ Нельзя применить цвет заливки: элемент не найден или не текст/фигура');
+          }
+          break;
+        case 'stroke':
+          if (selectedElement?.type === 'shape') {
+            console.log('✅ Применяем цвет границы:', color);
+            dispatch(handleAction(`SHAPE_STROKE:${color}`));
+          } else {
+            console.log('❌ Нельзя применить цвет границы: элемент не найден или не фигура');
+          }
+          break;
+        case 'background':
+          if (currentSlideId) {
+            console.log('✅ Применяем цвет фона слайда:', color);
+            dispatch(handleAction(`SLIDE_BACKGROUND: ${color}`));
+          } else {
+            console.log('❌ Нельзя применить цвет фона: слайд не выбран');
+          }
+          break;
+      }
+    },
+    [
+      dispatch,
+      selectedElementIds,
+      currentSlide,
+      currentSlideId,
+      menu.targetType,
+      menu.selectedElement,
+    ]
+  );
 
   const closeMenu = useCallback(() => {
     setMenu((prev) => ({ ...prev, visible: false }));
@@ -188,5 +295,7 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
     handleChangeBorderColor,
     handleChangeBorderWidth,
     closeMenu,
+    currentColors,
+    applyColor,
   };
 }

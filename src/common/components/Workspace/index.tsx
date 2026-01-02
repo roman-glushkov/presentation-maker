@@ -1,3 +1,4 @@
+// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\index.tsx
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -20,7 +21,7 @@ export default function Workspace({ preview }: Props) {
 
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
 
-  const selectedElement = useSelector((state: RootState) => {
+  const selectedElement = useSelector((state: RootState): SlideElement | undefined => {
     if (selectedElementIds.length === 0) return undefined;
 
     const currentSlide = state.editor.presentation.slides.find(
@@ -47,6 +48,8 @@ export default function Workspace({ preview }: Props) {
     handleChangeBorderColor,
     handleChangeBorderWidth,
     closeMenu,
+    currentColors,
+    applyColor,
   } = useWorkspaceContextMenu();
 
   useWorkspaceKeyboard(preview);
@@ -110,6 +113,8 @@ export default function Workspace({ preview }: Props) {
         onChangeBorderWidth={handleChangeBorderWidth}
         targetType={menu.targetType}
         selectedElement={menu.selectedElement}
+        currentColors={currentColors}
+        applyColor={applyColor}
       />
     </div>
   );
