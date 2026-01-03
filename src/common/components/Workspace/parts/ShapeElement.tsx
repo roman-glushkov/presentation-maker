@@ -52,7 +52,10 @@ export default function ShapeElementView({
   const handlePointerDown = (e: React.PointerEvent) => {
     startDrag(e, element, selectedElementIds, getAllElements);
   };
-
+  if (!element) {
+    return null;
+  }
+  const shadowFilterId = element.shadow ? `shape-shadow-${element.id}` : undefined;
   // Вспомогательные функции для создания фигур
   const renderShape = () => {
     const { width: w, height: h } = element.size;
@@ -60,6 +63,7 @@ export default function ShapeElementView({
     const fill = element.fill;
     const stroke = element.stroke;
     const radius = Math.min(w, h) / 2;
+    // Используем сглаживание для прямоугольников
 
     switch (element.shapeType) {
       case 'rectangle':
@@ -69,7 +73,6 @@ export default function ShapeElementView({
             y={sw / 2}
             width={w - sw}
             height={h - sw}
-            rx={element.borderRadius || 0}
             fill={fill}
             stroke={stroke}
             strokeWidth={sw}
@@ -226,8 +229,25 @@ export default function ShapeElementView({
       }}
       data-type="shape"
     >
-      <svg width={element.size.width} height={element.size.height} style={{ display: 'block' }}>
-        {renderShape()}
+      <svg
+        width={element.size.width}
+        height={element.size.height}
+        style={{ display: 'block', overflow: 'visible' }}
+      >
+        {element.shadow && (
+          <defs>
+            <filter id={shadowFilterId} x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow
+                dx="0"
+                dy="4"
+                stdDeviation={element.shadow.blur / 2}
+                floodColor={element.shadow.color}
+              />
+            </filter>
+          </defs>
+        )}
+
+        <g filter={shadowFilterId ? `url(#${shadowFilterId})` : undefined}>{renderShape()}</g>
       </svg>
 
       {isSelected && !preview && (

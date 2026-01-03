@@ -5,6 +5,10 @@ import * as func from './functions/presentation';
 import * as temp from './templates/presentation';
 import * as sld from './templates/slide';
 import { demoPresentation } from './templates/demoPresentation';
+import {
+  TEXT_SHADOW_OPTIONS,
+  SHAPE_SMOOTHING_OPTIONS,
+} from '../common/components/Toolbar/constants/textOptions';
 
 const initialPresentation: Presentation = {
   title: 'Новая презентация',
@@ -448,6 +452,72 @@ export const editorSlice = createSlice({
         ADD_DRAWING_WITH_CAPTION_SLIDE: sld.slideDrawingWithCaption,
       };
 
+      if (act.startsWith('TEXT_SHADOW:')) {
+        const shadowKey = act.split(':')[1].trim();
+        if (slide && elId) {
+          pushToPast(state, 'editor/handleAction/TEXT_SHADOW');
+
+          const shadowPreset = TEXT_SHADOW_OPTIONS.find(
+            (option: { key: string }) => option.key === shadowKey
+          );
+
+          if (shadowPreset) {
+            state.presentation.slides = state.presentation.slides.map((s) =>
+              s.id === slide.id
+                ? {
+                    ...s,
+                    elements: s.elements.map((el) =>
+                      el.id === elId
+                        ? {
+                            ...el,
+                            shadow:
+                              shadowKey === 'none'
+                                ? undefined
+                                : {
+                                    color: shadowPreset.color,
+                                    blur: shadowPreset.blur,
+                                  },
+                          }
+                        : el
+                    ),
+                  }
+                : s
+            );
+          }
+        }
+        return;
+      }
+
+      // Для сглаживания (общий для всех элементов)
+      if (act.startsWith('SHAPE_SMOOTHING:')) {
+        const smoothingKey = act.split(':')[1].trim();
+        if (slide && elId) {
+          pushToPast(state, 'editor/handleAction/SHAPE_SMOOTHING');
+
+          const smoothingPreset = SHAPE_SMOOTHING_OPTIONS.find(
+            (option: { key: string }) => option.key === smoothingKey
+          );
+
+          if (smoothingPreset) {
+            state.presentation.slides = state.presentation.slides.map((s) =>
+              s.id === slide.id
+                ? {
+                    ...s,
+                    elements: s.elements.map((el) =>
+                      el.id === elId
+                        ? {
+                            ...el,
+                            smoothing: smoothingPreset.value,
+                          }
+                        : el
+                    ),
+                  }
+                : s
+            );
+          }
+        }
+        return;
+      }
       // ДОБАВЛЯЕМ ОБРАБОТКУ ПЕРЕДНЕГО/ЗАДНЕГО ПЛАНА
       if (act === 'BRING_TO_FRONT' && slide && currentSelectedElementIds.length > 0) {
         pushToPast(state, 'editor/handleAction/BRING_TO_FRONT');

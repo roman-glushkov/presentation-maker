@@ -1,5 +1,5 @@
 // constants/config.ts
-export type GroupKey = 'main' | 'insert' | 'design' | 'transitions' | 'view';
+export type GroupKey = 'main' | 'insert' | 'colors' | 'effects' | 'transitions' | 'view';
 
 export interface GroupButton {
   label: string;
@@ -27,12 +27,17 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     //{ label: '📊 Диаграмма ❌', action: 'ADD_CHART' },
     //{ label: '🔗 Ссылка ❌', action: 'ADD_LINK' },
   ],
-  design: [
-    { label: '🎨 Фон', action: 'SLIDE_BACKGROUND' },
+  colors: [
+    { label: '🎨 Фон слайда', action: 'SLIDE_BACKGROUND' },
     { label: '🖍️ Цвет текста', action: 'TEXT_COLOR' },
     { label: '🧱 Заливка фигуры', action: 'SHAPE_FILL' },
-    { label: '🖌️ Граница фигуры', action: 'SHAPE_STROKE' },
+    { label: '🖌️ Цвет границы', action: 'SHAPE_STROKE' },
+  ],
+  effects: [
     { label: '📏 Толщина', action: 'SHAPE_STROKE_WIDTH' },
+    { label: '✨ Тень', action: 'TEXT_SHADOW' },
+    { label: '💎 Отражение', action: 'TEXT_REFLECTION' },
+    { label: '🎯 Сглаживание', action: 'SHAPE_SMOOTHING' },
   ],
   transitions: [
     /*
@@ -57,7 +62,8 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
 export const TAB_TITLES: { key: GroupKey; name: string }[] = [
   { key: 'main', name: 'Главная' },
   { key: 'insert', name: 'Вставка' },
-  { key: 'design', name: 'Дизайн' },
+  { key: 'colors', name: 'Цвета' },
+  { key: 'effects', name: 'Эффекты' },
   //{ key: 'transitions', name: 'Переходы' },
   //{ key: 'view', name: 'Вид' },
 ];

@@ -58,6 +58,11 @@ export default function TextElementView({
 
   const showPlaceholder = !element.content && element.placeholder && !isEditing;
 
+  // Стиль для тени текста (тень самого текста)
+  const textShadowStyle = element.shadow
+    ? `0 2px ${element.shadow.blur}px ${element.shadow.color}`
+    : 'none';
+
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!preview) {
@@ -74,8 +79,6 @@ export default function TextElementView({
     if (e.key === 'Escape') {
       (e.currentTarget as HTMLTextAreaElement).blur();
     }
-    // Enter теперь обрабатывается нативно textarea как перенос строки
-    // Ctrl/Cmd + Enter для выхода из режима редактирования
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       (e.currentTarget as HTMLTextAreaElement).blur();
     }
@@ -116,6 +119,8 @@ export default function TextElementView({
         fontStyle: showPlaceholder ? 'italic' : element.italic ? 'italic' : 'normal',
         textDecoration: element.underline ? 'underline' : 'none',
         border: isSelected && !preview ? '2px solid #3b82f6' : '1px solid #d1d5db',
+        // ПРИМЕНЯЕМ ТЕНИ
+        textShadow: textShadowStyle,
       }}
     >
       {preview ? (
@@ -155,6 +160,8 @@ export default function TextElementView({
             overflow: 'hidden',
             padding: 0,
             margin: 0,
+            // Тень текста в textarea
+            textShadow: textShadowStyle,
           }}
         />
       ) : showPlaceholder ? (

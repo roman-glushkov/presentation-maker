@@ -60,3 +60,39 @@ export const FONT_FAMILY_OPTIONS: TextOption[] = [
   { label: 'Comic Sans MS', key: "'Comic Sans MS', sans-serif" },
   { label: 'Lucida Console', key: "'Lucida Console', monospace" },
 ];
+
+export interface ShadowOption {
+  label: string;
+  key: string;
+  color: string;
+  blur: number;
+}
+
+export const TEXT_SHADOW_OPTIONS: ShadowOption[] = [
+  { label: 'Без тени', key: 'none', color: '#000000', blur: 0 },
+  { label: 'Лёгкая', key: 'light', color: 'rgba(0, 0, 0, 0.15)', blur: 3 },
+  { label: 'Средняя', key: 'medium', color: 'rgba(0, 0, 0, 0.3)', blur: 5 },
+  { label: 'Сильная', key: 'heavy', color: 'rgba(0, 0, 0, 0.5)', blur: 8 },
+  { label: 'Красная', key: 'red', color: 'rgba(255, 0, 0, 0.5)', blur: 6 },
+  { label: 'Синяя', key: 'blue', color: 'rgba(0, 123, 255, 0.5)', blur: 6 },
+  { label: 'Зелёная', key: 'green', color: 'rgba(0, 128, 0, 0.5)', blur: 6 },
+  { label: 'Жёлтая', key: 'yellow-glow', color: 'rgba(255, 215, 0, 0.7)', blur: 10 },
+  { label: 'Фиолетовая', key: 'purple-glow', color: 'rgba(128, 0, 128, 0.6)', blur: 8 },
+  { label: 'Розовая', key: 'pink', color: 'rgba(255, 105, 180, 0.5)', blur: 6 },
+  { label: 'Оранжевая', key: 'orange', color: 'rgba(255, 165, 0, 0.5)', blur: 6 },
+  { label: 'Белая', key: 'white-glow', color: 'rgba(255, 255, 255, 0.8)', blur: 12 },
+];
+
+export interface SmoothingOption {
+  label: string;
+  key: string;
+  value: number;
+}
+
+export const SHAPE_SMOOTHING_OPTIONS: SmoothingOption[] = [
+  { label: '0 px', key: 'none', value: 0 },
+  { label: '10 px', key: 'light', value: 10 },
+  { label: '20 px', key: 'medium', value: 20 },
+  { label: '50 px', key: 'strong', value: 50 },
+  { label: '100 px', key: 'very-strong', value: 100 },
+];

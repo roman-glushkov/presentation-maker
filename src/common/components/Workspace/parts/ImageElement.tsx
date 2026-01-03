@@ -53,6 +53,11 @@ export default function ImageElementView({
     startDrag(e, element, selectedElementIds, getAllElements);
   };
 
+  // Стиль для тени
+  const boxShadowStyle = element.shadow
+    ? `0 4px ${element.shadow.blur}px ${element.shadow.color}`
+    : 'none';
+
   return (
     <div
       className={`element ${isSelected ? 'selected' : ''}`}
@@ -71,6 +76,10 @@ export default function ImageElementView({
         justifyContent: 'center',
         pointerEvents: 'auto',
         border: isSelected && !preview ? '2px solid #3b82f6' : '1px solid #d1d5db',
+        // ПРИМЕНЯЕМ ТЕНЬ И СГЛАЖИВАНИЕ
+        boxShadow: boxShadowStyle,
+        borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
+        overflow: 'hidden',
       }}
     >
       <img
@@ -82,6 +91,7 @@ export default function ImageElementView({
           height: element.size.height === 0 ? 'auto' : '100%',
           objectFit: 'fill',
           userSelect: 'none',
+          borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
         }}
       />
       {isSelected && !preview && (

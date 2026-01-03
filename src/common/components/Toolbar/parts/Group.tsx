@@ -6,6 +6,9 @@ import TemplatePopup from './TemplatePopup';
 import FontPopup from './FontPopup';
 import ShapePopup from './ShapePopup';
 import StrokeWidthPopup from './StrokeWidthPopup';
+// ДОБАВЛЯЕМ ИМПОРТЫ ДЛЯ НОВЫХ МЕНЮШЕК
+import TextShadowMenu from './TextShadowMenu';
+import ShapeSmoothingMenu from './ShapeSmoothingMenu';
 import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
@@ -48,21 +51,25 @@ export default function ToolbarGroup() {
   }
 
   const handleButtonClick = (action: string) => {
-    if (
-      [
-        'ADD_SLIDE',
-        'TEXT_COLOR',
-        'SHAPE_FILL',
-        'SHAPE_STROKE',
-        'SHAPE_STROKE_WIDTH',
-        'SLIDE_BACKGROUND',
-        'TEXT_SIZE',
-        'TEXT_FONT',
-        'TEXT_ALIGN',
-        'TEXT_LINE_HEIGHT',
-        'ADD_SHAPE',
-      ].includes(action)
-    ) {
+    // ДОБАВЛЯЕМ НОВЫЕ ACTIONS В СПИСОК
+    const menuActions = [
+      'ADD_SLIDE',
+      'TEXT_COLOR',
+      'SHAPE_FILL',
+      'SHAPE_STROKE',
+      'SHAPE_STROKE_WIDTH',
+      'SLIDE_BACKGROUND',
+      'TEXT_SIZE',
+      'TEXT_FONT',
+      'TEXT_ALIGN',
+      'TEXT_LINE_HEIGHT',
+      'ADD_SHAPE',
+      // ДОБАВЛЯЕМ НОВЫЕ
+      'TEXT_SHADOW',
+      'SHAPE_SMOOTHING',
+    ];
+
+    if (menuActions.includes(action)) {
       dispatch(setActiveTextOption(activeTextOption === action ? null : action));
     } else if (action === 'ADD_IMAGE') {
       handleImageButtonClick();
@@ -303,6 +310,25 @@ export default function ToolbarGroup() {
                 options={LINE_HEIGHT_OPTIONS.map((o) => o.key)}
                 onSelect={(key: string) => {
                   dispatch(handleAction(`TEXT_LINE_HEIGHT:${key}`));
+                  dispatch(setActiveTextOption(null));
+                }}
+              />
+            )}
+
+            {/* ДОБАВЛЯЕМ НОВЫЕ МЕНЮШКИ */}
+            {btn.action === 'TEXT_SHADOW' && activeTextOption === 'TEXT_SHADOW' && (
+              <TextShadowMenu
+                onSelect={(key: string) => {
+                  dispatch(handleAction(`TEXT_SHADOW:${key}`));
+                  dispatch(setActiveTextOption(null));
+                }}
+              />
+            )}
+
+            {btn.action === 'SHAPE_SMOOTHING' && activeTextOption === 'SHAPE_SMOOTHING' && (
+              <ShapeSmoothingMenu
+                onSelect={(key: string) => {
+                  dispatch(handleAction(`SHAPE_SMOOTHING:${key}`));
                   dispatch(setActiveTextOption(null));
                 }}
               />
