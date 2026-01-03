@@ -1,10 +1,8 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\utils\elementActions.ts
 import { clipboardService } from './clipboardService';
 import { AppDispatch } from '../../../../store';
 import { duplicateElements, handleAction, removeSlide } from '../../../../store/editorSlice';
 
 export class ElementActions {
-  // ВЫРЕЗАТЬ (Ctrl+X)
   static cut(selectedElementIds: string[], dispatch: AppDispatch) {
     if (selectedElementIds.length === 0) return;
 
@@ -12,14 +10,12 @@ export class ElementActions {
     dispatch(handleAction('DELETE_SELECTED'));
   }
 
-  // КОПИРОВАТЬ (Ctrl+C)
   static copy(selectedElementIds: string[]) {
     if (selectedElementIds.length === 0) return;
 
     clipboardService.copy(selectedElementIds);
   }
 
-  // ВСТАВИТЬ (Ctrl+V)
   static paste(selectedElementIds: string[], dispatch: AppDispatch) {
     const elementIds = clipboardService.paste();
 
@@ -30,21 +26,18 @@ export class ElementActions {
     }
   }
 
-  // ДУБЛИРОВАТЬ (Ctrl+D и кнопка в меню)
   static duplicate(selectedElementIds: string[], dispatch: AppDispatch) {
     if (selectedElementIds.length === 0) return;
 
     dispatch(duplicateElements({ elementIds: selectedElementIds }));
   }
 
-  // УДАЛИТЬ ЭЛЕМЕНТЫ (Delete)
   static deleteElements(selectedElementIds: string[], dispatch: AppDispatch) {
     if (selectedElementIds.length === 0) return;
 
     dispatch(handleAction('DELETE_SELECTED'));
   }
 
-  // УДАЛИТЬ СЛАЙДЫ (Ctrl+Delete)
   static deleteSlides(selectedSlideIds: string[], dispatch: AppDispatch) {
     if (selectedSlideIds.length === 0) return;
 
@@ -56,15 +49,12 @@ export class ElementActions {
   static bringToFront(selectedElementIds: string[], dispatch: AppDispatch) {
     if (selectedElementIds.length === 0) return;
 
-    // Вызываем action с порядком 'front'
     dispatch(handleAction('BRING_TO_FRONT'));
   }
 
-  // ПЕРЕМЕСТИТЬ НА ЗАДНИЙ ПЛАН
   static sendToBack(selectedElementIds: string[], dispatch: AppDispatch) {
     if (selectedElementIds.length === 0) return;
 
-    // Вызываем action с порядком 'back'
     dispatch(handleAction('SEND_TO_BACK'));
   }
 }

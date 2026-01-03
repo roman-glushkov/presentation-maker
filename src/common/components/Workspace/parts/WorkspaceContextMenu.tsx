@@ -1,4 +1,3 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\parts\WorkspaceContextMenu.tsx
 import React, { useRef, useEffect, useState } from 'react';
 import { SlideElement } from '../../../../store/types/presentation';
 import ColorPickerContext from './ColorPickerContext';
@@ -19,7 +18,6 @@ interface WorkspaceContextMenuProps {
   onChangeTextColor: () => void;
   onChangeFill: () => void;
   onChangeBorderColor: () => void;
-  onChangeBorderWidth: () => void;
   targetType?: 'text' | 'image' | 'shape' | 'slide' | 'none';
   selectedElement?: SlideElement | null;
   currentColors?: {
@@ -28,7 +26,6 @@ interface WorkspaceContextMenuProps {
     fillColor?: string;
     borderColor?: string;
   };
-  // Добавляем пропс для применения цвета
   applyColor?: (color: string, type: 'text' | 'fill' | 'stroke' | 'background') => void;
 }
 
@@ -47,7 +44,6 @@ export default function WorkspaceContextMenu({
   onChangeTextColor,
   onChangeFill,
   onChangeBorderColor,
-  onChangeBorderWidth,
   targetType = 'none',
   currentColors = {},
   applyColor,
@@ -60,14 +56,11 @@ export default function WorkspaceContextMenu({
   );
   const [colorPickerPosition, setColorPickerPosition] = useState({ x: 0, y: 0 });
 
-  // Определяем, какие пункты меню показывать
   const showTextColor = targetType === 'text';
   const showFill = targetType === 'text' || targetType === 'shape';
   const showBorderColor = targetType === 'shape';
-  const showBorderWidth = targetType === 'shape';
   const showSlideBackground = targetType === 'slide';
 
-  // Общие пункты
   const showCommonItems = targetType !== 'slide' && targetType !== 'none';
   const showLayersItems = targetType !== 'slide' && targetType !== 'none';
 
@@ -149,7 +142,6 @@ export default function WorkspaceContextMenu({
     };
   }, [shouldShowMenu, showColorPicker, onClose]);
 
-  // Функция для рендера цветного квадрата
   const renderColorSquare = (color: string | undefined, defaultColor: string = '#cccccc') => {
     const displayColor = color === 'transparent' || !color ? defaultColor : color;
 
@@ -171,14 +163,12 @@ export default function WorkspaceContextMenu({
     );
   };
 
-  // Обработчик для открытия цветовой палитры
   const handleColorPickerOpen = (
     type: 'text' | 'fill' | 'stroke' | 'background',
     e: React.MouseEvent
   ) => {
     e.stopPropagation();
 
-    // Вызываем соответствующий обработчик для логики
     switch (type) {
       case 'text':
         onChangeTextColor();
@@ -194,7 +184,6 @@ export default function WorkspaceContextMenu({
         break;
     }
 
-    // Рассчитываем позицию для цветовой палитры (правее от меню)
     const pickerX = position.x + (menuRef.current?.offsetWidth || 200) + 5;
     const pickerY = position.y;
 
@@ -203,17 +192,13 @@ export default function WorkspaceContextMenu({
     setShowColorPicker(true);
   };
 
-  // Обработчик выбора цвета
   const handleColorSelect = (color: string) => {
-    // Закрываем палитру
     setShowColorPicker(false);
 
-    // Применяем цвет если есть функция applyColor
     if (applyColor) {
       applyColor(color, colorPickerType);
     }
 
-    // Закрываем меню
     onClose();
   };
 
@@ -237,7 +222,6 @@ export default function WorkspaceContextMenu({
           padding: '4px 0',
         }}
       >
-        {/* Общие пункты меню */}
         {showCommonItems && (
           <>
             <button
@@ -300,7 +284,6 @@ export default function WorkspaceContextMenu({
           </>
         )}
 
-        {/* Слой/порядок */}
         {showLayersItems && (
           <>
             <button
@@ -335,7 +318,6 @@ export default function WorkspaceContextMenu({
           </>
         )}
 
-        {/* Фон слайда (только для слайда) */}
         {showSlideBackground && (
           <button
             onClick={(e) => handleColorPickerOpen('background', e)}
@@ -347,7 +329,6 @@ export default function WorkspaceContextMenu({
           </button>
         )}
 
-        {/* Цвет текста (только для текста) */}
         {showTextColor && (
           <button
             onClick={(e) => handleColorPickerOpen('text', e)}
@@ -359,7 +340,6 @@ export default function WorkspaceContextMenu({
           </button>
         )}
 
-        {/* Заливка (для текста и фигур) */}
         {showFill && (
           <button
             onClick={(e) => handleColorPickerOpen('fill', e)}
@@ -371,40 +351,18 @@ export default function WorkspaceContextMenu({
           </button>
         )}
 
-        {/* Границы (только для фигур) */}
-        {(showBorderColor || showBorderWidth) && (
-          <>
-            {showBorderColor && (
-              <button
-                onClick={(e) => handleColorPickerOpen('stroke', e)}
-                className="context-menu-item"
-                style={menuItemStyle}
-              >
-                {renderColorSquare(currentColors.borderColor, '#000000')}
-                Цвет границы
-              </button>
-            )}
-
-            {showBorderWidth && (
-              <button
-                onClick={() => {
-                  onChangeBorderWidth();
-                  onClose();
-                }}
-                className="context-menu-item"
-                style={menuItemStyle}
-              >
-                <span className="menu-icon" style={{ marginRight: '8px' }}>
-                  📏
-                </span>
-                Толщина границы
-              </button>
-            )}
-          </>
+        {showBorderColor && (
+          <button
+            onClick={(e) => handleColorPickerOpen('stroke', e)}
+            className="context-menu-item"
+            style={menuItemStyle}
+          >
+            {renderColorSquare(currentColors.borderColor, '#000000')}
+            Цвет границы
+          </button>
         )}
       </div>
 
-      {/* Цветовая палитра */}
       {showColorPicker && (
         <ColorPickerContext
           type={colorPickerType}
@@ -417,7 +375,6 @@ export default function WorkspaceContextMenu({
   );
 }
 
-// Стили в виде объектов для простоты
 const menuItemStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',

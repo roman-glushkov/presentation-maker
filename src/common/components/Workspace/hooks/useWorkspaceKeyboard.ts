@@ -1,4 +1,3 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\hooks\useWorkspaceKeyboard.ts
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
@@ -22,28 +21,24 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
 
       if (isTextInputFocused) return;
 
-      // Ctrl+C - КОПИРОВАТЬ (работает в любой раскладке)
       if (isCtrl && e.code === 'KeyC' && selectedElementIds.length > 0) {
         e.preventDefault();
         e.stopPropagation();
         ElementActions.copy(selectedElementIds);
       }
 
-      // Ctrl+V - ВСТАВИТЬ (работает в любой раскладке)
       if (isCtrl && e.code === 'KeyV') {
         e.preventDefault();
         e.stopPropagation();
         ElementActions.paste(selectedElementIds, dispatch);
       }
 
-      // Ctrl+D - ДУБЛИРОВАТЬ (работает в любой раскладке)
       if (isCtrl && e.code === 'KeyD' && selectedElementIds.length > 0) {
         e.preventDefault();
         e.stopPropagation();
         ElementActions.duplicate(selectedElementIds, dispatch);
       }
 
-      // Delete - УДАЛИТЬ ЭЛЕМЕНТЫ
       if (e.key === 'Delete' && !isCtrl && selectedElementIds.length > 0) {
         e.preventDefault();
         e.stopPropagation();

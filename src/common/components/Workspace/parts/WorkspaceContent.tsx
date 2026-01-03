@@ -9,7 +9,7 @@ import {
 import { Slide } from '../../../../store/types/presentation';
 import TextElementView from './TextElement';
 import ImageElementView from './ImageElement';
-import ShapeElementView from './ShapeElement'; // ← ДОБАВЬТЕ ИМПОРТ
+import ShapeElementView from './ShapeElement';
 
 interface WorkspaceContentProps {
   slide: Slide;

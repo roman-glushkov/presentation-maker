@@ -1,8 +1,6 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\parts\ColorPickerContext.tsx
 import React from 'react';
 import ColorSwatchButton from './ColorSwatchButton';
 
-// Копируем цвета прямо сюда
 const THEME_COLUMNS: string[][] = [
   ['#ffffff', '#d8d8d8', '#bfbfbf', '#a5a5a5', '#7f7f7f'],
   ['#7f7f7f', '#595959', '#3f3f3f', '#262626', '#0c0c0c'],
@@ -43,11 +41,9 @@ export default function ColorPickerContext({
   onClose,
 }: ColorPickerContextProps) {
   const handleColorSelect = (color: string) => {
-    console.log('🎨 Цвет выбран в палитре:', { color, type });
     onSelectColor(color);
   };
 
-  // Определяем заголовок в зависимости от типа
   const getTitle = () => {
     switch (type) {
       case 'text':
@@ -63,7 +59,6 @@ export default function ColorPickerContext({
     }
   };
 
-  // Рассчитываем правильную позицию
   const calculatePosition = () => {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
@@ -112,7 +107,6 @@ export default function ColorPickerContext({
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
       onClick={(e) => {
-        console.log('👆 Клик по контейнеру палитры');
         e.stopPropagation();
       }}
     >
@@ -228,7 +222,6 @@ export default function ColorPickerContext({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            console.log('❌ Отмена');
             onClose();
           }}
           style={{

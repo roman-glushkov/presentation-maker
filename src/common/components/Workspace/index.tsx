@@ -1,4 +1,3 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\index.tsx
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -46,7 +45,6 @@ export default function Workspace({ preview }: Props) {
     handleChangeTextColor,
     handleChangeFill,
     handleChangeBorderColor,
-    handleChangeBorderWidth,
     closeMenu,
     currentColors,
     applyColor,
@@ -110,7 +108,6 @@ export default function Workspace({ preview }: Props) {
         onChangeTextColor={handleChangeTextColor}
         onChangeFill={handleChangeFill}
         onChangeBorderColor={handleChangeBorderColor}
-        onChangeBorderWidth={handleChangeBorderWidth}
         targetType={menu.targetType}
         selectedElement={menu.selectedElement}
         currentColors={currentColors}

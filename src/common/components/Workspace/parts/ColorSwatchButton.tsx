@@ -1,4 +1,3 @@
-// C:\PGTU\FRONT-end\presentation maker\src\common\components\Workspace\parts\ColorSwatchButton.tsx
 import React from 'react';
 
 interface Props {
@@ -11,7 +10,6 @@ export default function ColorSwatchButton({ color, onClick, title }: Props) {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('🎯 ColorSwatchButton кликнут:', color);
     onClick(color);
   };
 
