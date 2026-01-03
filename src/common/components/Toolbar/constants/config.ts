@@ -9,6 +9,7 @@ export interface GroupButton {
 export const GROUPS: Record<GroupKey, GroupButton[]> = {
   main: [
     { label: '➕ Слайд', action: 'ADD_SLIDE' },
+    { label: '⎘ Дублировать', action: 'DUPLICATE_SLIDE' },
     { label: '|', action: 'SEPARATOR' },
     { label: '🔠 Размер', action: 'TEXT_SIZE' },
     { label: '🎨 Шрифт', action: 'TEXT_FONT' },
@@ -31,7 +32,7 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '🖍️ Цвет текста', action: 'TEXT_COLOR' },
     { label: '🧱 Заливка фигуры', action: 'SHAPE_FILL' },
     { label: '🖌️ Граница фигуры', action: 'SHAPE_STROKE' },
-    { label: '📏 Толщина границы', action: 'SHAPE_STROKE_WIDTH' },
+    { label: '📏 Толщина', action: 'SHAPE_STROKE_WIDTH' },
   ],
   transitions: [
     /*
