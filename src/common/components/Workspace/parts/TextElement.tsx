@@ -58,7 +58,6 @@ export default function TextElementView({
 
   const showPlaceholder = !element.content && element.placeholder && !isEditing;
 
-  // Стиль для тени текста (тень самого текста)
   const textShadowStyle = element.shadow
     ? `0 2px ${element.shadow.blur}px ${element.shadow.color}`
     : 'none';
@@ -66,7 +65,6 @@ export default function TextElementView({
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!preview) {
-      setLocalContent(element.content);
       setIsEditing(true);
     }
   };
@@ -84,6 +82,19 @@ export default function TextElementView({
     }
   };
 
+  const textStyle: React.CSSProperties = {
+    fontFamily: element.font,
+    fontSize: `${element.fontSize}px`,
+    lineHeight: element.lineHeight || 1.2,
+    fontWeight: element.bold ? 'bold' : 'normal',
+    fontStyle: showPlaceholder ? 'italic' : element.italic ? 'italic' : 'normal',
+    textDecoration: element.underline ? 'underline' : 'none',
+    textAlign: element.align || 'left',
+    color: showPlaceholder ? '#999' : element.color || '#1f2937',
+    whiteSpace: 'pre-wrap',
+    textShadow: textShadowStyle,
+  };
+
   return (
     <div
       className={`element ${isSelected ? 'selected' : ''}`}
@@ -96,12 +107,7 @@ export default function TextElementView({
         top: element.position.y,
         width: element.size.width,
         height: element.size.height,
-        fontFamily: element.font,
-        fontSize: `${element.fontSize}px`,
-        color: showPlaceholder ? '#999' : element.color || '#1f2937',
         backgroundColor: element.backgroundColor || 'transparent',
-        textAlign: element.align || 'left',
-        lineHeight: element.lineHeight || 1.2,
         display: 'flex',
         flexDirection: 'column',
         justifyContent:
@@ -114,63 +120,55 @@ export default function TextElementView({
         userSelect: 'none',
         padding: 4,
         boxSizing: 'border-box',
-        whiteSpace: 'pre-wrap',
-        fontWeight: element.bold ? 'bold' : 'normal',
-        fontStyle: showPlaceholder ? 'italic' : element.italic ? 'italic' : 'normal',
-        textDecoration: element.underline ? 'underline' : 'none',
         border: isSelected && !preview ? '2px solid #3b82f6' : '1px solid #d1d5db',
-        // ПРИМЕНЯЕМ ТЕНИ
-        textShadow: textShadowStyle,
-        borderRadius: element.smoothing ? `${element.smoothing}px` : '0', // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
-        overflow: 'hidden', // <-- И ЭТУ СТРОКУ, ЧТОБЫ СОДЕРЖИМОЕ НЕ ВЫХОДИЛО ЗА СГЛАЖЕННЫЕ УГЛЫ
+        borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
+        overflow: 'hidden',
       }}
     >
-      {preview ? (
-        element.content
-      ) : isEditing ? (
+      {/* Основной текст */}
+      {!preview && isEditing ? (
         <textarea
           autoFocus
           value={localContent}
           placeholder={element.placeholder}
           onChange={(e) => {
-            const newContent = e.target.value;
-            setLocalContent(newContent);
-            dispatch(
-              updateTextContent({
-                elementId: elementId,
-                content: newContent,
-              })
-            );
+            const value = e.target.value;
+            setLocalContent(value);
+            dispatch(updateTextContent({ elementId, content: value }));
           }}
           onKeyDown={handleKeyDown}
           onBlur={() => setIsEditing(false)}
           style={{
+            ...textStyle,
             width: '100%',
             height: '100%',
-            color: element.color || '#1f2937',
-            backgroundColor: element.backgroundColor || 'transparent',
+            background: 'transparent',
             border: 'none',
             outline: 'none',
-            textAlign: element.align || 'left',
-            fontFamily: element.font,
-            fontSize: `${element.fontSize}px`,
-            lineHeight: element.lineHeight || 1.2,
-            fontWeight: element.bold ? 'bold' : 'normal',
-            fontStyle: element.italic ? 'italic' : 'normal',
-            textDecoration: element.underline ? 'underline' : 'none',
             resize: 'none',
-            overflow: 'hidden',
             padding: 0,
             margin: 0,
-            // Тень текста в textarea
-            textShadow: textShadowStyle,
-            borderRadius: element.smoothing ? `${element.smoothing}px` : '0', // <-- ДОБАВЬТЕ И ЗДЕСЬ
           }}
         />
-      ) : showPlaceholder ? (
-        element.placeholder
       ) : (
-        element.content
+        <div style={textStyle}>{showPlaceholder ? element.placeholder : element.content}</div>
+      )}
+
+      {/* Отражение текста */}
+      {element.reflection && element.reflection > 0 && !isEditing && (
+        <div
+          style={{
+            ...textStyle,
+            transform: 'scaleY(-1)',
+            opacity: element.reflection,
+            marginTop: 4,
+            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)',
+            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)',
+            pointerEvents: 'none',
+          }}
+        >
+          {element.content}
+        </div>
       )}
 
       {isSelected && !preview && (

@@ -9,7 +9,12 @@ import StrokeWidthPopup from './StrokeWidthPopup';
 // ДОБАВЛЯЕМ ИМПОРТЫ ДЛЯ НОВЫХ МЕНЮШЕК
 import TextShadowMenu from './TextShadowMenu';
 import ShapeSmoothingMenu from './ShapeSmoothingMenu';
-import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions';
+import TextReflectionMenu from './TextReflectionMenu'; // <-- ДОБАВЛЯЕМ
+import {
+  TEXT_SIZE_OPTIONS,
+  LINE_HEIGHT_OPTIONS,
+  TEXT_REFLECTION_OPTIONS,
+} from '../constants/textOptions'; // <-- ДОБАВЛЯЕМ
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
@@ -67,6 +72,7 @@ export default function ToolbarGroup() {
       // ДОБАВЛЯЕМ НОВЫЕ
       'TEXT_SHADOW',
       'SHAPE_SMOOTHING',
+      'TEXT_REFLECTION', // <-- ДОБАВЛЯЕМ
     ];
 
     if (menuActions.includes(action)) {
@@ -329,6 +335,19 @@ export default function ToolbarGroup() {
               <ShapeSmoothingMenu
                 onSelect={(key: string) => {
                   dispatch(handleAction(`SHAPE_SMOOTHING:${key}`));
+                  dispatch(setActiveTextOption(null));
+                }}
+              />
+            )}
+
+            {/* ДОБАВЛЯЕМ МЕНЮ ОТРАЖЕНИЯ */}
+            {btn.action === 'TEXT_REFLECTION' && activeTextOption === 'TEXT_REFLECTION' && (
+              <TextReflectionMenu
+                onSelect={(key: string, value: number) => {
+                  // Находим опцию по ключу, чтобы получить тип отражения
+                  const reflectionOption = TEXT_REFLECTION_OPTIONS.find((opt) => opt.key === key);
+                  const type = reflectionOption?.key === 'colored' ? 'colored' : 'standard';
+                  dispatch(handleAction(`TEXT_REFLECTION:${key}:${value}:${type}`));
                   dispatch(setActiveTextOption(null));
                 }}
               />

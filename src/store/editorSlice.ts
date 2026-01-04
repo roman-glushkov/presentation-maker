@@ -518,6 +518,34 @@ export const editorSlice = createSlice({
         }
         return;
       }
+
+      if (act.startsWith('TEXT_REFLECTION:')) {
+        const parts = act.split(':');
+        const reflectionKey = parts[1].trim();
+        const reflectionValue = parseFloat(parts[2]);
+
+        if (slide && elId) {
+          pushToPast(state, 'editor/handleAction/TEXT_REFLECTION');
+
+          state.presentation.slides = state.presentation.slides.map((s) =>
+            s.id === slide.id
+              ? {
+                  ...s,
+                  elements: s.elements.map((el) =>
+                    el.id === elId && el.type === 'text'
+                      ? {
+                          ...el,
+                          reflection: reflectionKey === 'none' ? undefined : reflectionValue,
+                        }
+                      : el
+                  ),
+                }
+              : s
+          );
+        }
+        return;
+      }
+
       // ДОБАВЛЯЕМ ОБРАБОТКУ ПЕРЕДНЕГО/ЗАДНЕГО ПЛАНА
       if (act === 'BRING_TO_FRONT' && slide && currentSelectedElementIds.length > 0) {
         pushToPast(state, 'editor/handleAction/BRING_TO_FRONT');
