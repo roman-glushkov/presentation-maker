@@ -121,6 +121,8 @@ export default function TextElementView({
         border: isSelected && !preview ? '2px solid #3b82f6' : '1px solid #d1d5db',
         // ПРИМЕНЯЕМ ТЕНИ
         textShadow: textShadowStyle,
+        borderRadius: element.smoothing ? `${element.smoothing}px` : '0', // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+        overflow: 'hidden', // <-- И ЭТУ СТРОКУ, ЧТОБЫ СОДЕРЖИМОЕ НЕ ВЫХОДИЛО ЗА СГЛАЖЕННЫЕ УГЛЫ
       }}
     >
       {preview ? (
@@ -162,6 +164,7 @@ export default function TextElementView({
             margin: 0,
             // Тень текста в textarea
             textShadow: textShadowStyle,
+            borderRadius: element.smoothing ? `${element.smoothing}px` : '0', // <-- ДОБАВЬТЕ И ЗДЕСЬ
           }}
         />
       ) : showPlaceholder ? (
