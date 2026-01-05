@@ -122,7 +122,7 @@ export default function TextElementView({
         boxSizing: 'border-box',
         border: isSelected && !preview ? '2px solid #3b82f6' : '1px solid #d1d5db',
         borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
       {/* Основной текст */}

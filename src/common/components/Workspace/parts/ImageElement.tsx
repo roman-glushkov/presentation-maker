@@ -79,7 +79,7 @@ export default function ImageElementView({
         // ПРИМЕНЯЕМ ТЕНЬ И СГЛАЖИВАНИЕ
         boxShadow: boxShadowStyle,
         borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
       <img

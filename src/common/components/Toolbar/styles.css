@@ -305,14 +305,12 @@
 
 .text-option-button:hover {
   background: rgb(255 255 255 / 15%);
-  color: #fff;
   transform: translateX(2px);
 }
 
 .text-option-button.active {
   background: #2563eb;
   font-weight: 600;
-  color: #fff;
 }
 
 .text-align-popup {

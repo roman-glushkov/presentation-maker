@@ -26,7 +26,7 @@
   max-width: 960px;
   background: #fff;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
 }
 

@@ -89,6 +89,57 @@ export default function Player() {
   const scaleY = windowSize.height / EDITOR_SLIDE_HEIGHT;
   const scale = Math.min(scaleX, scaleY);
 
+  // Хелпер для получения стиля тени
+  const getShadowStyle = (shadow?: { color: string; blur: number }) => {
+    if (!shadow) return 'none';
+    return `0 ${2 * scale}px ${shadow.blur * scale}px ${shadow.color}`;
+  };
+
+  // Хелпер для отражения текста
+  const getTextReflectionStyle = (
+    reflection?: number,
+    color?: string,
+    isColored?: boolean
+  ): React.CSSProperties => {
+    if (!reflection || reflection <= 0) {
+      return { display: 'none' };
+    }
+
+    // Определяем, цветное ли отражение (значение 0.6 соответствует цветному в константах)
+    const colored = isColored || reflection === 0.6;
+
+    if (colored && color) {
+      const opacityHex = Math.round(reflection * 255)
+        .toString(16)
+        .padStart(2, '0');
+      const baseColor = color.startsWith('#') ? color.substring(0, 7) : color;
+
+      return {
+        position: 'absolute',
+        bottom: '-100%',
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: `linear-gradient(to bottom, ${baseColor}${opacityHex} 0%, ${baseColor}00 100%)`,
+        transform: 'scaleY(-1)',
+        opacity: reflection,
+        pointerEvents: 'none',
+      };
+    } else {
+      return {
+        position: 'absolute',
+        bottom: '-100%',
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: `linear-gradient(to bottom, rgba(255,255,255,${reflection}) 0%, rgba(255,255,255,0) 100%)`,
+        transform: 'scaleY(-1)',
+        opacity: reflection,
+        pointerEvents: 'none',
+      };
+    }
+  };
+
   const renderShape = (el: ShapeElement) => {
     const w = el.size.width * scale;
     const h = el.size.height * scale;
@@ -97,6 +148,9 @@ export default function Player() {
     const stroke = el.stroke;
     const radius = Math.min(w, h) / 2;
 
+    // Стиль для тени фигуры
+    const shadowStyle = getShadowStyle(el.shadow);
+
     const polygon = (points: string) => (
       <polygon
         points={points}
@@ -104,6 +158,9 @@ export default function Player() {
         stroke={stroke}
         strokeWidth={sw}
         strokeLinejoin="round"
+        style={{
+          filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+        }}
       />
     );
     const path = (d: string) => (
@@ -114,6 +171,9 @@ export default function Player() {
         strokeWidth={sw}
         strokeLinejoin="round"
         strokeLinecap="round"
+        style={{
+          filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+        }}
       />
     );
 
@@ -125,10 +185,14 @@ export default function Player() {
             y={sw / 2}
             width={w - sw}
             height={h - sw}
-            rx={el.borderRadius || 0}
+            rx={0}
+            ry={0}
             fill={fill}
             stroke={stroke}
             strokeWidth={sw}
+            style={{
+              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            }}
           />
         );
       case 'circle':
@@ -140,6 +204,9 @@ export default function Player() {
             fill={fill}
             stroke={stroke}
             strokeWidth={sw}
+            style={{
+              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            }}
           />
         );
       case 'triangle':
@@ -210,6 +277,11 @@ export default function Player() {
             fill={fill}
             stroke={stroke}
             strokeWidth={sw}
+            rx={0}
+            ry={0}
+            style={{
+              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            }}
           />
         );
     }
@@ -253,6 +325,7 @@ export default function Player() {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             position: 'relative',
+            overflow: 'hidden',
           }}
         >
           {slide.elements.map((el: SlideElement) => {
@@ -264,6 +337,8 @@ export default function Player() {
             switch (el.type) {
               case 'text': {
                 const textEl = el as TextElement;
+                const isColoredReflection = textEl.reflection === 0.6;
+
                 return (
                   <div
                     key={textEl.id}
@@ -296,13 +371,41 @@ export default function Player() {
                       fontStyle: textEl.italic ? 'italic' : 'normal',
                       textDecoration: textEl.underline ? 'underline' : 'none',
                       border: 'none',
+                      // Применяем эффекты
+                      textShadow: getShadowStyle(textEl.shadow),
+                      borderRadius: textEl.smoothing ? `${textEl.smoothing * scale}px` : '0',
+                      overflow: 'visible',
                     }}
-                    dangerouslySetInnerHTML={{ __html: textEl.content }}
-                  />
+                  >
+                    {/* Основное содержимое текста */}
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        borderRadius: textEl.smoothing ? `${textEl.smoothing * scale}px` : '0',
+                      }}
+                      dangerouslySetInnerHTML={{ __html: textEl.content }}
+                    />
+
+                    {/* Отражение текста */}
+                    {textEl.reflection && textEl.reflection > 0 && (
+                      <div
+                        style={getTextReflectionStyle(
+                          textEl.reflection,
+                          textEl.color,
+                          isColoredReflection
+                        )}
+                      />
+                    )}
+                  </div>
                 );
               }
               case 'image': {
                 const imgEl = el as ImageElement;
+                const shadowStyle = getShadowStyle(imgEl.shadow);
+
                 return (
                   <div
                     key={imgEl.id}
@@ -318,6 +421,10 @@ export default function Player() {
                       cursor: 'default',
                       userSelect: 'none',
                       pointerEvents: 'auto',
+                      // Применяем эффекты
+                      filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+                      borderRadius: imgEl.smoothing ? `${imgEl.smoothing * scale}px` : '0',
+                      overflow: 'hidden',
                     }}
                   >
                     <img
@@ -329,6 +436,7 @@ export default function Player() {
                         height: height === 0 ? 'auto' : '100%',
                         objectFit: 'fill',
                         userSelect: 'none',
+                        borderRadius: imgEl.smoothing ? `${imgEl.smoothing * scale}px` : '0',
                       }}
                     />
                   </div>

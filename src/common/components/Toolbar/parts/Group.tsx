@@ -10,11 +10,7 @@ import StrokeWidthPopup from './StrokeWidthPopup';
 import TextShadowMenu from './TextShadowMenu';
 import ShapeSmoothingMenu from './ShapeSmoothingMenu';
 import TextReflectionMenu from './TextReflectionMenu'; // <-- ДОБАВЛЯЕМ
-import {
-  TEXT_SIZE_OPTIONS,
-  LINE_HEIGHT_OPTIONS,
-  TEXT_REFLECTION_OPTIONS,
-} from '../constants/textOptions'; // <-- ДОБАВЛЯЕМ
+import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions'; // <-- ДОБАВЛЯЕМ
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
@@ -247,10 +243,8 @@ export default function ToolbarGroup() {
                 btn.label
               )}
             </button>
-
             {/* Попапы для различных опций */}
             {btn.action === 'ADD_SLIDE' && activeTextOption === 'ADD_SLIDE' && <TemplatePopup />}
-
             {btn.action === 'TEXT_FONT' && activeTextOption === 'TEXT_FONT' && (
               <FontPopup
                 onSelect={(key: string) => {
@@ -259,7 +253,6 @@ export default function ToolbarGroup() {
                 }}
               />
             )}
-
             {btn.action === 'ADD_SHAPE' && activeTextOption === 'ADD_SHAPE' && (
               <ShapePopup
                 onSelect={(shapeType: string) => {
@@ -268,7 +261,6 @@ export default function ToolbarGroup() {
                 }}
               />
             )}
-
             {btn.action === 'SHAPE_STROKE_WIDTH' && activeTextOption === 'SHAPE_STROKE_WIDTH' && (
               <StrokeWidthPopup
                 onSelect={(width: number) => {
@@ -277,7 +269,6 @@ export default function ToolbarGroup() {
                 }}
               />
             )}
-
             {btn.action === 'TEXT_COLOR' && activeTextOption === 'TEXT_COLOR' && (
               <ColorSection type="text" />
             )}
@@ -320,7 +311,6 @@ export default function ToolbarGroup() {
                 }}
               />
             )}
-
             {/* ДОБАВЛЯЕМ НОВЫЕ МЕНЮШКИ */}
             {btn.action === 'TEXT_SHADOW' && activeTextOption === 'TEXT_SHADOW' && (
               <TextShadowMenu
@@ -330,7 +320,6 @@ export default function ToolbarGroup() {
                 }}
               />
             )}
-
             {btn.action === 'SHAPE_SMOOTHING' && activeTextOption === 'SHAPE_SMOOTHING' && (
               <ShapeSmoothingMenu
                 onSelect={(key: string) => {
@@ -339,20 +328,15 @@ export default function ToolbarGroup() {
                 }}
               />
             )}
-
             {/* ДОБАВЛЯЕМ МЕНЮ ОТРАЖЕНИЯ */}
             {btn.action === 'TEXT_REFLECTION' && activeTextOption === 'TEXT_REFLECTION' && (
               <TextReflectionMenu
                 onSelect={(key: string, value: number) => {
-                  // Находим опцию по ключу, чтобы получить тип отражения
-                  const reflectionOption = TEXT_REFLECTION_OPTIONS.find((opt) => opt.key === key);
-                  const type = reflectionOption?.key === 'colored' ? 'colored' : 'standard';
-                  dispatch(handleAction(`TEXT_REFLECTION:${key}:${value}:${type}`));
+                  dispatch(handleAction(`TEXT_REFLECTION:${key}:${value}`));
                   dispatch(setActiveTextOption(null));
                 }}
               />
             )}
-
             {/* Поле для ввода URL */}
             {btn.action === 'ADD_IMAGE_FROM_URL' && showUrlInput && (
               <div className="url-upload-popup">

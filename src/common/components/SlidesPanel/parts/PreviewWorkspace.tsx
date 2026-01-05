@@ -15,6 +15,57 @@ interface Props {
 export function SlidePreview({ slide, scale }: Props) {
   const s = scale;
 
+  // Хелпер для получения стиля тени
+  const getShadowStyle = (shadow?: { color: string; blur: number }) => {
+    if (!shadow) return 'none';
+    return `0 ${2 * s}px ${shadow.blur * s}px ${shadow.color}`;
+  };
+
+  // Хелпер для отражения текста
+  const getTextReflectionStyle = (
+    reflection?: number,
+    color?: string,
+    isColored?: boolean
+  ): React.CSSProperties => {
+    if (!reflection || reflection <= 0) {
+      return { display: 'none' };
+    }
+
+    // Определяем, цветное ли отражение (значение 0.6 соответствует цветному в константах)
+    const colored = isColored || reflection === 0.6;
+
+    if (colored && color) {
+      const opacityHex = Math.round(reflection * 255)
+        .toString(16)
+        .padStart(2, '0');
+      const baseColor = color.startsWith('#') ? color.substring(0, 7) : color;
+
+      return {
+        position: 'absolute',
+        bottom: '-100%',
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: `linear-gradient(to bottom, ${baseColor}${opacityHex} 0%, ${baseColor}00 100%)`,
+        transform: 'scaleY(-1)',
+        opacity: reflection,
+        pointerEvents: 'none',
+      };
+    } else {
+      return {
+        position: 'absolute',
+        bottom: '-100%',
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: `linear-gradient(to bottom, rgba(255,255,255,${reflection}) 0%, rgba(255,255,255,0) 100%)`,
+        transform: 'scaleY(-1)',
+        opacity: reflection,
+        pointerEvents: 'none',
+      };
+    }
+  };
+
   const renderShape = (el: ShapeElement) => {
     const w = el.size.width * s;
     const h = el.size.height * s;
@@ -23,6 +74,9 @@ export function SlidePreview({ slide, scale }: Props) {
     const stroke = el.stroke;
     const radius = Math.min(w, h) / 2;
 
+    // Стиль для тени фигуры
+    const shadowStyle = getShadowStyle(el.shadow);
+
     const polygon = (points: string) => (
       <polygon
         points={points}
@@ -30,6 +84,9 @@ export function SlidePreview({ slide, scale }: Props) {
         stroke={stroke}
         strokeWidth={sw}
         strokeLinejoin="round"
+        style={{
+          filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+        }}
       />
     );
 
@@ -41,6 +98,9 @@ export function SlidePreview({ slide, scale }: Props) {
         strokeWidth={sw}
         strokeLinejoin="round"
         strokeLinecap="round"
+        style={{
+          filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+        }}
       />
     );
 
@@ -52,10 +112,14 @@ export function SlidePreview({ slide, scale }: Props) {
             y={sw / 2}
             width={w - sw}
             height={h - sw}
-            rx={el.borderRadius || 0}
+            rx={0} // У фигур нет smoothing
+            ry={0} // У фигур нет smoothing
             fill={fill}
             stroke={stroke}
             strokeWidth={sw}
+            style={{
+              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            }}
           />
         );
 
@@ -68,6 +132,9 @@ export function SlidePreview({ slide, scale }: Props) {
             fill={fill}
             stroke={stroke}
             strokeWidth={sw}
+            style={{
+              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            }}
           />
         );
 
@@ -146,6 +213,11 @@ export function SlidePreview({ slide, scale }: Props) {
             fill={fill}
             stroke={stroke}
             strokeWidth={sw}
+            rx={0} // У фигур нет smoothing
+            ry={0} // У фигур нет smoothing
+            style={{
+              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            }}
           />
         );
     }
@@ -160,11 +232,14 @@ export function SlidePreview({ slide, scale }: Props) {
           height: 540 * s,
           backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
         {slide.elements.map((el: SlideElement) => {
           if (el.type === 'text') {
             const textEl = el as TextElement;
+            const isColoredReflection = textEl.reflection === 0.6;
+
             return (
               <div
                 key={el.id}
@@ -197,15 +272,43 @@ export function SlidePreview({ slide, scale }: Props) {
                   fontStyle: textEl.italic ? 'italic' : 'normal',
                   textDecoration: textEl.underline ? 'underline' : 'none',
                   border: 'none',
+                  // Применяем эффекты
+                  textShadow: getShadowStyle(textEl.shadow),
+                  borderRadius: textEl.smoothing ? `${textEl.smoothing * s}px` : '0',
+                  overflow: 'visible',
                 }}
               >
-                {textEl.content}
+                {/* Основное содержимое текста */}
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderRadius: textEl.smoothing ? `${textEl.smoothing * s}px` : '0',
+                  }}
+                >
+                  {textEl.content}
+                </div>
+
+                {/* Отражение текста */}
+                {textEl.reflection && textEl.reflection > 0 && (
+                  <div
+                    style={getTextReflectionStyle(
+                      textEl.reflection,
+                      textEl.color,
+                      isColoredReflection
+                    )}
+                  />
+                )}
               </div>
             );
           }
 
           if (el.type === 'image') {
             const imageEl = el as ImageElement;
+            const shadowStyle = getShadowStyle(imageEl.shadow);
+
             return (
               <div
                 key={el.id}
@@ -220,6 +323,10 @@ export function SlidePreview({ slide, scale }: Props) {
                   justifyContent: 'center',
                   cursor: 'default',
                   userSelect: 'none',
+                  // Применяем эффекты
+                  filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+                  borderRadius: imageEl.smoothing ? `${imageEl.smoothing * s}px` : '0',
+                  overflow: 'hidden',
                 }}
               >
                 <img
@@ -231,6 +338,7 @@ export function SlidePreview({ slide, scale }: Props) {
                     height: imageEl.size.height === 0 ? 'auto' : '100%',
                     objectFit: 'fill',
                     userSelect: 'none',
+                    borderRadius: imageEl.smoothing ? `${imageEl.smoothing * s}px` : '0',
                   }}
                 />
               </div>

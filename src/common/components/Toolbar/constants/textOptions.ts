@@ -108,5 +108,4 @@ export const TEXT_REFLECTION_OPTIONS: ReflectionOption[] = [
   { label: 'Слабое', key: 'light', value: 0.3 },
   { label: 'Среднее', key: 'medium', value: 0.5 },
   { label: 'Сильное', key: 'strong', value: 0.7 },
-  { label: 'Цветное', key: 'colored', value: 0.6 },
 ];
