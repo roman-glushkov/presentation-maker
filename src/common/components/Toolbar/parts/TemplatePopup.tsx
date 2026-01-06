@@ -1,6 +1,6 @@
 import React from 'react';
 import { TEMPLATES } from '../constants/templates';
-import { useAppDispatch } from '../../../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
 import TemplateSlidePreview from './TemplatePreview';
@@ -15,6 +15,7 @@ import {
   slideObjectWithSignature,
   slideDrawingWithCaption,
 } from '../../../../store/templates/slide';
+import { RootState } from '../../../../store';
 
 const TEMPLATE_SLIDES = {
   ADD_TITLE_SLIDE: slideTitle,
@@ -31,15 +32,49 @@ const TEMPLATE_SLIDES = {
 export default function TemplatePopup() {
   const dispatch = useAppDispatch();
 
+  // Получаем текущую презентацию для определения примененного дизайна
+  const presentation = useAppSelector((state: RootState) => state.editor.presentation);
+
   const handleSelect = (templateKey: string) => {
     dispatch(handleAction(templateKey));
     dispatch(setActiveTextOption(null));
   };
 
+  // Находим активный дизайн (фон с isLocked: true)
+  const findActiveDesign = () => {
+    // Ищем первый слайд с заблокированным фоном
+    const slideWithLockedBg = presentation.slides.find(
+      (slide) =>
+        slide.background.type !== 'none' &&
+        'isLocked' in slide.background &&
+        slide.background.isLocked
+    );
+
+    return slideWithLockedBg ? slideWithLockedBg.background : null;
+  };
+
+  // Получаем шаблон слайда с применением активного дизайна
+  const getTemplateWithDesign = (templateKey: string) => {
+    const templateSlide = TEMPLATE_SLIDES[templateKey as keyof typeof TEMPLATE_SLIDES];
+    if (!templateSlide) return null;
+
+    const activeDesign = findActiveDesign();
+
+    // Если есть активный дизайн, применяем его к шаблону
+    if (activeDesign) {
+      return {
+        ...templateSlide,
+        background: { ...activeDesign },
+      };
+    }
+
+    return templateSlide;
+  };
+
   return (
     <div className="template-popup">
       {TEMPLATES.map((template) => {
-        const slide = TEMPLATE_SLIDES[template.key as keyof typeof TEMPLATE_SLIDES];
+        const slide = getTemplateWithDesign(template.key);
 
         return (
           <div
@@ -50,10 +85,7 @@ export default function TemplatePopup() {
           >
             <div className="template-preview">
               {slide ? (
-                <TemplateSlidePreview
-                  slide={slide}
-                  scale={0.2} // Масштаб для маленького превью
-                />
+                <TemplateSlidePreview slide={slide} scale={0.2} />
               ) : (
                 <div
                   style={{

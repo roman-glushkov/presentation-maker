@@ -15,6 +15,30 @@ interface Props {
 export function SlidePreview({ slide, scale }: Props) {
   const s = scale;
 
+  // Определяем стили фона для превью
+  const getBackgroundStyle = (): React.CSSProperties => {
+    const bg = slide.background;
+
+    switch (bg.type) {
+      case 'image':
+        return {
+          backgroundImage: `url(${bg.value})`,
+          backgroundSize: bg.size || 'cover',
+          backgroundPosition: bg.position || 'center',
+          backgroundRepeat: 'no-repeat',
+        };
+      case 'color':
+        return {
+          backgroundColor: bg.value,
+        };
+      case 'none':
+      default:
+        return {
+          backgroundColor: '#fff',
+        };
+    }
+  };
+
   // Хелпер для получения стиля тени
   const getShadowStyle = (shadow?: { color: string; blur: number }) => {
     if (!shadow) return 'none';
@@ -230,9 +254,9 @@ export function SlidePreview({ slide, scale }: Props) {
         style={{
           width: 960 * s,
           height: 540 * s,
-          backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
           position: 'relative',
           overflow: 'hidden',
+          ...getBackgroundStyle(), // Используем ту же функцию для фона
         }}
       >
         {slide.elements.map((el: SlideElement) => {

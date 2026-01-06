@@ -233,11 +233,11 @@ export const editorSlice = createSlice({
       );
     },
 
+    // В редакторе слайса, в функции addSlide:
     addSlide(state, action: PayloadAction<Slide>) {
       pushToPast(state, 'editor/addSlide');
 
-      // Если в презентации уже есть слайды с заблокированным фоном (дизайн-темой),
-      // то новый слайд должен получить тот же фон
+      // Проверяем, есть ли в презентации слайды с заблокированным фоном (дизайн-темой)
       const existingSlideWithTheme = state.presentation.slides.find(
         (s) => s.background.type !== 'none' && 'isLocked' in s.background && s.background.isLocked
       );
@@ -440,9 +440,9 @@ export const editorSlice = createSlice({
         id: `slide-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         elements: slide.elements.map((el) => ({
           ...el,
-          id: `${el.id}-copy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         })),
-        // Копируем фон с тем же статусом блокировки
+        // ВАЖНО: Копируем фон с тем же статусом блокировки
         background: { ...slide.background },
       };
 
@@ -652,9 +652,34 @@ export const editorSlice = createSlice({
         return;
       }
 
+      // В редакторе слайса, в обработке шаблонов:
       if (slideMap[act]) {
         pushToPast(state, 'editor/handleAction');
-        const newSlide = { ...slideMap[act], id: `slide${Date.now()}` };
+
+        // Получаем шаблон слайда
+        const templateSlide = slideMap[act];
+
+        // Проверяем, есть ли слайды с дизайн-темой
+        const existingSlideWithTheme = state.presentation.slides.find(
+          (s) => s.background.type !== 'none' && 'isLocked' in s.background && s.background.isLocked
+        );
+
+        // Создаем новый слайд с уникальными ID элементов
+        const newSlide = {
+          ...templateSlide,
+          id: `slide-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          elements: templateSlide.elements.map((el) => ({
+            ...el,
+            id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            // Сбрасываем текстовое содержимое для текстовых элементов
+            ...(el.type === 'text' && { content: '' }),
+          })),
+          // Копируем фон, если есть тема
+          ...(existingSlideWithTheme && {
+            background: { ...existingSlideWithTheme.background },
+          }),
+        };
+
         state.presentation = func.addSlide(state.presentation, newSlide);
         state.selectedSlideId = newSlide.id;
         state.selectedSlideIds = [newSlide.id];

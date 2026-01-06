@@ -9,16 +9,40 @@ interface Props {
 export default function TemplateSlidePreview({ slide, scale }: Props) {
   const s = scale; // Масштаб для всего слайда
 
+  // Определяем стили фона для превью
+  const getBackgroundStyle = (): React.CSSProperties => {
+    const bg = slide.background;
+
+    switch (bg.type) {
+      case 'image':
+        return {
+          backgroundImage: `url(${bg.value})`,
+          backgroundSize: bg.size || 'cover',
+          backgroundPosition: bg.position || 'center',
+          backgroundRepeat: 'no-repeat',
+        };
+      case 'color':
+        return {
+          backgroundColor: bg.value,
+        };
+      case 'none':
+      default:
+        return {
+          backgroundColor: 'white',
+        };
+    }
+  };
+
   return (
     <div
       style={{
         width: 960 * s,
         height: 540 * s,
-        backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
         position: 'relative',
         overflow: 'hidden',
         borderRadius: '4px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        ...getBackgroundStyle(), // Используем функцию для фона
       }}
     >
       {slide.elements.map((el) => {
