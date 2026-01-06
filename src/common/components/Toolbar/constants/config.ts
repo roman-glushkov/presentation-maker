@@ -1,9 +1,21 @@
 // constants/config.ts
-export type GroupKey = 'main' | 'insert' | 'colors' | 'effects' | 'transitions' | 'view';
+import IronManPreview from '../assets/wallpaper/Iron_man.jpg';
+import BlackAndWhitePreview from '../assets/wallpaper/Black_and_white.jpg';
+import BlueAutumnPreview from '../assets/wallpaper/Blue_autumn.jpg';
+import ChristmasPreview from '../assets/wallpaper/Christmas.jpg';
+import GraphPreview from '../assets/wallpaper/Graph.jpg';
+import GreenPreview from '../assets/wallpaper/Green.jpg';
+import GreyPreview from '../assets/wallpaper/Grey.jpg';
+import NeiroPreview from '../assets/wallpaper/Neiro.jpg';
+import PlanePreview from '../assets/wallpaper/plane.jpg';
+import SchoolPreview from '../assets/wallpaper/School.jpg';
+
+export type GroupKey = 'main' | 'insert' | 'colors' | 'effects' | 'design';
 
 export interface GroupButton {
-  label: string;
+  label?: string;
   action: string;
+  previewImage?: string;
 }
 
 export const GROUPS: Record<GroupKey, GroupButton[]> = {
@@ -24,8 +36,6 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '🖼️ Картинка', action: 'ADD_IMAGE' },
     { label: '🔗 По ссылке', action: 'ADD_IMAGE_FROM_URL' },
     { label: '🔷 Фигуры', action: 'ADD_SHAPE' },
-    //{ label: '📊 Диаграмма ❌', action: 'ADD_CHART' },
-    //{ label: '🔗 Ссылка ❌', action: 'ADD_LINK' },
   ],
   colors: [
     { label: '🎨 Фон слайда', action: 'SLIDE_BACKGROUND' },
@@ -39,23 +49,47 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '💎 Отражение', action: 'TEXT_REFLECTION' },
     { label: '🎯 Сглаживание', action: 'SHAPE_SMOOTHING' },
   ],
-  transitions: [
-    /*
-    { label: '✨ Переходы ❌', action: 'SLIDE_TRANSITIONS' },
-    { label: '✨ Анимации ❌', action: 'ADD_ANIMATION' },
-    { label: '⏱️ Тайминг ❌', action: 'ANIMATION_TIMING' },
-    { label: '🎬 Предпросмотр ❌', action: 'PREVIEW_ANIMATIONS' },
-    */
-  ],
-  view: [
-    /*
-    { label: '🔲 Разметка ❌', action: 'SHOW_LAYOUT' },
-    { label: '📐 Направляющие ❌', action: 'SHOW_GUIDES' },
-    { label: '🎯 Привязка ❌', action: 'ENABLE_SNAP' },
-    { label: '📏 Линейки ❌', action: 'SHOW_RULERS' },
-    { label: '👁️ Скрытые ❌', action: 'SHOW_HIDDEN' },
-    { label: '🔍 Масштаб ❌', action: 'ZOOM' },
-     */
+  design: [
+    {
+      action: 'DESIGN_THEME:iron_man',
+      previewImage: IronManPreview,
+    },
+    {
+      action: 'DESIGN_THEME:black_white',
+      previewImage: BlackAndWhitePreview,
+    },
+    {
+      action: 'DESIGN_THEME:blue_autumn',
+      previewImage: BlueAutumnPreview,
+    },
+    {
+      action: 'DESIGN_THEME:christmas',
+      previewImage: ChristmasPreview,
+    },
+    {
+      action: 'DESIGN_THEME:graph',
+      previewImage: GraphPreview,
+    },
+    {
+      action: 'DESIGN_THEME:green',
+      previewImage: GreenPreview,
+    },
+    {
+      action: 'DESIGN_THEME:grey',
+      previewImage: GreyPreview,
+    },
+    {
+      action: 'DESIGN_THEME:neiro',
+      previewImage: NeiroPreview,
+    },
+    {
+      action: 'DESIGN_THEME:plane',
+      previewImage: PlanePreview,
+    },
+    {
+      action: 'DESIGN_THEME:school',
+      previewImage: SchoolPreview,
+    },
   ],
 };
 
@@ -64,6 +98,5 @@ export const TAB_TITLES: { key: GroupKey; name: string }[] = [
   { key: 'insert', name: 'Вставка' },
   { key: 'colors', name: 'Цвета' },
   { key: 'effects', name: 'Эффекты' },
-  //{ key: 'transitions', name: 'Переходы' },
-  //{ key: 'view', name: 'Вид' },
+  { key: 'design', name: 'Дизайн' },
 ];

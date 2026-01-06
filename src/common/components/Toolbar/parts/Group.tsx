@@ -6,11 +6,10 @@ import TemplatePopup from './TemplatePopup';
 import FontPopup from './FontPopup';
 import ShapePopup from './ShapePopup';
 import StrokeWidthPopup from './StrokeWidthPopup';
-// ДОБАВЛЯЕМ ИМПОРТЫ ДЛЯ НОВЫХ МЕНЮШЕК
 import TextShadowMenu from './TextShadowMenu';
 import ShapeSmoothingMenu from './ShapeSmoothingMenu';
-import TextReflectionMenu from './TextReflectionMenu'; // <-- ДОБАВЛЯЕМ
-import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions'; // <-- ДОБАВЛЯЕМ
+import TextReflectionMenu from './TextReflectionMenu';
+import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
@@ -32,7 +31,6 @@ export default function ToolbarGroup() {
   const activeGroup = useAppSelector((state) => state.toolbar.activeGroup) as GroupKey;
   const activeTextOption = useAppSelector((state) => state.toolbar.activeTextOption);
 
-  // Используем систему уведомлений
   const { addNotification } = useNotifications();
 
   // Для загрузки изображений
@@ -68,8 +66,15 @@ export default function ToolbarGroup() {
       // ДОБАВЛЯЕМ НОВЫЕ
       'TEXT_SHADOW',
       'SHAPE_SMOOTHING',
-      'TEXT_REFLECTION', // <-- ДОБАВЛЯЕМ
+      'TEXT_REFLECTION',
     ];
+
+    // Добавляем обработку дизайн-действий
+    if (action.startsWith('DESIGN_')) {
+      // Просто отправляем действие, не открывая попап
+      dispatch(handleAction(action));
+      return;
+    }
 
     if (menuActions.includes(action)) {
       dispatch(setActiveTextOption(activeTextOption === action ? null : action));
@@ -214,7 +219,112 @@ export default function ToolbarGroup() {
           );
         }
 
+        // ================ ОСОБАЯ ОТРИСОВКА ДЛЯ РАЗДЕЛА "ДИЗАЙН" ================
+        if (activeGroup === 'design') {
+          // Извлекаем тему из action (например: "DESIGN_THEME:iron_man")
+          const theme = btn.action.split(':')[1] || 'theme';
+          const themeName = theme
+            .split('_')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
+          return (
+            <div key={btn.action} className="design-button-wrapper">
+              <button
+                onClick={() => handleButtonClick(btn.action)}
+                className="design-button"
+                title={themeName} // Используем форматированное название как title для тултипа
+                style={{
+                  width: '120px',
+                  height: '90px',
+                  padding: 0,
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  background: 'white',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  transition: 'all 0.2s',
+                  position: 'relative',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#3b82f6';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#ddd';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                }}
+              >
+                {btn.previewImage ? (
+                  <img
+                    src={btn.previewImage}
+                    alt={themeName}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '7px',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      borderRadius: '7px',
+                      padding: '8px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {themeName}
+                  </div>
+                )}
+                {/* Накладываем градиентную подложку с названием темы */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background:
+                      'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
+                    color: 'white',
+                    padding: '8px 6px 4px',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    textAlign: 'center',
+                    opacity: 0,
+                    transition: 'opacity 0.2s',
+                    borderRadius: '0 0 7px 7px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '0';
+                  }}
+                >
+                  {themeName}
+                </div>
+              </button>
+            </div>
+          );
+        }
+
+        // ================ ОБЫЧНАЯ ОТРИСОВКА ДЛЯ ДРУГИХ РАЗДЕЛОВ ================
         const isImageButton = btn.action === 'ADD_IMAGE';
+
+        // Проверяем, есть ли у кнопки лейбл
+        const buttonLabel = btn.label || '';
 
         return (
           <div key={btn.action} className="toolbar-button-wrapper">
@@ -222,6 +332,7 @@ export default function ToolbarGroup() {
               onClick={() => handleButtonClick(btn.action)}
               disabled={isImageButton && uploading}
               style={{ position: 'relative' }}
+              title={buttonLabel} // Добавляем title для accessibility
             >
               {isImageButton && uploading ? (
                 <>
@@ -240,7 +351,7 @@ export default function ToolbarGroup() {
                   />
                 </>
               ) : (
-                btn.label
+                buttonLabel
               )}
             </button>
             {/* Попапы для различных опций */}

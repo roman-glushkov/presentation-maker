@@ -44,12 +44,34 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
 
   const getAllElements = () => slide?.elements || [];
 
+  // Определяем стили фона
+  const getBackgroundStyle = (): React.CSSProperties => {
+    const bg = slide.background;
+
+    switch (bg.type) {
+      case 'image':
+        return {
+          backgroundImage: `url(${bg.value})`,
+          backgroundSize: bg.size || 'cover',
+          backgroundPosition: bg.position || 'center',
+          backgroundRepeat: 'no-repeat',
+        };
+      case 'color':
+        return {
+          backgroundColor: bg.value,
+        };
+      case 'none':
+      default:
+        return {
+          backgroundColor: '#fff',
+        };
+    }
+  };
+
   return (
     <div
       className="workspace-content"
-      style={{
-        backgroundColor: slide.background.type === 'color' ? slide.background.value : '#fff',
-      }}
+      style={getBackgroundStyle()} // УБРАЛИ width и height
       onClick={handleWorkspaceClick}
     >
       {slide.elements.map((el) => {

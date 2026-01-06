@@ -17,8 +17,8 @@ export type Selection = {
 };
 
 export type Background =
-  | { type: 'color'; value: string }
-  | { type: 'image'; value: string }
+  | { type: 'color'; value: string; isLocked?: boolean }
+  | { type: 'image'; value: string; size?: string; position?: string; isLocked?: boolean }
   | { type: 'none' };
 
 export type SlideElement = TextElement | ImageElement | ShapeElement;

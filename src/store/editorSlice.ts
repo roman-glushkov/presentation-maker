@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Presentation, Slide, Background, SlideElement, ShapeType } from './types/presentation';
+import { DESIGN_THEMES } from '../common/components/Toolbar/constants/designThemes';
 
 import * as func from './functions/presentation';
 import * as temp from './templates/presentation';
@@ -234,12 +235,28 @@ export const editorSlice = createSlice({
 
     addSlide(state, action: PayloadAction<Slide>) {
       pushToPast(state, 'editor/addSlide');
-      state.presentation = func.addSlide(state.presentation, action.payload);
-      state.selectedSlideId = action.payload.id;
-      state.selectedSlideIds = [action.payload.id];
+
+      // Если в презентации уже есть слайды с заблокированным фоном (дизайн-темой),
+      // то новый слайд должен получить тот же фон
+      const existingSlideWithTheme = state.presentation.slides.find(
+        (s) => s.background.type !== 'none' && 'isLocked' in s.background && s.background.isLocked
+      );
+
+      const newSlide = {
+        ...action.payload,
+        // Если есть слайд с темой, копируем его фон
+        ...(existingSlideWithTheme && {
+          background: { ...existingSlideWithTheme.background },
+        }),
+      };
+
+      state.presentation = func.addSlide(state.presentation, newSlide);
+      state.selectedSlideId = newSlide.id;
+      state.selectedSlideIds = [newSlide.id];
       state.selectedElementIds = [];
     },
 
+    // Если removeSlide отсутствует, добавь его в reducers перед reorderSlides:
     removeSlide(state, action: PayloadAction<string>) {
       pushToPast(state, 'editor/removeSlide');
       state.presentation = func.removeSlide(state.presentation, action.payload);
@@ -266,6 +283,18 @@ export const editorSlice = createSlice({
     changeBackground(state, action: PayloadAction<Background>) {
       const slide = state.presentation.slides.find((s) => s.id === state.selectedSlideId);
       if (!slide) return;
+
+      // Проверяем, заблокирован ли текущий фон
+      if (
+        slide.background.type !== 'none' &&
+        'isLocked' in slide.background &&
+        slide.background.isLocked
+      ) {
+        // Если фон заблокирован, не позволяем его менять
+        console.warn('Фон заблокирован и не может быть изменен');
+        return;
+      }
+
       pushToPast(state, 'editor/changeBackground');
       state.presentation.slides = state.presentation.slides.map((s) =>
         s.id === slide.id ? func.changeBackground(s, action.payload) : s
@@ -413,6 +442,8 @@ export const editorSlice = createSlice({
           ...el,
           id: `${el.id}-copy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         })),
+        // Копируем фон с тем же статусом блокировки
+        background: { ...slide.background },
       };
 
       const slideIndex = state.presentation.slides.findIndex((s) => s.id === slideId);
@@ -451,6 +482,38 @@ export const editorSlice = createSlice({
         ADD_OBJECT_WITH_SIGNATURE_SLIDE: sld.slideObjectWithSignature,
         ADD_DRAWING_WITH_CAPTION_SLIDE: sld.slideDrawingWithCaption,
       };
+
+      if (act.startsWith('DESIGN_THEME:')) {
+        const themeId = act.split(':')[1];
+        const theme = DESIGN_THEMES[themeId];
+
+        console.log('Выбрана тема:', themeId, 'Тема найдена:', theme);
+
+        if (theme) {
+          pushToPast(state, 'editor/handleAction/DESIGN_THEME');
+
+          console.log(
+            'Применяем тему ко всем слайдам, всего слайдов:',
+            state.presentation.slides.length
+          );
+
+          // Применяем дизайн-тему ко ВСЕМ слайдам презентации
+          state.presentation.slides = state.presentation.slides.map((slide, index) => {
+            console.log(`Слайд ${index}:`, slide.id);
+            return {
+              ...slide,
+              background: {
+                type: 'image' as const,
+                value: theme.backgroundImage,
+                size: theme.backgroundSize || 'cover',
+                position: theme.backgroundPosition || 'center',
+                isLocked: true, // Блокируем фон!
+              },
+            };
+          });
+        }
+        return;
+      }
 
       if (act.startsWith('TEXT_SHADOW:')) {
         const shadowKey = act.split(':')[1].trim();
@@ -743,8 +806,18 @@ export const editorSlice = createSlice({
       }
 
       if (act.startsWith('SLIDE_BACKGROUND:')) {
-        const color = act.split(':')[1]; // Теперь просто [1]
+        const color = act.split(':')[1];
         if (slide) {
+          // Проверяем, заблокирован ли текущий фон
+          if (
+            slide.background.type !== 'none' &&
+            'isLocked' in slide.background &&
+            slide.background.isLocked
+          ) {
+            console.warn('Фон заблокирован и не может быть изменен');
+            return;
+          }
+
           pushToPast(state, 'editor/handleAction/SLIDE_BACKGROUND');
           state.presentation.slides = state.presentation.slides.map((s) =>
             s.id === slide.id ? func.changeBackground(s, { type: 'color', value: color }) : s
