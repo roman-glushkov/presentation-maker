@@ -280,6 +280,7 @@ export const editorSlice = createSlice({
       state.presentation.title = action.payload;
     },
 
+    // В функции changeBackground:
     changeBackground(state, action: PayloadAction<Background>) {
       const slide = state.presentation.slides.find((s) => s.id === state.selectedSlideId);
       if (!slide) return;
@@ -483,35 +484,62 @@ export const editorSlice = createSlice({
         ADD_DRAWING_WITH_CAPTION_SLIDE: sld.slideDrawingWithCaption,
       };
 
+      // В редьюсере handleAction, в обработке DESIGN_THEME:
+      // В редакторе слайса, в обработке DESIGN_THEME:
       if (act.startsWith('DESIGN_THEME:')) {
         const themeId = act.split(':')[1];
         const theme = DESIGN_THEMES[themeId];
+        if (!theme) return;
 
-        console.log('Выбрана тема:', themeId, 'Тема найдена:', theme);
+        pushToPast(state, 'editor/handleAction/DESIGN_THEME');
 
-        if (theme) {
-          pushToPast(state, 'editor/handleAction/DESIGN_THEME');
-
-          console.log(
-            'Применяем тему ко всем слайдам, всего слайдов:',
-            state.presentation.slides.length
-          );
-
-          // Применяем дизайн-тему ко ВСЕМ слайдам презентации
-          state.presentation.slides = state.presentation.slides.map((slide, index) => {
-            console.log(`Слайд ${index}:`, slide.id);
+        state.presentation.slides = state.presentation.slides.map((slide) => {
+          // Проверяем наличие backgroundImage или backgroundColor
+          if (themeId === 'no_design') {
+            // Сброс дизайна - белый фон без блокировки
             return {
               ...slide,
               background: {
-                type: 'image' as const,
+                type: 'color',
+                value: '#ffffff',
+                isLocked: false,
+              } as Background,
+            };
+          } else if (theme.backgroundImage) {
+            // Дизайн с изображением
+            return {
+              ...slide,
+              background: {
+                type: 'image',
                 value: theme.backgroundImage,
                 size: theme.backgroundSize || 'cover',
                 position: theme.backgroundPosition || 'center',
-                isLocked: true, // Блокируем фон!
-              },
+                isLocked: theme.isLocked,
+              } as Background,
             };
-          });
-        }
+          } else if (theme.backgroundColor) {
+            // Дизайн с цветным фоном
+            return {
+              ...slide,
+              background: {
+                type: 'color',
+                value: theme.backgroundColor,
+                isLocked: theme.isLocked,
+              } as Background,
+            };
+          } else {
+            // Fallback: белый фон
+            return {
+              ...slide,
+              background: {
+                type: 'color',
+                value: '#ffffff',
+                isLocked: false,
+              } as Background,
+            };
+          }
+        });
+
         return;
       }
 

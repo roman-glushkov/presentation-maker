@@ -13,14 +13,23 @@ import SchoolBackground from '../assets/wallpaper/School.jpg';
 export interface DesignTheme {
   id: string;
   name: string;
-  backgroundImage: string;
-  isLocked: boolean; // Фон нельзя удалить
+  backgroundImage?: string;
+  isLocked: boolean;
   backgroundSize?: 'cover' | 'contain' | 'auto';
   backgroundPosition?: string;
   backgroundColor?: string;
 }
 
 export const DESIGN_THEMES: Record<string, DesignTheme> = {
+  // НОВАЯ ОПЦИЯ - БЕЗ ДИЗАЙНА (первая в списке)
+  no_design: {
+    id: 'no_design',
+    name: 'Без дизайна',
+    backgroundColor: '#ffffff', // Белый фон
+    isLocked: false, // Можно сбросить
+    // backgroundImage нет - значит чистый белый фон
+  },
+  // Существующие темы
   iron_man: {
     id: 'iron_man',
     name: 'Iron Man',

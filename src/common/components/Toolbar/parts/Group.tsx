@@ -269,24 +269,7 @@ export default function ToolbarGroup() {
                     }}
                   />
                 ) : (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      borderRadius: '7px',
-                      padding: '8px',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {themeName}
-                  </div>
+                  <div></div>
                 )}
                 {/* Накладываем градиентную подложку с названием темы */}
                 <div
