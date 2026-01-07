@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { selectSlide, selectSlides, reorderSlides } from '../../../../store/editorSlice';
 import { SlideRow } from './Row';
@@ -8,49 +8,45 @@ export default function SlidesContainer() {
   const dispatch = useAppDispatch();
   const slides = useAppSelector((state) => state.editor.presentation.slides);
   const selectedSlideIds = useAppSelector((state) => state.editor.selectedSlideIds);
+  const selectedSlideId = selectedSlideIds[0];
+  const slideRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const setSelectedSlideIds = (ids: string[]) => {
-    dispatch(selectSlides(ids));
-  };
+  const setSelectedSlideIds = useCallback(
+    (ids: string[]) => dispatch(selectSlides(ids)),
+    [dispatch]
+  );
 
   const { localSlides, hoverIndex, handleDragStart, handleDragEnter, handleDragEnd } =
     useSlidesDrag({
       slides,
       selectedSlideIds,
       setSelectedSlideIds,
-      onSlidesReorder: (newOrder) => {
-        dispatch(reorderSlides(newOrder));
-      },
+      onSlidesReorder: (newOrder) => dispatch(reorderSlides(newOrder)),
     });
-
-  const slideRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const selectedSlideId = selectedSlideIds[0];
 
   useEffect(() => {
     if (selectedSlideId) {
       const ref = slideRefs.current[selectedSlideId];
-      if (ref) {
-        ref.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      }
+      ref?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [selectedSlideId]);
 
-  const handleSlideClick = (slideId: string, multi: boolean) => {
-    if (multi) {
-      if (selectedSlideIds.includes(slideId)) {
-        if (selectedSlideIds.length > 1) {
-          setSelectedSlideIds(selectedSlideIds.filter((id) => id !== slideId));
+  const handleSlideClick = useCallback(
+    (slideId: string, multi: boolean) => {
+      if (multi) {
+        if (selectedSlideIds.includes(slideId)) {
+          if (selectedSlideIds.length > 1) {
+            setSelectedSlideIds(selectedSlideIds.filter((id) => id !== slideId));
+          }
+        } else {
+          setSelectedSlideIds([...selectedSlideIds, slideId]);
         }
       } else {
-        setSelectedSlideIds([...selectedSlideIds, slideId]);
+        dispatch(selectSlide(slideId));
       }
-    } else {
-      dispatch(selectSlide(slideId));
-    }
-  };
+    },
+    [selectedSlideIds, setSelectedSlideIds, dispatch]
+  );
 
   return (
     <div className="slides-container">
@@ -64,7 +60,6 @@ export default function SlidesContainer() {
           <SlideRow
             slide={slide}
             index={index}
-            scale={0.25}
             selected={selectedSlideIds.includes(slide.id)}
             hovered={index === hoverIndex}
             onClick={(e) => handleSlideClick(slide.id, e.ctrlKey || e.metaKey)}

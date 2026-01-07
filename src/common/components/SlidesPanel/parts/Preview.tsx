@@ -1,6 +1,6 @@
 import React from 'react';
 import { Slide } from '../../../../store/types/presentation';
-import { SlidePreview } from './PreviewWorkspace';
+import { PreviewWorkspace } from './PreviewWorkspace';
 
 interface Props {
   slide: Slide;
@@ -8,5 +8,5 @@ interface Props {
 }
 
 export function Preview({ slide, scale }: Props) {
-  return <SlidePreview slide={slide} scale={scale} />;
+  return <PreviewWorkspace slide={slide} scale={scale} />;
 }
