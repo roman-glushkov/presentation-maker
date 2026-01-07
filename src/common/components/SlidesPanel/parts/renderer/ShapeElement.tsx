@@ -59,7 +59,6 @@ export function ShapeElement({ element, scale }: Props) {
         />
       );
       break;
-
     case 'circle':
       shape = (
         <circle
@@ -73,11 +72,9 @@ export function ShapeElement({ element, scale }: Props) {
         />
       );
       break;
-
     case 'triangle':
       shape = polygon(`${sw},${h - sw} ${w / 2},${sw} ${w - sw},${h - sw}`);
       break;
-
     case 'star': {
       const points: string[] = [];
       for (let i = 0; i < 10; i++) {
@@ -88,7 +85,6 @@ export function ShapeElement({ element, scale }: Props) {
       shape = polygon(points.join(' '));
       break;
     }
-
     case 'hexagon': {
       const points = Array.from({ length: 6 }, (_, i) => {
         const angle = (Math.PI / 3) * i;
@@ -97,7 +93,6 @@ export function ShapeElement({ element, scale }: Props) {
       shape = polygon(points.join(' '));
       break;
     }
-
     case 'heart':
       shape = path(`
         M ${w / 2} ${h * 0.3}
@@ -107,7 +102,6 @@ export function ShapeElement({ element, scale }: Props) {
         Q ${w * 0.3} ${h * 0.1} ${w / 2} ${h * 0.3} Z
       `);
       break;
-
     case 'cloud':
       shape = path(`
         M ${w * 0.25} ${h * 0.6}
@@ -119,14 +113,12 @@ export function ShapeElement({ element, scale }: Props) {
         C ${w * 0.26} ${h * 0.65} ${w * 0.25} ${h * 0.62} ${w * 0.25} ${h * 0.6} Z
       `);
       break;
-
     case 'callout': {
       const bodyHeight = h - 16 * s - sw;
       const cx = w / 2;
       const r = 12 * s;
       const tailW = 24 * s;
       const tailH = 16 * s;
-
       shape = path(`
         M ${r} ${sw / 2}
         H ${w - r}
@@ -143,17 +135,16 @@ export function ShapeElement({ element, scale }: Props) {
       `);
       break;
     }
-
     default:
       shape = null;
   }
 
   return (
     <svg
+      className="slide-svg-element"
       width={w}
       height={h}
       style={{
-        position: 'absolute',
         left: element.position.x * s,
         top: element.position.y * s,
       }}

@@ -27,13 +27,10 @@ export function PreviewWorkspace({ slide, scale }: Props) {
           switch (el.type) {
             case 'text':
               return <TextElement key={el.id} element={el} scale={scale} />;
-
             case 'image':
               return <ImageElement key={el.id} element={el} scale={scale} />;
-
             case 'shape':
               return <ShapeElement key={el.id} element={el} scale={scale} />;
-
             default:
               return null;
           }

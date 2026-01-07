@@ -36,21 +36,17 @@ export function TextElement({ element, scale }: Props) {
 
   return (
     <div
+      className="slide-element slide-text-element"
       style={{
-        position: 'absolute',
         left: element.position.x * s,
         top: element.position.y * s,
         width: element.size.width * s,
         height: element.size.height * s,
         backgroundColor: element.backgroundColor || 'transparent',
-        display: 'flex',
-        flexDirection: 'column',
         justifyContent,
         padding: 4 * s,
-        boxSizing: 'border-box',
         borderRadius: element.smoothing ? `${element.smoothing * s}px` : '0',
         overflow: 'visible',
-        userSelect: 'none',
       }}
     >
       <div
@@ -64,14 +60,13 @@ export function TextElement({ element, scale }: Props) {
 
       {element.reflection && element.reflection > 0 && (
         <div
+          className="slide-text-element-reflection"
           style={{
             ...textStyle,
-            transform: 'scaleY(-1)',
             opacity: element.reflection,
             marginTop: 4 * s,
             maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)',
             WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)',
-            pointerEvents: 'none',
           }}
         >
           {element.content}

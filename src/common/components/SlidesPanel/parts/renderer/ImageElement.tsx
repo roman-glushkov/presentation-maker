@@ -13,31 +13,24 @@ export function ImageElement({ element, scale }: Props) {
 
   return (
     <div
+      className="slide-element slide-image-element"
       style={{
-        position: 'absolute',
         left: element.position.x * s,
         top: element.position.y * s,
         width: element.size.width * s,
         height: element.size.height * s,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
         borderRadius: element.smoothing ? `${element.smoothing * s}px` : '0',
-        overflow: 'hidden',
-        userSelect: 'none',
       }}
     >
       <img
         src={element.src}
-        alt="Изображение"
+        alt=""
         draggable={false}
         style={{
           width: element.size.width === 0 ? 'auto' : '100%',
           height: element.size.height === 0 ? 'auto' : '100%',
-          objectFit: 'fill',
           borderRadius: element.smoothing ? `${element.smoothing * s}px` : '0',
-          userSelect: 'none',
         }}
       />
     </div>

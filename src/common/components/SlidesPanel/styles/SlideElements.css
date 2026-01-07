@@ -1,0 +1,32 @@
+.slide-element {
+  position: absolute;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.slide-text-element {
+  display: flex;
+  flex-direction: column;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+.slide-text-element-reflection {
+  transform: scaleY(-1);
+  pointer-events: none;
+}
+
+.slide-image-element {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.slide-image-element img {
+  object-fit: fill;
+}
+
+.slide-svg-element {
+  position: absolute;
+}

@@ -1,12 +1,16 @@
 import React from 'react';
 import SlidesContainer from './parts/Container';
-import useSlidesKeyboard from './hooks/useSlidesKeyboard';
-import useSlidesCopyPaste from './hooks/useSlidesCopyPaste'; // Добавлено
-import './styles.css';
+import useSlidesActions from './hooks/useSlidesActions';
+import useSlidesNavigation from './hooks/useSlidesNavigation';
+import './styles/index.css';
+import './styles/Container.css';
+import './styles/Row.css';
+import './styles/PreviewWorkspace.css';
+import './styles/SlideElements.css';
 
 export default function SlidesPanel() {
-  useSlidesKeyboard(); // Хук удаления слайдов
-  useSlidesCopyPaste(); // Хук копирования-вставки слайдов
+  useSlidesActions();
+  useSlidesNavigation();
 
   return (
     <div className="slides-panel">
