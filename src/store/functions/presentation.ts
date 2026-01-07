@@ -168,17 +168,14 @@ export function toggleTextUnderline(slide: Slide, elementId: string): Slide {
   };
 }
 
-// Функция для добавления фигуры
 export function addShape(slide: Slide, shapeElement: ShapeElement): Slide {
   return { ...slide, elements: [...slide.elements, { ...shapeElement }] };
 }
 
-// Функция для создания базовой фигуры (теперь используем шаблон)
 export function createBasicShape(shapeType: ShapeType): ShapeElement {
   return createShapeElement(shapeType);
 }
 
-// Функция для изменения заливки фигуры
 export function changeShapeFill(slide: Slide, elementId: string, fill: string): Slide {
   return {
     ...slide,
@@ -188,7 +185,6 @@ export function changeShapeFill(slide: Slide, elementId: string, fill: string): 
   };
 }
 
-// Функция для изменения цвета границы фигуры
 export function changeShapeStroke(slide: Slide, elementId: string, stroke: string): Slide {
   return {
     ...slide,
@@ -198,7 +194,6 @@ export function changeShapeStroke(slide: Slide, elementId: string, stroke: strin
   };
 }
 
-// Функция для изменения толщины границы фигуры
 export function changeShapeStrokeWidth(
   slide: Slide,
   elementId: string,

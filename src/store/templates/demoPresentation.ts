@@ -3,7 +3,6 @@ import { Presentation } from '../types/presentation';
 export const demoPresentation: Presentation = {
   title: 'SlideCraft — Демонстрация возможностей',
   slides: [
-    // ---------- SLIDE 1 / HERO ----------
     {
       id: 'demo1',
       background: { type: 'color', value: '#0f172a' },
@@ -66,7 +65,6 @@ export const demoPresentation: Presentation = {
       ],
     },
 
-    // ---------- SLIDE 2 / ИНТЕРФЕЙС И ПАНЕЛИ ----------
     {
       id: 'demo2',
       background: { type: 'color', value: '#1e1b4b' },
@@ -133,8 +131,6 @@ export const demoPresentation: Presentation = {
         },
       ],
     },
-
-    // ---------- SLIDE 3 / РАБОТА С ТЕКСТОМ ----------
     {
       id: 'demo3',
       background: { type: 'color', value: '#0f172a' },
@@ -218,7 +214,6 @@ export const demoPresentation: Presentation = {
       ],
     },
 
-    // ---------- SLIDE 4 / ВСТАВКА И РАБОТА С ЭЛЕМЕНТАМИ ----------
     {
       id: 'demo4',
       background: { type: 'color', value: '#1e293b' },
@@ -289,7 +284,6 @@ export const demoPresentation: Presentation = {
       ],
     },
 
-    // ---------- SLIDE 5 / АККАУНТ И ДАННЫЕ ----------
     {
       id: 'demo5',
       background: { type: 'color', value: '#1e1b4b' },
@@ -356,7 +350,6 @@ export const demoPresentation: Presentation = {
       ],
     },
 
-    // ---------- SLIDE 6 / УВЕДОМЛЕНИЯ И UX ----------
     {
       id: 'demo6',
       background: { type: 'color', value: '#0f172a' },
@@ -439,8 +432,6 @@ export const demoPresentation: Presentation = {
         },
       ],
     },
-
-    // ---------- SLIDE 7 / ПЕРСПЕКТИВЫ И ПРИЗЫВ ----------
     {
       id: 'demo7',
       background: { type: 'color', value: ' #1e1b4b ' },

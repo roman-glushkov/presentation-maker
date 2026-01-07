@@ -82,7 +82,7 @@ export type ShapeType =
 export type ShapeElement = BaseElement & {
   type: 'shape';
   shapeType: ShapeType;
-  fill: string; // цвет заливки
-  stroke: string; // цвет границы
-  strokeWidth: number; // толщина границы
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
 };

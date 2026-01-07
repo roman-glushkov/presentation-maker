@@ -22,7 +22,6 @@ export const imageElementTemplate: ImageElement = {
   size: { width: 400, height: 300 },
 };
 
-// ШАБЛОН ДЛЯ ФИГУР
 export const shapeElementTemplate: ShapeElement = {
   type: 'shape',
   id: '',
@@ -47,7 +46,6 @@ export const createImageElement = (): ImageElement => ({
   id: `img${Date.now()}`,
 });
 
-// ФУНКЦИЯ ДЛЯ СОЗДАНИЯ ФИГУРЫ
 export const createShapeElement = (shapeType: ShapeType): ShapeElement => ({
   ...shapeElementTemplate,
   id: `shape-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
