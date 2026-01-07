@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Presentation, Slide, Background, SlideElement } from './types/presentation';
+import { Presentation, Slide, Background } from './types/presentation';
 import * as func from './functions/presentation';
 import * as sld from './templates/slide';
 import { demoPresentation } from './templates/demoPresentation';
@@ -9,7 +9,6 @@ import {
   findSlideById,
   updateSlideInPresentation,
   findLockedThemeSlide,
-  createSlideFromTemplate,
   calculateImageSize,
   isBackgroundLocked,
   generateId,
@@ -319,10 +318,11 @@ export const editorSlice = createSlice({
       const titleSlide = {
         ...sld.slideTitle,
         id: newSlideId,
-        elements: sld.slideTitle.elements?.map((el) => ({
-          ...el,
-          id: generateId(el.type),
-        })) || [],
+        elements:
+          sld.slideTitle.elements?.map((el) => ({
+            ...el,
+            id: generateId(el.type),
+          })) || [],
       };
 
       state.presentation = {
@@ -407,10 +407,10 @@ export const editorSlice = createSlice({
       const actionType = action.payload.split(':')[0];
       // Сохраняем состояние ДО изменений
       pushToPast(state, `editor/handleAction/${actionType}`);
-      
+
       // Выполняем действие
       const handled = processAction(state, action.payload);
-      
+
       // Синхронизируем slides после изменений
       if (handled) {
         state.slides = state.presentation.slides;
