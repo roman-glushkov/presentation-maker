@@ -39,7 +39,11 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
         ElementActions.duplicate(selectedElementIds, dispatch);
       }
 
-      if ((e.key === 'Delete' || e.key === 'Backspace') && !isCtrl && selectedElementIds.length > 0) {
+      if (
+        (e.key === 'Delete' || e.key === 'Backspace') &&
+        !isCtrl &&
+        selectedElementIds.length > 0
+      ) {
         e.preventDefault();
         e.stopPropagation();
         ElementActions.deleteElements(selectedElementIds, dispatch);
