@@ -1,15 +1,21 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Presentation, Slide, Background, SlideElement, ShapeType } from './types/presentation';
-import { DESIGN_THEMES } from '../common/components/Toolbar/constants/designThemes';
-
+import { Presentation, Slide, Background, SlideElement } from './types/presentation';
 import * as func from './functions/presentation';
-import * as temp from './templates/presentation';
 import * as sld from './templates/slide';
 import { demoPresentation } from './templates/demoPresentation';
 import {
-  TEXT_SHADOW_OPTIONS,
-  SHAPE_SMOOTHING_OPTIONS,
-} from '../common/components/Toolbar/constants/textOptions';
+  clonePresentation,
+  makeSnapshot,
+  findSlideById,
+  updateSlideInPresentation,
+  findLockedThemeSlide,
+  createSlideFromTemplate,
+  calculateImageSize,
+  isBackgroundLocked,
+  generateId,
+} from './utils/editorHelpers';
+import { handleAction as processAction } from './utils/actionHandlers';
+import * as temp from './templates/presentation';
 
 const initialPresentation: Presentation = {
   title: 'Новая презентация',
@@ -32,12 +38,10 @@ export interface EditorState {
   selectedSlideIds: string[];
   selectedElementIds: string[];
   slides: Slide[];
-
   history: {
     past: EditorSnapshot[];
     future: EditorSnapshot[];
     maxItems: number;
-
     transactionDepth: number;
     transactionInitial?: EditorSnapshot | null;
     transactionAction?: string | null;
@@ -73,28 +77,17 @@ const initialState: EditorState = {
   },
 };
 
-function clonePresentation(p: Presentation): Presentation {
-  return JSON.parse(JSON.stringify(p));
-}
-
-function makeSnapshot(state: EditorState): EditorSnapshot {
-  return {
-    presentation: clonePresentation(state.presentation),
-    selectedSlideId: state.selectedSlideId,
-    selectedSlideIds: [...state.selectedSlideIds],
-    selectedElementIds: [...state.selectedElementIds],
-  };
-}
-
 function pushToPast(state: EditorState, actionType?: string) {
   if (actionType && SELECTION_ACTIONS.has(actionType)) return;
   if (state.history.transactionDepth > 0) return;
 
   const snap = makeSnapshot(state);
   state.history.past.push(snap);
+
   if (state.history.past.length > state.history.maxItems) {
     state.history.past.shift();
   }
+
   state.history.future = [];
 }
 
@@ -104,6 +97,7 @@ export const editorSlice = createSlice({
   reducers: {
     beginTransaction(state, action: PayloadAction<string | undefined>) {
       state.history.transactionDepth += 1;
+
       if (state.history.transactionDepth === 1) {
         state.history.transactionInitial = makeSnapshot(state);
         state.history.transactionAction = action.payload || null;
@@ -124,11 +118,14 @@ export const editorSlice = createSlice({
           JSON.stringify(initial.presentation) !== JSON.stringify(finalSnap.presentation)
         ) {
           state.history.past.push(initial);
+
           if (state.history.past.length > state.history.maxItems) {
             state.history.past.shift();
           }
+
           state.history.future = [];
         }
+
         state.history.transactionAction = null;
       }
     },
@@ -164,9 +161,11 @@ export const editorSlice = createSlice({
 
     addToSelection(state, action: PayloadAction<string>) {
       const elementId = action.payload;
+
       if (!state.selectedElementIds.includes(elementId)) {
         state.selectedElementIds.push(elementId);
       }
+
       state.selectedSlideIds = [];
     },
 
@@ -202,7 +201,7 @@ export const editorSlice = createSlice({
 
     updateSlide(state, action: PayloadAction<(s: Slide) => Slide>) {
       const slideId = state.selectedSlideId;
-      const oldSlide = state.presentation.slides.find((s) => s.id === slideId);
+      const oldSlide = findSlideById(state, slideId);
       if (!oldSlide) return;
 
       const newSlide = action.payload(
@@ -212,15 +211,14 @@ export const editorSlice = createSlice({
       if (JSON.stringify(oldSlide) === JSON.stringify(newSlide)) return;
 
       pushToPast(state, 'editor/updateSlide');
-      state.presentation.slides = state.presentation.slides.map((s) =>
-        s.id === slideId ? newSlide : s
-      );
+      updateSlideInPresentation(state, slideId, () => newSlide);
     },
 
     updateTextContent(state, action: PayloadAction<{ elementId: string; content: string }>) {
       const { elementId, content } = action.payload;
       const slideId = state.selectedSlideId;
-      const slide = state.presentation.slides.find((s) => s.id === slideId);
+      const slide = findSlideById(state, slideId);
+
       if (!slide) return;
 
       const element = slide.elements.find((el) => el.id === elementId);
@@ -228,26 +226,16 @@ export const editorSlice = createSlice({
       if (element.content === content) return;
 
       pushToPast(state, 'editor/updateTextContent');
-      state.presentation.slides = state.presentation.slides.map((s) =>
-        s.id === slideId ? func.changeText(s, elementId, content) : s
-      );
+      updateSlideInPresentation(state, slideId, (s) => func.changeText(s, elementId, content));
     },
 
-    // В редакторе слайса, в функции addSlide:
     addSlide(state, action: PayloadAction<Slide>) {
       pushToPast(state, 'editor/addSlide');
 
-      // Проверяем, есть ли в презентации слайды с заблокированным фоном (дизайн-темой)
-      const existingSlideWithTheme = state.presentation.slides.find(
-        (s) => s.background.type !== 'none' && 'isLocked' in s.background && s.background.isLocked
-      );
-
+      const existingSlideWithTheme = findLockedThemeSlide(state.presentation.slides);
       const newSlide = {
         ...action.payload,
-        // Если есть слайд с темой, копируем его фон
-        ...(existingSlideWithTheme && {
-          background: { ...existingSlideWithTheme.background },
-        }),
+        ...(existingSlideWithTheme && { background: { ...existingSlideWithTheme.background } }),
       };
 
       state.presentation = func.addSlide(state.presentation, newSlide);
@@ -256,9 +244,9 @@ export const editorSlice = createSlice({
       state.selectedElementIds = [];
     },
 
-    // Если removeSlide отсутствует, добавь его в reducers перед reorderSlides:
     removeSlide(state, action: PayloadAction<string>) {
       pushToPast(state, 'editor/removeSlide');
+
       state.presentation = func.removeSlide(state.presentation, action.payload);
       state.selectedSlideId = state.presentation.slides[0]?.id || '';
       state.selectedSlideIds = state.presentation.slides[0]
@@ -276,111 +264,58 @@ export const editorSlice = createSlice({
 
     changeTitle(state, action: PayloadAction<string>) {
       if (state.presentation.title === action.payload) return;
+
       pushToPast(state, 'editor/changeTitle');
       state.presentation.title = action.payload;
     },
 
-    // В функции changeBackground:
     changeBackground(state, action: PayloadAction<Background>) {
-      const slide = state.presentation.slides.find((s) => s.id === state.selectedSlideId);
-      if (!slide) return;
-
-      // Проверяем, заблокирован ли текущий фон
-      if (
-        slide.background.type !== 'none' &&
-        'isLocked' in slide.background &&
-        slide.background.isLocked
-      ) {
-        // Если фон заблокирован, не позволяем его менять
-        console.warn('Фон заблокирован и не может быть изменен');
-        return;
-      }
+      const slide = findSlideById(state);
+      if (!slide || isBackgroundLocked(slide.background)) return;
 
       pushToPast(state, 'editor/changeBackground');
-      state.presentation.slides = state.presentation.slides.map((s) =>
-        s.id === slide.id ? func.changeBackground(s, action.payload) : s
-      );
+      updateSlideInPresentation(state, slide.id, (s) => func.changeBackground(s, action.payload));
     },
 
     addImageWithUrl(
       state,
-      action: PayloadAction<
-        | string
-        | {
-            url: string;
-            width: number;
-            height: number;
-          }
-      >
+      action: PayloadAction<string | { url: string; width: number; height: number }>
     ) {
       pushToPast(state, 'editor/addImageWithUrl');
-      const slide = state.presentation.slides.find((s) => s.id === state.selectedSlideId);
+      const slide = findSlideById(state);
       if (!slide) return;
 
       const imageData = action.payload;
       const imageUrl = typeof imageData === 'string' ? imageData : imageData.url;
 
-      let containerWidth = 300;
-      let containerHeight = 200;
-
+      let size = { width: 300, height: 200 };
       if (typeof imageData !== 'string' && imageData.width && imageData.height) {
-        const maxWidth = 400;
-        const maxHeight = 300;
-        const aspectRatio = imageData.width / imageData.height;
-
-        containerWidth = imageData.width;
-        containerHeight = imageData.height;
-
-        if (containerWidth > maxWidth) {
-          containerWidth = maxWidth;
-          containerHeight = maxWidth / aspectRatio;
-        }
-
-        if (containerHeight > maxHeight) {
-          containerHeight = maxHeight;
-          containerWidth = maxHeight * aspectRatio;
-        }
+        size = calculateImageSize(imageData.width, imageData.height);
       }
 
       const imageElement = {
         ...temp.createImageElement(),
         src: imageUrl,
-        id: `image-${Date.now()}`,
-        position: {
-          x: 100,
-          y: 100,
-        },
-        size: {
-          width: containerWidth,
-          height: containerHeight,
-        },
+        id: generateId('image'),
+        position: { x: 100, y: 100 },
+        size,
       };
 
-      state.presentation.slides = state.presentation.slides.map((s) =>
-        s.id === slide.id ? func.addImage(s, imageElement) : s
-      );
+      updateSlideInPresentation(state, slide.id, (s) => func.addImage(s, imageElement));
     },
 
     createNewPresentation(state) {
       pushToPast(state, 'editor/createNewPresentation');
 
-      const newSlideId = `slide-${Date.now()}`;
-
-      console.log('slideTitle существует?', !!sld.slideTitle);
-      console.log('slideTitle структура:', sld.slideTitle);
-
+      const newSlideId = generateId('slide');
       const titleSlide = {
         ...sld.slideTitle,
         id: newSlideId,
-      };
-
-      titleSlide.elements =
-        titleSlide.elements?.map((el) => ({
+        elements: sld.slideTitle.elements?.map((el) => ({
           ...el,
-          id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        })) || [];
-
-      console.log('Созданный слайд:', titleSlide);
+          id: generateId(el.type),
+        })) || [],
+      };
 
       state.presentation = {
         title: 'Новая презентация',
@@ -397,32 +332,23 @@ export const editorSlice = createSlice({
 
     duplicateElements(state, action: PayloadAction<{ elementIds: string[] }>) {
       const { elementIds } = action.payload;
-      const currentSlide = state.presentation.slides.find((s) => s.id === state.selectedSlideId);
+      const currentSlide = findSlideById(state);
 
       if (!currentSlide || elementIds.length === 0) return;
 
       pushToPast(state, 'editor/duplicateElements');
 
       const elementsToDuplicate = currentSlide.elements.filter((el) => elementIds.includes(el.id));
+      const newElements = elementsToDuplicate.map((el, index) => ({
+        ...el,
+        id: generateId(`element-${index}`),
+        position: { x: el.position.x + 15, y: el.position.y + 15 },
+      }));
 
-      const newElements: SlideElement[] = elementsToDuplicate.map((el, index) => {
-        const newId = `element-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`;
-        return {
-          ...el,
-          id: newId,
-          position: {
-            x: el.position.x + 15,
-            y: el.position.y + 15,
-          },
-        };
-      });
-
-      const slideIndex = state.presentation.slides.findIndex((s) => s.id === state.selectedSlideId);
-
-      state.presentation.slides[slideIndex] = {
-        ...currentSlide,
-        elements: [...currentSlide.elements, ...newElements],
-      };
+      updateSlideInPresentation(state, currentSlide.id, (slide) => ({
+        ...slide,
+        elements: [...slide.elements, ...newElements],
+      }));
 
       state.selectedElementIds = newElements.map((el) => el.id);
       state.selectedSlideIds = [];
@@ -430,7 +356,7 @@ export const editorSlice = createSlice({
 
     duplicateSlide(state, action: PayloadAction<string | undefined>) {
       const slideId = action.payload || state.selectedSlideId;
-      const slide = state.presentation.slides.find((s) => s.id === slideId);
+      const slide = findSlideById(state, slideId);
 
       if (!slide) return;
 
@@ -438,12 +364,11 @@ export const editorSlice = createSlice({
 
       const duplicatedSlide = {
         ...slide,
-        id: `slide-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: generateId('slide'),
         elements: slide.elements.map((el) => ({
           ...el,
-          id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: generateId(el.type),
         })),
-        // ВАЖНО: Копируем фон с тем же статусом блокировки
         background: { ...slide.background },
       };
 
@@ -459,6 +384,7 @@ export const editorSlice = createSlice({
 
     loadExistingPresentation(state, action: PayloadAction<Presentation>) {
       pushToPast(state, 'editor/loadExistingPresentation');
+
       state.presentation = clonePresentation(action.payload);
       state.selectedSlideId = action.payload.slides[0]?.id || '';
       state.selectedSlideIds = action.payload.slides[0] ? [action.payload.slides[0].id] : [];
@@ -466,534 +392,19 @@ export const editorSlice = createSlice({
     },
 
     handleAction(state, action: PayloadAction<string>) {
-      const act = action.payload;
-      const slideId = state.selectedSlideId;
-      const slide = state.presentation.slides.find((s) => s.id === slideId);
-      const elId = state.selectedElementIds[0];
-      const currentSelectedElementIds = [...state.selectedElementIds]; // ← ДОБАВЬТЕ ЭТУ СТРОКУ
-
-      const slideMap: Record<string, Slide> = {
-        ADD_TITLE_SLIDE: sld.slideTitle,
-        ADD_TITLE_AND_OBJECT_SLIDE: sld.slideTitleAndObject,
-        ADD_SECTION_HEADER_SLIDE: sld.slideSectionHeader,
-        ADD_TWO_OBJECTS_SLIDE: sld.slideTwoObjects,
-        ADD_COMPARISON_SLIDE: sld.slideComparison,
-        ADD_JUST_HEADLINE_SLIDE: sld.slideJustHeadline,
-        ADD_EMPTY_SLIDE: sld.slideEmpty,
-        ADD_OBJECT_WITH_SIGNATURE_SLIDE: sld.slideObjectWithSignature,
-        ADD_DRAWING_WITH_CAPTION_SLIDE: sld.slideDrawingWithCaption,
-      };
-
-      // В редьюсере handleAction, в обработке DESIGN_THEME:
-      // В редакторе слайса, в обработке DESIGN_THEME:
-      if (act.startsWith('DESIGN_THEME:')) {
-        const themeId = act.split(':')[1];
-        const theme = DESIGN_THEMES[themeId];
-        if (!theme) return;
-
-        pushToPast(state, 'editor/handleAction/DESIGN_THEME');
-
-        state.presentation.slides = state.presentation.slides.map((slide) => {
-          // Проверяем наличие backgroundImage или backgroundColor
-          if (themeId === 'no_design') {
-            // Сброс дизайна - белый фон без блокировки
-            return {
-              ...slide,
-              background: {
-                type: 'color',
-                value: '#ffffff',
-                isLocked: false,
-              } as Background,
-            };
-          } else if (theme.backgroundImage) {
-            // Дизайн с изображением
-            return {
-              ...slide,
-              background: {
-                type: 'image',
-                value: theme.backgroundImage,
-                size: theme.backgroundSize || 'cover',
-                position: theme.backgroundPosition || 'center',
-                isLocked: theme.isLocked,
-              } as Background,
-            };
-          } else if (theme.backgroundColor) {
-            // Дизайн с цветным фоном
-            return {
-              ...slide,
-              background: {
-                type: 'color',
-                value: theme.backgroundColor,
-                isLocked: theme.isLocked,
-              } as Background,
-            };
-          } else {
-            // Fallback: белый фон
-            return {
-              ...slide,
-              background: {
-                type: 'color',
-                value: '#ffffff',
-                isLocked: false,
-              } as Background,
-            };
-          }
-        });
-
+      const actionType = action.payload.split(':')[0];
+      pushToPast(state, `editor/handleAction/${actionType}`);
+      
+      if (processAction(state, action.payload)) {
+        // Action was handled successfully
         return;
-      }
-
-      if (act.startsWith('TEXT_SHADOW:')) {
-        const shadowKey = act.split(':')[1].trim();
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_SHADOW');
-
-          const shadowPreset = TEXT_SHADOW_OPTIONS.find(
-            (option: { key: string }) => option.key === shadowKey
-          );
-
-          if (shadowPreset) {
-            state.presentation.slides = state.presentation.slides.map((s) =>
-              s.id === slide.id
-                ? {
-                    ...s,
-                    elements: s.elements.map((el) =>
-                      el.id === elId
-                        ? {
-                            ...el,
-                            shadow:
-                              shadowKey === 'none'
-                                ? undefined
-                                : {
-                                    color: shadowPreset.color,
-                                    blur: shadowPreset.blur,
-                                  },
-                          }
-                        : el
-                    ),
-                  }
-                : s
-            );
-          }
-        }
-        return;
-      }
-
-      // Для сглаживания (общий для всех элементов)
-      if (act.startsWith('SHAPE_SMOOTHING:')) {
-        const smoothingKey = act.split(':')[1].trim();
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/SHAPE_SMOOTHING');
-
-          const smoothingPreset = SHAPE_SMOOTHING_OPTIONS.find(
-            (option: { key: string }) => option.key === smoothingKey
-          );
-
-          if (smoothingPreset) {
-            state.presentation.slides = state.presentation.slides.map((s) =>
-              s.id === slide.id
-                ? {
-                    ...s,
-                    elements: s.elements.map((el) =>
-                      el.id === elId
-                        ? {
-                            ...el,
-                            smoothing: smoothingPreset.value,
-                          }
-                        : el
-                    ),
-                  }
-                : s
-            );
-          }
-        }
-        return;
-      }
-
-      if (act.startsWith('TEXT_REFLECTION:')) {
-        const parts = act.split(':');
-        const reflectionKey = parts[1].trim();
-        const reflectionValue = parseFloat(parts[2]);
-
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_REFLECTION');
-
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id
-              ? {
-                  ...s,
-                  elements: s.elements.map((el) =>
-                    el.id === elId && el.type === 'text'
-                      ? {
-                          ...el,
-                          reflection: reflectionKey === 'none' ? undefined : reflectionValue,
-                        }
-                      : el
-                  ),
-                }
-              : s
-          );
-        }
-        return;
-      }
-
-      // ДОБАВЛЯЕМ ОБРАБОТКУ ПЕРЕДНЕГО/ЗАДНЕГО ПЛАНА
-      if (act === 'BRING_TO_FRONT' && slide && currentSelectedElementIds.length > 0) {
-        pushToPast(state, 'editor/handleAction/BRING_TO_FRONT');
-
-        // Получаем элементы слайда
-        const elements = [...slide.elements];
-
-        // Фильтруем выбранные элементы
-        const selectedElements = elements.filter((el) => currentSelectedElementIds.includes(el.id));
-
-        // Фильтруем невыбранные элементы
-        const otherElements = elements.filter((el) => !currentSelectedElementIds.includes(el.id));
-
-        // Помещаем выбранные элементы в конец (на передний план)
-        const newElements = [...otherElements, ...selectedElements];
-
-        state.presentation.slides = state.presentation.slides.map((s) =>
-          s.id === slide.id ? { ...s, elements: newElements } : s
-        );
-        return;
-      }
-
-      if (act === 'SEND_TO_BACK' && slide && currentSelectedElementIds.length > 0) {
-        pushToPast(state, 'editor/handleAction/SEND_TO_BACK');
-
-        // Получаем элементы слайда
-        const elements = [...slide.elements];
-
-        // Фильтруем выбранные элементы
-        const selectedElements = elements.filter((el) => currentSelectedElementIds.includes(el.id));
-
-        // Фильтруем невыбранные элементы
-        const otherElements = elements.filter((el) => !currentSelectedElementIds.includes(el.id));
-
-        // Помещаем выбранные элементы в начало (на задний план)
-        const newElements = [...selectedElements, ...otherElements];
-
-        state.presentation.slides = state.presentation.slides.map((s) =>
-          s.id === slide.id ? { ...s, elements: newElements } : s
-        );
-        return;
-      }
-
-      // В редакторе слайса, в обработке шаблонов:
-      if (slideMap[act]) {
-        pushToPast(state, 'editor/handleAction');
-
-        // Получаем шаблон слайда
-        const templateSlide = slideMap[act];
-
-        // Проверяем, есть ли слайды с дизайн-темой
-        const existingSlideWithTheme = state.presentation.slides.find(
-          (s) => s.background.type !== 'none' && 'isLocked' in s.background && s.background.isLocked
-        );
-
-        // Создаем новый слайд с уникальными ID элементов
-        const newSlide = {
-          ...templateSlide,
-          id: `slide-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          elements: templateSlide.elements.map((el) => ({
-            ...el,
-            id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            // Сбрасываем текстовое содержимое для текстовых элементов
-            ...(el.type === 'text' && { content: '' }),
-          })),
-          // Копируем фон, если есть тема
-          ...(existingSlideWithTheme && {
-            background: { ...existingSlideWithTheme.background },
-          }),
-        };
-
-        state.presentation = func.addSlide(state.presentation, newSlide);
-        state.selectedSlideId = newSlide.id;
-        state.selectedSlideIds = [newSlide.id];
-        state.selectedElementIds = [];
-        return;
-      }
-
-      if (act.startsWith('TEXT_FONT:')) {
-        const fontFamily = act.split(':')[1].trim();
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_FONT');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeTextFont(s, elId, fontFamily) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('ADD_SHAPE:')) {
-        const shapeType = act.split(':')[1].trim() as ShapeType;
-        console.log('Добавление фигуры:', shapeType); // ← ДОБАВЬТЕ
-        console.log('Текущий слайд:', slide?.id); // ← ДОБАВЬТЕ
-
-        if (slide) {
-          pushToPast(state, 'editor/handleAction/ADD_SHAPE');
-          // Используем через temp
-          const shapeElement = temp.createShapeElement(shapeType);
-          console.log('Созданная фигура:', shapeElement); // ← ДОБАВЬТЕ
-
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.addShape(s, shapeElement) : s
-          );
-
-          console.log(
-            'Фигура добавлена, элементы слайда:',
-            state.presentation.slides.find((s) => s.id === slide.id)?.elements
-          ); // ← ДОБАВЬТЕ
-        }
-        return;
-      }
-
-      if (act.startsWith('SHAPE_FILL:')) {
-        const color = act.split(':')[1].trim();
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/SHAPE_FILL');
-          // Проверяем тип элемента
-          const element = slide.elements.find((el) => el.id === elId);
-          if (element?.type === 'shape') {
-            // Для фигур используем новую функцию
-            state.presentation.slides = state.presentation.slides.map((s) =>
-              s.id === slide.id ? func.changeShapeFill(s, elId, color) : s
-            );
-          } else if (element?.type === 'text') {
-            // Для текста используем существующую
-            state.presentation.slides = state.presentation.slides.map((s) =>
-              s.id === slide.id ? func.changeTextBackgroundColor(s, elId, color) : s
-            );
-          }
-        }
-        return;
-      }
-
-      if (act.startsWith('SHAPE_STROKE:')) {
-        const color = act.split(':')[1].trim();
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/SHAPE_STROKE');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeShapeStroke(s, elId, color) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('SHAPE_STROKE_WIDTH:')) {
-        const width = parseInt(act.split(':')[1].trim(), 10);
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/SHAPE_STROKE_WIDTH');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeShapeStrokeWidth(s, elId, width) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('TEXT_SIZE:')) {
-        const size = parseInt(act.split(':')[1].trim(), 10);
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_SIZE');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeTextSize(s, elId, size) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('TEXT_ALIGN_HORIZONTAL:')) {
-        const align = act.split(':')[1].trim() as 'left' | 'center' | 'right' | 'justify';
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_ALIGN_H');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeTextAlignment(s, elId, align) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('TEXT_ALIGN_VERTICAL:')) {
-        const vAlign = act.split(':')[1].trim() as 'top' | 'middle' | 'bottom';
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_ALIGN_V');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeTextVerticalAlignment(s, elId, vAlign) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('TEXT_LINE_HEIGHT:')) {
-        const lineHeight = parseFloat(act.split(':')[1].trim());
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_LINE_HEIGHT');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeTextLineHeight(s, elId, lineHeight) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('TEXT_COLOR:')) {
-        const color = act.split(':')[1].trim();
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/TEXT_COLOR');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeTextColor(s, elId, color) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('SHAPE_FILL:')) {
-        const color = act.split(':')[1].trim();
-        if (slide && elId) {
-          pushToPast(state, 'editor/handleAction/SHAPE_FILL');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeTextBackgroundColor(s, elId, color) : s
-          );
-        }
-        return;
-      }
-
-      if (act.startsWith('SLIDE_BACKGROUND:')) {
-        const color = act.split(':')[1];
-        if (slide) {
-          // Проверяем, заблокирован ли текущий фон
-          if (
-            slide.background.type !== 'none' &&
-            'isLocked' in slide.background &&
-            slide.background.isLocked
-          ) {
-            console.warn('Фон заблокирован и не может быть изменен');
-            return;
-          }
-
-          pushToPast(state, 'editor/handleAction/SLIDE_BACKGROUND');
-          state.presentation.slides = state.presentation.slides.map((s) =>
-            s.id === slide.id ? func.changeBackground(s, { type: 'color', value: color }) : s
-          );
-        }
-        return;
-      }
-
-      if (act === 'TEXT_BOLD' && slide && elId) {
-        pushToPast(state, 'editor/handleAction/TEXT_BOLD');
-        state.presentation.slides = state.presentation.slides.map((s) =>
-          s.id === slide.id
-            ? {
-                ...s,
-                elements: s.elements.map((el) =>
-                  el.id === elId && el.type === 'text' ? { ...el, bold: !el.bold } : el
-                ),
-              }
-            : s
-        );
-        return;
-      }
-
-      if (act === 'TEXT_ITALIC' && slide && elId) {
-        pushToPast(state, 'editor/handleAction/TEXT_ITALIC');
-        state.presentation.slides = state.presentation.slides.map((s) =>
-          s.id === slide.id
-            ? {
-                ...s,
-                elements: s.elements.map((el) =>
-                  el.id === elId && el.type === 'text' ? { ...el, italic: !el.italic } : el
-                ),
-              }
-            : s
-        );
-        return;
-      }
-
-      if (act === 'TEXT_UNDERLINE' && slide && elId) {
-        pushToPast(state, 'editor/handleAction/TEXT_UNDERLINE');
-        state.presentation.slides = state.presentation.slides.map((s) =>
-          s.id === slide.id
-            ? {
-                ...s,
-                elements: s.elements.map((el) =>
-                  el.id === elId && el.type === 'text' ? { ...el, underline: !el.underline } : el
-                ),
-              }
-            : s
-        );
-        return;
-      }
-
-      if (act === 'CHANGE_FONT_FAMILY' && slide && elId) {
-        pushToPast(state, 'editor/handleAction/CHANGE_FONT_FAMILY');
-        state.presentation.slides = state.presentation.slides.map((s) =>
-          s.id === slide.id
-            ? {
-                ...s,
-                elements: s.elements.map((el) =>
-                  el.id === elId && el.type === 'text' ? { ...el, fontFamily: 'Arial' } : el
-                ),
-              }
-            : s
-        );
-        return;
-      }
-
-      if (act === 'DELETE_SELECTED' && slide && state.selectedElementIds.length > 0) {
-        pushToPast(state, 'editor/handleAction/DELETE_SELECTED');
-
-        state.presentation.slides = state.presentation.slides.map((s) =>
-          s.id === slide.id
-            ? {
-                ...s,
-                elements: s.elements.filter((el) => !state.selectedElementIds.includes(el.id)),
-              }
-            : s
-        );
-
-        state.selectedElementIds = [];
-        return;
-      }
-
-      switch (act) {
-        case 'ADD_TEXT':
-          if (slide) {
-            pushToPast(state, 'editor/ADD_TEXT');
-            state.presentation.slides = state.presentation.slides.map((s) =>
-              s.id === slide.id ? func.addText(s, temp.createTextElement()) : s
-            );
-          }
-          break;
-
-        case 'ADD_IMAGE':
-          if (slide) {
-            pushToPast(state, 'editor/ADD_IMAGE');
-            state.presentation.slides = state.presentation.slides.map((s) =>
-              s.id === slide.id ? func.addImage(s, temp.createImageElement()) : s
-            );
-          }
-          break;
-
-        case 'DUPLICATE_SLIDE':
-          if (slide) {
-            pushToPast(state, 'editor/DUPLICATE_SLIDE');
-            const duplicatedSlide = {
-              ...slide,
-              id: `slide-${Date.now()}`,
-              elements: slide.elements.map((el) => ({ ...el, id: `${el.id}-copy-${Date.now()}` })),
-            };
-            state.presentation = func.addSlide(state.presentation, duplicatedSlide);
-            state.selectedSlideId = duplicatedSlide.id;
-            state.selectedSlideIds = [duplicatedSlide.id];
-            state.selectedElementIds = [];
-          }
-          break;
       }
     },
 
     undo(state) {
       const past = state.history.past;
       if (past.length === 0) return;
+
       const last = past.pop()!;
       const currentSnap = makeSnapshot(state);
       state.history.future.push(currentSnap);
@@ -1007,6 +418,7 @@ export const editorSlice = createSlice({
     redo(state) {
       const future = state.history.future;
       if (future.length === 0) return;
+
       const next = future.pop()!;
       const currentSnap = makeSnapshot(state);
       state.history.past.push(currentSnap);
