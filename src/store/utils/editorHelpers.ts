@@ -32,6 +32,8 @@ export function updateSlideInPresentation(
   state.presentation.slides = state.presentation.slides.map((s) =>
     s.id === slideId ? updater(s) : s
   );
+  // Синхронизируем state.slides с presentation.slides
+  state.slides = state.presentation.slides;
 }
 
 export function updateSlideElements(

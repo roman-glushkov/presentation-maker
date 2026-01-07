@@ -45,6 +45,7 @@ function handleDesignTheme(state: EditorState, themeId: string): boolean {
     ...slide,
     background: getThemeBackground(themeId),
   }));
+  state.slides = state.presentation.slides;
   return true;
 }
 
@@ -129,6 +130,7 @@ function handleAddSlideFromTemplate(state: EditorState, templateKey: string): bo
   const newSlide = createSlideFromTemplate(template, !!existingSlideWithTheme);
 
   state.presentation = func.addSlide(state.presentation, newSlide);
+  state.slides = state.presentation.slides;
   state.selectedSlideId = newSlide.id;
   state.selectedSlideIds = [newSlide.id];
   state.selectedElementIds = [];
@@ -150,6 +152,11 @@ function handleAddShape(state: EditorState, shapeType: string): boolean {
 
   const shapeElement = temp.createShapeElement(shapeType as ShapeType);
   updateSlideInPresentation(state, slide.id, (s) => func.addShape(s, shapeElement));
+  
+  // Автоматически выбираем новый элемент
+  state.selectedElementIds = [shapeElement.id];
+  state.selectedSlideIds = [];
+  
   return true;
 }
 
@@ -305,7 +312,13 @@ function handleAddText(state: EditorState): boolean {
   const slide = findSlideById(state);
   if (!slide) return false;
 
-  updateSlideInPresentation(state, slide.id, (s) => func.addText(s, temp.createTextElement()));
+  const newTextElement = temp.createTextElement();
+  updateSlideInPresentation(state, slide.id, (s) => func.addText(s, newTextElement));
+  
+  // Автоматически выбираем новый элемент
+  state.selectedElementIds = [newTextElement.id];
+  state.selectedSlideIds = [];
+  
   return true;
 }
 
@@ -313,7 +326,13 @@ function handleAddImage(state: EditorState): boolean {
   const slide = findSlideById(state);
   if (!slide) return false;
 
-  updateSlideInPresentation(state, slide.id, (s) => func.addImage(s, temp.createImageElement()));
+  const newImageElement = temp.createImageElement();
+  updateSlideInPresentation(state, slide.id, (s) => func.addImage(s, newImageElement));
+  
+  // Автоматически выбираем новый элемент
+  state.selectedElementIds = [newImageElement.id];
+  state.selectedSlideIds = [];
+  
   return true;
 }
 
@@ -328,6 +347,7 @@ function handleDuplicateSlide(state: EditorState): boolean {
   };
 
   state.presentation = func.addSlide(state.presentation, duplicatedSlide);
+  state.slides = state.presentation.slides;
   state.selectedSlideId = duplicatedSlide.id;
   state.selectedSlideIds = [duplicatedSlide.id];
   state.selectedElementIds = [];

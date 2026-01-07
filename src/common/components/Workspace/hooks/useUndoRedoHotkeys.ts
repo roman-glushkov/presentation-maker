@@ -11,16 +11,33 @@ export default function useUndoRedoHotkeys() {
       const ctrl = isMac ? e.metaKey : e.ctrlKey;
       if (!ctrl) return;
 
+      // Проверяем, не находимся ли мы в текстовом поле
+      const isTextInputFocused =
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.hasAttribute('contenteditable');
+
+      // Если мы в текстовом поле, не перехватываем undo/redo (пусть работает стандартное поведение)
+      if (isTextInputFocused) return;
+
       const key = (e.code || '').toLowerCase();
 
-      if (key === 'KeyZ' && !e.shiftKey) {
+      if (key === 'keyz' && !e.shiftKey) {
         e.preventDefault();
         e.stopPropagation();
         dispatch(undo());
         return;
       }
 
-      if (key === 'KeyY') {
+      if (key === 'keyy') {
+        e.preventDefault();
+        e.stopPropagation();
+        dispatch(redo());
+        return;
+      }
+
+      // На Mac также поддерживаем Cmd+Shift+Z для redo
+      if (isMac && key === 'keyz' && e.shiftKey) {
         e.preventDefault();
         e.stopPropagation();
         dispatch(redo());

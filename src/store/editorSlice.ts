@@ -193,6 +193,7 @@ export const editorSlice = createSlice({
     loadDemoPresentation(state) {
       pushToPast(state, 'editor/loadDemoPresentation');
       state.presentation = clonePresentation(demoPresentation);
+      state.slides = state.presentation.slides;
       state.presentationId = undefined;
       state.selectedSlideId = demoPresentation.slides[0]?.id || '';
       state.selectedSlideIds = demoPresentation.slides[0] ? [demoPresentation.slides[0].id] : [];
@@ -212,6 +213,7 @@ export const editorSlice = createSlice({
 
       pushToPast(state, 'editor/updateSlide');
       updateSlideInPresentation(state, slideId, () => newSlide);
+      state.slides = state.presentation.slides;
     },
 
     updateTextContent(state, action: PayloadAction<{ elementId: string; content: string }>) {
@@ -227,6 +229,7 @@ export const editorSlice = createSlice({
 
       pushToPast(state, 'editor/updateTextContent');
       updateSlideInPresentation(state, slideId, (s) => func.changeText(s, elementId, content));
+      state.slides = state.presentation.slides;
     },
 
     addSlide(state, action: PayloadAction<Slide>) {
@@ -239,6 +242,7 @@ export const editorSlice = createSlice({
       };
 
       state.presentation = func.addSlide(state.presentation, newSlide);
+      state.slides = state.presentation.slides;
       state.selectedSlideId = newSlide.id;
       state.selectedSlideIds = [newSlide.id];
       state.selectedElementIds = [];
@@ -248,6 +252,7 @@ export const editorSlice = createSlice({
       pushToPast(state, 'editor/removeSlide');
 
       state.presentation = func.removeSlide(state.presentation, action.payload);
+      state.slides = state.presentation.slides;
       state.selectedSlideId = state.presentation.slides[0]?.id || '';
       state.selectedSlideIds = state.presentation.slides[0]
         ? [state.presentation.slides[0].id]
@@ -260,6 +265,7 @@ export const editorSlice = createSlice({
 
       pushToPast(state, 'editor/reorderSlides');
       state.presentation.slides = action.payload;
+      state.slides = state.presentation.slides;
     },
 
     changeTitle(state, action: PayloadAction<string>) {
@@ -275,6 +281,7 @@ export const editorSlice = createSlice({
 
       pushToPast(state, 'editor/changeBackground');
       updateSlideInPresentation(state, slide.id, (s) => func.changeBackground(s, action.payload));
+      state.slides = state.presentation.slides;
     },
 
     addImageWithUrl(
@@ -302,6 +309,7 @@ export const editorSlice = createSlice({
       };
 
       updateSlideInPresentation(state, slide.id, (s) => func.addImage(s, imageElement));
+      state.slides = state.presentation.slides;
     },
 
     createNewPresentation(state) {
@@ -324,6 +332,7 @@ export const editorSlice = createSlice({
         selectedSlideIds: [newSlideId],
       };
 
+      state.slides = state.presentation.slides;
       state.presentationId = undefined;
       state.selectedSlideId = newSlideId;
       state.selectedSlideIds = [newSlideId];
@@ -350,6 +359,7 @@ export const editorSlice = createSlice({
         elements: [...slide.elements, ...newElements],
       }));
 
+      state.slides = state.presentation.slides;
       state.selectedElementIds = newElements.map((el) => el.id);
       state.selectedSlideIds = [];
     },
@@ -377,6 +387,7 @@ export const editorSlice = createSlice({
       newSlides.splice(slideIndex + 1, 0, duplicatedSlide);
 
       state.presentation.slides = newSlides;
+      state.slides = state.presentation.slides;
       state.selectedSlideId = duplicatedSlide.id;
       state.selectedSlideIds = [duplicatedSlide.id];
       state.selectedElementIds = [];
@@ -386,6 +397,7 @@ export const editorSlice = createSlice({
       pushToPast(state, 'editor/loadExistingPresentation');
 
       state.presentation = clonePresentation(action.payload);
+      state.slides = state.presentation.slides;
       state.selectedSlideId = action.payload.slides[0]?.id || '';
       state.selectedSlideIds = action.payload.slides[0] ? [action.payload.slides[0].id] : [];
       state.selectedElementIds = [];
@@ -393,11 +405,15 @@ export const editorSlice = createSlice({
 
     handleAction(state, action: PayloadAction<string>) {
       const actionType = action.payload.split(':')[0];
+      // Сохраняем состояние ДО изменений
       pushToPast(state, `editor/handleAction/${actionType}`);
       
-      if (processAction(state, action.payload)) {
-        // Action was handled successfully
-        return;
+      // Выполняем действие
+      const handled = processAction(state, action.payload);
+      
+      // Синхронизируем slides после изменений
+      if (handled) {
+        state.slides = state.presentation.slides;
       }
     },
 
@@ -410,6 +426,7 @@ export const editorSlice = createSlice({
       state.history.future.push(currentSnap);
 
       state.presentation = clonePresentation(last.presentation);
+      state.slides = state.presentation.slides;
       state.selectedSlideId = last.selectedSlideId;
       state.selectedSlideIds = [...last.selectedSlideIds];
       state.selectedElementIds = [...last.selectedElementIds];
@@ -424,6 +441,7 @@ export const editorSlice = createSlice({
       state.history.past.push(currentSnap);
 
       state.presentation = clonePresentation(next.presentation);
+      state.slides = state.presentation.slides;
       state.selectedSlideId = next.selectedSlideId;
       state.selectedSlideIds = [...next.selectedSlideIds];
       state.selectedElementIds = [...next.selectedElementIds];
