@@ -1,6 +1,6 @@
 import React from 'react';
 import { Slide } from '../../../../store/types/presentation';
-import { Preview } from './Preview';
+import { PreviewWorkspace } from './PreviewWorkspace';
 import { SlideNumber } from './Number';
 
 interface RowProps {
@@ -46,7 +46,7 @@ export function SlideRow({
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <SlideNumber number={index + 1} />
-        <Preview slide={slide} scale={0.25} />
+        <PreviewWorkspace slide={slide} scale={0.25} />
       </div>
     </div>
   );
