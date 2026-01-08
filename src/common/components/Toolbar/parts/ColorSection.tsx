@@ -1,11 +1,11 @@
 import React from 'react';
 import { THEME_COLUMNS, STANDARD_COLORS } from '../constants/colors';
-import ThemeColorButton from './ThemeButton';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction } from '../../../../store/editorSlice';
+import '../styles/ColorSection.css';
 
 interface Props {
-  type: 'text' | 'fill' | 'stroke' | 'background'; // ← ДОБАВИЛИ 'stroke'
+  type: 'text' | 'fill' | 'stroke' | 'background';
 }
 
 export default function ColorSection({ type }: Props) {
@@ -24,7 +24,7 @@ export default function ColorSection({ type }: Props) {
         if (selectedElementId) dispatch(handleAction(`SHAPE_STROKE:${color}`));
         break;
       case 'background':
-        dispatch(handleAction(`SLIDE_BACKGROUND: ${color}`));
+        dispatch(handleAction(`SLIDE_BACKGROUND:${color}`)); // убрал лишний пробел
         break;
     }
   };
@@ -37,7 +37,14 @@ export default function ColorSection({ type }: Props) {
           {THEME_COLUMNS.map((column, ci) => (
             <div key={ci} className="theme-column">
               {column.map((color) => (
-                <ThemeColorButton key={color} color={color} onClick={onSelectColor} />
+                <button
+                  key={color}
+                  className="color-swatch"
+                  style={{ backgroundColor: color }}
+                  onClick={() => onSelectColor(color)}
+                  title={color}
+                  aria-label={color}
+                />
               ))}
             </div>
           ))}
@@ -48,7 +55,14 @@ export default function ColorSection({ type }: Props) {
         <div className="color-section-title">Стандартные цвета</div>
         <div className="standard-colors">
           {STANDARD_COLORS.map((color) => (
-            <ThemeColorButton key={color} color={color} onClick={onSelectColor} />
+            <button
+              key={color}
+              className="color-swatch"
+              style={{ backgroundColor: color }}
+              onClick={() => onSelectColor(color)}
+              title={color}
+              aria-label={color}
+            />
           ))}
         </div>
       </div>

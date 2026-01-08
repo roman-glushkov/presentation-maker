@@ -4,6 +4,10 @@ import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
 import TemplateSlidePreview from './TemplatePreview';
+import { Slide } from '../../../../store/types/presentation';
+import { RootState } from '../../../../store';
+import '../styles/TemplatePopup.css';
+
 import {
   slideTitle,
   slideTitleAndObject,
@@ -15,9 +19,8 @@ import {
   slideObjectWithSignature,
   slideDrawingWithCaption,
 } from '../../../../store/templates/slide';
-import { RootState } from '../../../../store';
 
-const TEMPLATE_SLIDES = {
+const TEMPLATE_SLIDES: Record<string, Slide> = {
   ADD_TITLE_SLIDE: slideTitle,
   ADD_TITLE_AND_OBJECT_SLIDE: slideTitleAndObject,
   ADD_SECTION_HEADER_SLIDE: slideSectionHeader,
@@ -31,8 +34,6 @@ const TEMPLATE_SLIDES = {
 
 export default function TemplatePopup() {
   const dispatch = useAppDispatch();
-
-  // Получаем текущую презентацию для определения примененного дизайна
   const presentation = useAppSelector((state: RootState) => state.editor.presentation);
 
   const handleSelect = (templateKey: string) => {
@@ -40,9 +41,7 @@ export default function TemplatePopup() {
     dispatch(setActiveTextOption(null));
   };
 
-  // Находим активный дизайн (фон с isLocked: true)
   const findActiveDesign = () => {
-    // Ищем первый слайд с заблокированным фоном
     const slideWithLockedBg = presentation.slides.find(
       (slide) =>
         slide.background.type !== 'none' &&
@@ -53,14 +52,11 @@ export default function TemplatePopup() {
     return slideWithLockedBg ? slideWithLockedBg.background : null;
   };
 
-  // Получаем шаблон слайда с применением активного дизайна
   const getTemplateWithDesign = (templateKey: string) => {
-    const templateSlide = TEMPLATE_SLIDES[templateKey as keyof typeof TEMPLATE_SLIDES];
+    const templateSlide = TEMPLATE_SLIDES[templateKey];
     if (!templateSlide) return null;
 
     const activeDesign = findActiveDesign();
-
-    // Если есть активный дизайн, применяем его к шаблону
     if (activeDesign) {
       return {
         ...templateSlide,
@@ -81,25 +77,12 @@ export default function TemplatePopup() {
             key={template.key}
             className="template-item"
             onClick={() => handleSelect(template.key)}
-            style={{ cursor: 'pointer' }}
           >
             <div className="template-preview">
               {slide ? (
                 <TemplateSlidePreview slide={slide} scale={0.2} />
               ) : (
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#666',
-                    fontSize: '12px',
-                  }}
-                >
-                  Нет превью
-                </div>
+                <div className="template-no-preview">Нет превью</div>
               )}
             </div>
             <div className="template-label">{template.label}</div>

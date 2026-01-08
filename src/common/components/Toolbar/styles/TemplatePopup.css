@@ -1,0 +1,75 @@
+.template-popup {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 12px;
+  z-index: 20;
+  animation: popupFade 0.15s ease-out;
+  min-width: 600px;
+}
+
+.template-item {
+  background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%);
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 100px;
+}
+
+.template-item:hover {
+  background: #2563eb;
+  border-color: #60a5fa;
+}
+
+.template-preview {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.template-label {
+  padding: 8px 4px;
+  font-size: 12px;
+  text-align: center;
+  background: white;
+  color: #1e3a8a;
+  font-weight: 600;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1px solid #e2e8f0;
+  line-height: 1.3;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
+}
+
+.template-item:hover .template-label {
+  background: #2563eb;
+  color: white;
+}
+
+.template-no-preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 12px;
+}
