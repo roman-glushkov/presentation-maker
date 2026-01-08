@@ -100,7 +100,7 @@ export const SHAPE_SMOOTHING_OPTIONS: SmoothingOption[] = [
 export interface ReflectionOption {
   label: string;
   key: string;
-  value: number; // числовое значение прозрачности
+  value: number;
 }
 
 export const TEXT_REFLECTION_OPTIONS: ReflectionOption[] = [

@@ -1,4 +1,3 @@
-// components/Toolbar/constants/templates.ts
 export interface Template {
   label: string;
   key: string;

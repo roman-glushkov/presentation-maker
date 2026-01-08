@@ -1,4 +1,3 @@
-// constants/config.ts
 import IronManPreview from '../assets/wallpaper/Iron_man.jpg';
 import BlackAndWhitePreview from '../assets/wallpaper/Black_and_white.jpg';
 import BlueAutumnPreview from '../assets/wallpaper/Blue_autumn.jpg';
@@ -50,12 +49,10 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '🎯 Сглаживание', action: 'SHAPE_SMOOTHING' },
   ],
   design: [
-    // НОВАЯ ОПЦИЯ - БЕЗ ДИЗАЙНА (первая в списке)
     {
       label: '❌ Без дизайна',
       action: 'DESIGN_THEME:no_design',
     },
-    // Существующие темы
     {
       action: 'DESIGN_THEME:iron_man',
       previewImage: IronManPreview,

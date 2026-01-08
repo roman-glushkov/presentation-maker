@@ -1,4 +1,3 @@
-// constants/designThemes.ts
 import IronManBackground from '../assets/wallpaper/Iron_man.jpg';
 import BlackAndWhiteBackground from '../assets/wallpaper/Black_and_white.jpg';
 import BlueAutumnBackground from '../assets/wallpaper/Blue_autumn.jpg';
@@ -21,15 +20,12 @@ export interface DesignTheme {
 }
 
 export const DESIGN_THEMES: Record<string, DesignTheme> = {
-  // НОВАЯ ОПЦИЯ - БЕЗ ДИЗАЙНА (первая в списке)
   no_design: {
     id: 'no_design',
     name: 'Без дизайна',
-    backgroundColor: '#ffffff', // Белый фон
-    isLocked: false, // Можно сбросить
-    // backgroundImage нет - значит чистый белый фон
+    backgroundColor: '#ffffff',
+    isLocked: false,
   },
-  // Существующие темы
   iron_man: {
     id: 'iron_man',
     name: 'Iron Man',
@@ -112,7 +108,6 @@ export const DESIGN_THEMES: Record<string, DesignTheme> = {
   },
 };
 
-// Вспомогательные функции
 export function getThemeById(id: string): DesignTheme | undefined {
   return DESIGN_THEMES[id];
 }
