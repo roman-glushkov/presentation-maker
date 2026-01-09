@@ -6,7 +6,7 @@ import PresentationList from './services/components/PresentationList';
 import EditorLayout from './services/auth/EditorLayout';
 import AuthWrapper from './services/auth/AuthWrapper';
 import Player from './services/auth/Player';
-import './appwrite/styles/AuthStyles.css';
+import './services/styles/AuthStyles.css';
 import './common/view/styles.css';
 
 function ProtectedRoutes() {

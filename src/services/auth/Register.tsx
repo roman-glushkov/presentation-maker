@@ -159,56 +159,6 @@ export default function Register() {
   const emailError = getValidationMessage('email');
   const passwordError = getValidationMessage('password');
 
-  const features = [
-    {
-      id: 'feature1',
-      title: 'Текстовые и графические элементы',
-      text: 'Добавляйте текст, изображения, фигуры и настраивайте их оформление',
-      icon: (
-        <>
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-        </>
-      ),
-    },
-    {
-      id: 'feature2',
-      title: 'Гибкое редактирование слайдов',
-      text: 'Изменяйте размер, положение и стиль элементов, перетаскивайте их мышью',
-      icon: (
-        <>
-          <path d="M3 6h18" />
-          <path d="M3 12h18" />
-          <path d="M3 18h18" />
-        </>
-      ),
-    },
-    {
-      id: 'feature3',
-      title: 'Управление несколькими слайдами',
-      text: 'Создавайте, удаляйте, дублируйте и переупорядочивайте слайды',
-      icon: (
-        <>
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <line x1="3" y1="9" x2="21" y2="9" />
-          <line x1="9" y1="21" x2="9" y2="9" />
-        </>
-      ),
-    },
-    {
-      id: 'feature4',
-      title: 'Сохранение и загрузка проектов',
-      text: 'Храните презентации в облаке и возвращайтесь к ним позже',
-      icon: (
-        <>
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </>
-      ),
-    },
-  ];
-
   return (
     <div className="presentation-body">
       <div className="presentation-notifications-container">
@@ -270,7 +220,51 @@ export default function Register() {
             </p>
 
             <div className="presentation-features">
-              {features.map(({ id, title, text, icon }) => (
+              {[
+                {
+                  id: 'feature1',
+                  title: '9 готовых шаблонов слайдов',
+                  text: 'Начните с профессиональных шаблонов или создайте свой дизайн с нуля',
+                  icon: (
+                    <>
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </>
+                  ),
+                },
+                {
+                  id: 'feature2',
+                  title: 'Расширенное редактирование',
+                  text: 'Настройте шрифты, цвета, выравнивание и интервалы с помощью интуитивных инструментов',
+                  icon: (
+                    <>
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                    </>
+                  ),
+                },
+                {
+                  id: 'feature3',
+                  title: 'Вставка изображений и фигур',
+                  text: 'Добавляйте картинки по ссылке или с устройства, вставляйте фигуры с настраиваемыми контурами',
+                  icon: (
+                    <>
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <polyline points="21 15 16 10 5 21" />
+                    </>
+                  ),
+                },
+                {
+                  id: 'feature4',
+                  title: 'Режим презентации',
+                  text: 'Запускайте слайд-шоу прямо в браузере, отслеживайте нумерацию слайдов',
+                  icon: (
+                    <>
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </>
+                  ),
+                },
+              ].map(({ id, title, text, icon }) => (
                 <div className="presentation-feature" key={id}>
                   <div className="presentation-feature-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
