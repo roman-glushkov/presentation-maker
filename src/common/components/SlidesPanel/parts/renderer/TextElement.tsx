@@ -57,21 +57,6 @@ export function TextElement({ element, scale }: Props) {
       >
         {element.content}
       </div>
-
-      {element.reflection && element.reflection > 0 && (
-        <div
-          className="slide-text-element-reflection"
-          style={{
-            ...textStyle,
-            opacity: element.reflection,
-            marginTop: 4 * s,
-            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)',
-            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)',
-          }}
-        >
-          {element.content}
-        </div>
-      )}
     </div>
   );
 }

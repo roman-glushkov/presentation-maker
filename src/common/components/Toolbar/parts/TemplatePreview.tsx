@@ -71,18 +71,6 @@ export default function TemplateSlidePreview({ slide, scale }: Props) {
             <div className="text-element-content" style={getTextStyle(textEl, showPlaceholder)}>
               {showPlaceholder ? textEl.placeholder : textEl.content || 'Текстовый блок'}
             </div>
-
-            {textEl.reflection && textEl.reflection > 0 && (
-              <div
-                className="text-reflection"
-                style={{
-                  ...getTextStyle(textEl, showPlaceholder),
-                  opacity: textEl.reflection,
-                }}
-              >
-                {textEl.content || textEl.placeholder}
-              </div>
-            )}
           </div>
         );
       })}

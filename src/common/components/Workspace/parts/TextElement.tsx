@@ -31,8 +31,10 @@ const TextElementRenderer = ({
   const showPlaceholder = !element.content && element.placeholder && !isEditing;
   const isPlaceholderShown = Boolean(!element.content && element.placeholder && !isEditing);
 
-  const { dynamicTextStyle, dynamicContainerStyle, dynamicReflectionStyle, containerClasses } =
-    getTextStyles(element, isPlaceholderShown);
+  const { dynamicTextStyle, dynamicContainerStyle, containerClasses } = getTextStyles(
+    element,
+    isPlaceholderShown
+  );
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,15 +71,6 @@ const TextElementRenderer = ({
       ) : (
         <div className="text-content" style={dynamicTextStyle}>
           {showPlaceholder ? element.placeholder : element.content}
-        </div>
-      )}
-
-      {element.reflection && element.reflection > 0 && !isEditing && (
-        <div
-          className="text-content text-reflection"
-          style={{ ...dynamicTextStyle, ...dynamicReflectionStyle }}
-        >
-          {element.content}
         </div>
       )}
     </div>

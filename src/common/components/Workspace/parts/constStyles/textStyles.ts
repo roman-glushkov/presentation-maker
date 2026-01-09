@@ -26,17 +26,11 @@ export const getTextStyles = (element: TextElementType, showPlaceholder: boolean
     borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
   };
 
-  const dynamicReflectionStyle: React.CSSProperties = {
-    opacity: element.reflection || 0,
-    marginTop: 4,
-  };
-
   const containerClasses = `text-element-container ${showPlaceholder ? 'text-placeholder' : ''}`;
 
   return {
     dynamicTextStyle,
     dynamicContainerStyle,
-    dynamicReflectionStyle,
     containerClasses,
   };
 };

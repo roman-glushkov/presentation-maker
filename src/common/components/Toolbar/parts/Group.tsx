@@ -17,7 +17,6 @@ import {
   ShapePopup,
   ShapeSmoothingMenu,
   TextShadowMenu,
-  TextReflectionMenu,
   FontPopup,
   TextAlignPopup,
   StrokeWidthPopup,
@@ -43,7 +42,6 @@ const menuActions = [
   'ADD_SHAPE',
   'TEXT_SHADOW',
   'SHAPE_SMOOTHING',
-  'TEXT_REFLECTION',
 ];
 
 export default function ToolbarGroup() {
@@ -245,13 +243,6 @@ export default function ToolbarGroup() {
       SHAPE_SMOOTHING: (
         <ShapeSmoothingMenu
           onSelect={(key: string) => handlePopupAction(`SHAPE_SMOOTHING:${key}`)}
-        />
-      ),
-      TEXT_REFLECTION: (
-        <TextReflectionMenu
-          onSelect={(key: string, value: number) =>
-            handlePopupAction(`TEXT_REFLECTION:${key}:${value}`)
-          }
         />
       ),
     };

@@ -45,7 +45,6 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
   effects: [
     { label: '📏 Толщина', action: 'SHAPE_STROKE_WIDTH' },
     { label: '✨ Тень', action: 'TEXT_SHADOW' },
-    { label: '💎 Отражение', action: 'TEXT_REFLECTION' },
     { label: '🎯 Сглаживание', action: 'SHAPE_SMOOTHING' },
   ],
   design: [

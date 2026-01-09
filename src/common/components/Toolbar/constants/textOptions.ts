@@ -96,16 +96,3 @@ export const SHAPE_SMOOTHING_OPTIONS: SmoothingOption[] = [
   { label: '50 px', key: 'strong', value: 50 },
   { label: '100 px', key: 'very-strong', value: 100 },
 ];
-
-export interface ReflectionOption {
-  label: string;
-  key: string;
-  value: number;
-}
-
-export const TEXT_REFLECTION_OPTIONS: ReflectionOption[] = [
-  { label: 'Без отражения', key: 'none', value: 0 },
-  { label: 'Слабое', key: 'light', value: 0.3 },
-  { label: 'Среднее', key: 'medium', value: 0.5 },
-  { label: 'Сильное', key: 'strong', value: 0.7 },
-];
