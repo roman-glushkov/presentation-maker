@@ -16,6 +16,12 @@ interface WorkspaceContentProps {
   preview?: boolean;
 }
 
+const elementComponents = {
+  text: TextElementView,
+  image: ImageElementView,
+  shape: ShapeElementView,
+} as const;
+
 export default function WorkspaceContent({ slide, preview }: WorkspaceContentProps) {
   const dispatch = useDispatch();
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
@@ -30,22 +36,16 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
     e.stopPropagation();
 
     if (e.ctrlKey || e.metaKey) {
-      if (selectedElementIds.includes(elementId)) {
-        dispatch(
-          selectMultipleElements(selectedElementIds.filter((id: string) => id !== elementId))
-        );
-      } else {
-        dispatch(selectMultipleElements([...selectedElementIds, elementId]));
-      }
+      const newSelection = selectedElementIds.includes(elementId)
+        ? selectedElementIds.filter((id) => id !== elementId)
+        : [...selectedElementIds, elementId];
+      dispatch(selectMultipleElements(newSelection));
     } else {
       dispatch(selectElement(elementId));
     }
   };
 
-  const getAllElements = () => slide?.elements || [];
-
-  // Определяем стили фона
-  const getBackgroundStyle = (): React.CSSProperties => {
+  const backgroundStyle: React.CSSProperties = (() => {
     const bg = slide.background;
 
     switch (bg.type) {
@@ -57,65 +57,31 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
           backgroundRepeat: 'no-repeat',
         };
       case 'color':
-        return {
-          backgroundColor: bg.value,
-        };
-      case 'none':
+        return { backgroundColor: bg.value };
       default:
-        return {
-          backgroundColor: '#fff',
-        };
+        return { backgroundColor: '#fff' };
     }
+  })();
+
+  const ElementComponent = (el: Slide['elements'][0]) => {
+    const Component = elementComponents[el.type];
+    if (!Component) return null;
+
+    return (
+      <Component
+        key={el.id}
+        elementId={el.id}
+        preview={!!preview}
+        selectedElementIds={selectedElementIds}
+        onElementClick={handleElementClick}
+        getAllElements={() => slide?.elements || []}
+      />
+    );
   };
 
   return (
-    <div
-      className="workspace-content"
-      style={getBackgroundStyle()} // УБРАЛИ width и height
-      onClick={handleWorkspaceClick}
-    >
-      {slide.elements.map((el) => {
-        if (el.type === 'text') {
-          return (
-            <TextElementView
-              key={el.id}
-              elementId={el.id}
-              preview={!!preview}
-              selectedElementIds={selectedElementIds}
-              onElementClick={handleElementClick}
-              getAllElements={getAllElements}
-            />
-          );
-        }
-
-        if (el.type === 'image') {
-          return (
-            <ImageElementView
-              key={el.id}
-              elementId={el.id}
-              preview={!!preview}
-              selectedElementIds={selectedElementIds}
-              onElementClick={handleElementClick}
-              getAllElements={getAllElements}
-            />
-          );
-        }
-
-        if (el.type === 'shape') {
-          return (
-            <ShapeElementView
-              key={el.id}
-              elementId={el.id}
-              preview={!!preview}
-              selectedElementIds={selectedElementIds}
-              onElementClick={handleElementClick}
-              getAllElements={getAllElements}
-            />
-          );
-        }
-
-        return null;
-      })}
+    <div className="workspace-content" style={backgroundStyle} onClick={handleWorkspaceClick}>
+      {slide.elements.map(ElementComponent)}
     </div>
   );
 }

@@ -1,0 +1,92 @@
+.element {
+  position: absolute;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border 0.2s ease;
+  border: 1px solid #c4c6c8;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.element:hover {
+  border-color: inherit;
+  box-shadow: none;
+}
+
+.element.selected {
+  border: 2px solid #2563eb !important;
+}
+
+/* Специфичные стили для разных типов элементов */
+.element[data-type='text'] {
+  border: 1px solid #d1d5db;
+  display: block;
+  padding: 4px;
+  box-sizing: border-box;
+  text-align: left;
+  line-height: 1.2;
+  white-space: pre-wrap;
+}
+
+.element[type='image'] {
+  border: none;
+}
+
+.element[type='shape'] {
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+}
+
+.element[type='shape']:hover {
+  border-color: #3b82f6;
+}
+
+/* Специальные стили для конкретных типов фигур */
+.element[type='shape'][data-shape-type='line'] {
+  border: none;
+  background-color: #000000;
+}
+
+.element[type='shape'][data-shape-type='circle'] {
+  border-radius: 50%;
+}
+
+.element[type='shape'][data-shape-type='arrow'] {
+  border: none;
+  background: transparent;
+  position: relative;
+}
+
+.element[type='shape'][data-shape-type='arrow']::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 30px solid currentColor;
+  top: 50%;
+  left: 50%;
+}
+
+.text-element-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-edit-area {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+
+.text-placeholder .text-content {
+  font-style: italic;
+}

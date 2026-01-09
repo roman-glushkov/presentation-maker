@@ -1,7 +1,7 @@
 import React from 'react';
 import ToolbarTabs from './parts/Tabs';
 import ToolbarGroup from './parts/Group';
-import './styles/index.css'; // Основные стили тулбара
+import './styles/index.css';
 
 export default function Toolbar() {
   return (

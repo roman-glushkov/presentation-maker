@@ -2,11 +2,12 @@ import React, { useRef, useEffect, useState } from 'react';
 import { SlideElement } from '../../../../store/types/presentation';
 import ColorPickerContext from './ColorPickerContext';
 
+import '../styles/WorkspaceContextMenu.css';
+
 interface WorkspaceContextMenuProps {
   visible: boolean;
   x: number;
   y: number;
-  slideAreaHeight: number;
   onClose: () => void;
   onCopy: () => void;
   onPaste: () => void;
@@ -142,27 +143,6 @@ export default function WorkspaceContextMenu({
     };
   }, [shouldShowMenu, showColorPicker, onClose]);
 
-  const renderColorSquare = (color: string | undefined, defaultColor: string = '#cccccc') => {
-    const displayColor = color === 'transparent' || !color ? defaultColor : color;
-
-    return (
-      <div
-        className="color-square"
-        style={{
-          display: 'inline-block',
-          width: '16px',
-          height: '16px',
-          backgroundColor: displayColor,
-          border: '1px solid #888',
-          marginRight: '8px',
-          verticalAlign: 'middle',
-          borderRadius: '2px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-        }}
-      />
-    );
-  };
-
   const handleColorPickerOpen = (
     type: 'text' | 'fill' | 'stroke' | 'background',
     e: React.MouseEvent
@@ -208,18 +188,10 @@ export default function WorkspaceContextMenu({
     <>
       <div
         ref={menuRef}
-        className="workspace-context-menu"
+        className="workspace-context-menu dark-theme"
         style={{
           top: `${position.y}px`,
           left: `${position.x}px`,
-          position: 'fixed',
-          zIndex: 1000,
-          minWidth: '200px',
-          backgroundColor: 'white',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          padding: '4px 0',
         }}
       >
         {showCommonItems && (
@@ -230,12 +202,8 @@ export default function WorkspaceContextMenu({
                 onClose();
               }}
               className="context-menu-item"
-              style={menuItemStyle}
             >
-              <span className="menu-icon" style={iconStyle}>
-                📋
-              </span>{' '}
-              Копировать
+              <span className="menu-icon">📋</span> Копировать
             </button>
 
             <button
@@ -244,12 +212,8 @@ export default function WorkspaceContextMenu({
                 onClose();
               }}
               className="context-menu-item"
-              style={menuItemStyle}
             >
-              <span className="menu-icon" style={iconStyle}>
-                📝
-              </span>{' '}
-              Вставить
+              <span className="menu-icon">📝</span> Вставить
             </button>
 
             <button
@@ -258,12 +222,8 @@ export default function WorkspaceContextMenu({
                 onClose();
               }}
               className="context-menu-item"
-              style={menuItemStyle}
             >
-              <span className="menu-icon" style={iconStyle}>
-                ⎘
-              </span>{' '}
-              Дублировать
+              <span className="menu-icon">⎘</span> Дублировать
             </button>
 
             <button
@@ -272,15 +232,11 @@ export default function WorkspaceContextMenu({
                 onClose();
               }}
               className="context-menu-item"
-              style={menuItemStyle}
             >
-              <span className="menu-icon" style={iconStyle}>
-                🗑️
-              </span>{' '}
-              Удалить
+              <span className="menu-icon">🗑️</span> Удалить
             </button>
 
-            <div style={dividerStyle} />
+            <div className="context-menu-divider" />
           </>
         )}
 
@@ -292,12 +248,8 @@ export default function WorkspaceContextMenu({
                 onClose();
               }}
               className="context-menu-item"
-              style={menuItemStyle}
             >
-              <span className="menu-icon" style={iconStyle}>
-                ⬆️
-              </span>{' '}
-              На передний план
+              <span className="menu-icon">⬆️</span> На передний план
             </button>
 
             <button
@@ -306,15 +258,11 @@ export default function WorkspaceContextMenu({
                 onClose();
               }}
               className="context-menu-item"
-              style={menuItemStyle}
             >
-              <span className="menu-icon" style={iconStyle}>
-                ⬇️
-              </span>{' '}
-              На задний план
+              <span className="menu-icon">⬇️</span> На задний план
             </button>
 
-            <div style={dividerStyle} />
+            <div className="context-menu-divider" />
           </>
         )}
 
@@ -322,42 +270,49 @@ export default function WorkspaceContextMenu({
           <button
             onClick={(e) => handleColorPickerOpen('background', e)}
             className="context-menu-item"
-            style={menuItemStyle}
           >
-            {renderColorSquare(currentColors.slideBackground, '#ffffff')}
+            <div
+              className="color-square"
+              style={{
+                backgroundColor: currentColors.slideBackground || '#ffffff',
+              }}
+            />
             Фон слайда
           </button>
         )}
 
         {showTextColor && (
-          <button
-            onClick={(e) => handleColorPickerOpen('text', e)}
-            className="context-menu-item"
-            style={menuItemStyle}
-          >
-            {renderColorSquare(currentColors.textColor, '#000000')}
+          <button onClick={(e) => handleColorPickerOpen('text', e)} className="context-menu-item">
+            <div
+              className="color-square"
+              style={{
+                backgroundColor: currentColors.textColor || '#000000',
+              }}
+            />
             Цвет текста
           </button>
         )}
 
         {showFill && (
-          <button
-            onClick={(e) => handleColorPickerOpen('fill', e)}
-            className="context-menu-item"
-            style={menuItemStyle}
-          >
-            {renderColorSquare(currentColors.fillColor, 'transparent')}
+          <button onClick={(e) => handleColorPickerOpen('fill', e)} className="context-menu-item">
+            <div
+              className="color-square"
+              style={{
+                backgroundColor: currentColors.fillColor || 'transparent',
+              }}
+            />
             Заливка
           </button>
         )}
 
         {showBorderColor && (
-          <button
-            onClick={(e) => handleColorPickerOpen('stroke', e)}
-            className="context-menu-item"
-            style={menuItemStyle}
-          >
-            {renderColorSquare(currentColors.borderColor, '#000000')}
+          <button onClick={(e) => handleColorPickerOpen('stroke', e)} className="context-menu-item">
+            <div
+              className="color-square"
+              style={{
+                backgroundColor: currentColors.borderColor || '#000000',
+              }}
+            />
             Цвет границы
           </button>
         )}
@@ -374,32 +329,3 @@ export default function WorkspaceContextMenu({
     </>
   );
 }
-
-const menuItemStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  padding: '8px 16px',
-  width: '100%',
-  textAlign: 'left',
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '14px',
-  color: '#333',
-  fontFamily: 'inherit',
-  whiteSpace: 'nowrap',
-};
-
-const iconStyle: React.CSSProperties = {
-  marginRight: '8px',
-  fontSize: '16px',
-  width: '16px',
-  textAlign: 'center',
-};
-
-const dividerStyle: React.CSSProperties = {
-  height: '1px',
-  backgroundColor: '#eee',
-  margin: '4px 0',
-  width: '100%',
-};

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import '../styles/ResizeHandle.css';
+
 interface Props {
   corner: 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w';
   onPointerDown: (e: React.PointerEvent) => void;
