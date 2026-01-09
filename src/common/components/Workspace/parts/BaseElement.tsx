@@ -100,7 +100,6 @@ export function BaseElement({
   );
 }
 
-// Хелпер для создания конкретных элементов
 export function createElementComponent<T extends SlideElement>(
   elementType: T['type'],
   renderContent: (element: T, isSelected: boolean) => React.ReactNode

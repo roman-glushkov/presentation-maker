@@ -10,16 +10,11 @@ export default function useSlidesKeyboard() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Проверяем, не редактируется ли текст
       const isTextInputFocused =
         document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA' ||
         document.activeElement?.hasAttribute('contenteditable');
-
       if (isTextInputFocused) return;
-
-      // Удаление выбранных слайдов через Delete (без Ctrl)
-      // Работает ТОЛЬКО если выделены слайды и НЕ выделены элементы
       if (
         e.key === 'Delete' &&
         !e.ctrlKey &&
@@ -29,8 +24,6 @@ export default function useSlidesKeyboard() {
       ) {
         e.preventDefault();
         e.stopPropagation();
-
-        // Удаляем все выбранные слайды
         selectedSlideIds.forEach((slideId: string) => {
           dispatch(removeSlide(slideId));
         });

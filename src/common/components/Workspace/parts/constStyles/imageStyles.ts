@@ -1,4 +1,4 @@
-import React from 'react'; // Добавить эту строку
+import React from 'react';
 import { ImageElement as ImageElementType } from '../../../../../store/types/presentation';
 
 export const getImageStyles = (element: ImageElementType) => {

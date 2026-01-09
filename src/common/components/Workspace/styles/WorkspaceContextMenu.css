@@ -55,7 +55,6 @@
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
-/* Темная тема для контекстного меню */
 .workspace-context-menu.dark-theme {
   background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
   border: 1px solid rgb(255 255 255 / 20%);

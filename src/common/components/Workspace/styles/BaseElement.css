@@ -17,7 +17,6 @@
   border: 2px solid #2563eb !important;
 }
 
-/* Специфичные стили для разных типов элементов */
 .element[data-type='text'] {
   border: 1px solid #d1d5db;
   display: block;
@@ -41,7 +40,6 @@
   border-color: #3b82f6;
 }
 
-/* Специальные стили для конкретных типов фигур */
 .element[type='shape'][data-shape-type='line'] {
   border: none;
   background-color: #000;

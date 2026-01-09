@@ -40,37 +40,6 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
     return true;
   }
 
-  if (action.startsWith('TEXT_REFLECTION:')) {
-    const parts = action.split(':');
-    const reflectionKey = parts[1].trim();
-    let reflectionValue: number | undefined;
-    if (reflectionKey !== 'none' && parts.length >= 3) {
-      const value = parseFloat(parts[2]);
-      if (!isNaN(value) && value >= 0 && value <= 1) {
-        reflectionValue = value;
-      } else {
-        reflectionValue = 0.3;
-      }
-    }
-
-    state.presentation.slides = state.presentation.slides.map((s: Slide) =>
-      s.id === slide.id
-        ? {
-            ...s,
-            elements: s.elements.map((el) =>
-              el.id === elId && el.type === 'text'
-                ? {
-                    ...el,
-                    reflection: reflectionKey === 'none' ? undefined : reflectionValue,
-                  }
-                : el
-            ),
-          }
-        : s
-    );
-    return true;
-  }
-
   if (action.startsWith('TEXT_FONT:')) {
     const fontFamily = action.split(':')[1].trim();
     state.presentation.slides = state.presentation.slides.map((s: Slide) =>

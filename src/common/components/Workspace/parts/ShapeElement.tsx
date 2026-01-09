@@ -6,12 +6,9 @@ import {
 import { createElementComponent } from './BaseElement';
 import { renderShape } from '../utils/shapeRenderer';
 
-// Исправленная функция согласно вашим типам
 const getShadowStyle = (shadow: ShapeElementType['shadow'], scale: number = 1): string => {
   if (!shadow) return 'none';
 
-  // Согласно вашим типам, у shadow только color и blur
-  // Используем значения по умолчанию для offset
   const offsetX = 0;
   const offsetY = 2;
 

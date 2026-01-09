@@ -24,7 +24,7 @@ export default function ColorSection({ type }: Props) {
         if (selectedElementId) dispatch(handleAction(`SHAPE_STROKE:${color}`));
         break;
       case 'background':
-        dispatch(handleAction(`SLIDE_BACKGROUND:${color}`)); // убрал лишний пробел
+        dispatch(handleAction(`SLIDE_BACKGROUND:${color}`));
         break;
     }
   };

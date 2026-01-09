@@ -420,7 +420,6 @@ export const editorSlice = createSlice({
     handleAction(state, action: PayloadAction<string>) {
       const act = action.payload;
 
-      // Используем диспетчер действий
       const actionType = handleActionDispatcher(state, act);
       if (actionType) {
         pushToPast(state, actionType);
