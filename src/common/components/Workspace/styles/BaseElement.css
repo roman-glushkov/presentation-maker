@@ -34,7 +34,7 @@
 
 .element[type='shape'] {
   border: 1px solid #d1d5db;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 
 .element[type='shape']:hover {
@@ -44,7 +44,7 @@
 /* Специальные стили для конкретных типов фигур */
 .element[type='shape'][data-shape-type='line'] {
   border: none;
-  background-color: #000000;
+  background-color: #000;
 }
 
 .element[type='shape'][data-shape-type='circle'] {
@@ -64,7 +64,7 @@
   height: 0;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
-  border-bottom: 30px solid currentColor;
+  border-bottom: 30px solid currentcolor;
   top: 50%;
   left: 50%;
 }

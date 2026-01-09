@@ -6,7 +6,11 @@ export { IMAGE_NOTIFICATIONS } from './messages';
 export { APPWRITE_ERRORS } from './messages';
 export { NOTIFICATION_TIMEOUT } from './messages';
 
-export { VALIDATION_MESSAGES, PRESENTATION_VALIDATION_MESSAGES } from './validation';
+export {
+  VALIDATION_MESSAGES,
+  LOGIN_VALIDATION_MESSAGES,
+  PRESENTATION_VALIDATION_MESSAGES,
+} from './validation';
 
 export {
   validateRegisterForm,
@@ -15,6 +19,10 @@ export {
   validateName,
   validateRequired,
   getValidationMessage,
+  getFieldValidationMessage,
+  validateLoginForm,
+  getLoginValidationMessage,
+  validateLoginFields,
   validatePresentationTitle,
   validatePresentationTitleLength,
   validatePresentationTitleMaxLength,

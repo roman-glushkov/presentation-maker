@@ -3,6 +3,7 @@ export const VALIDATION_MESSAGES = {
   INVALID_EMAIL: 'Введите корректный email адрес (например: user@company.com)',
   PASSWORD_TOO_SHORT: 'Пароль должен содержать минимум 8 символов',
   NAME_TOO_SHORT: 'Имя должно содержать минимум 2 символа',
+  NAME_REQUIRED: 'Введите ваше имя',
 } as const;
 
 export const LOGIN_VALIDATION_MESSAGES = {
@@ -181,7 +182,7 @@ export const getFieldValidationMessage = (
       if (!validatePassword(value)) return LOGIN_VALIDATION_MESSAGES.PASSWORD_TOO_SHORT;
       break;
     case 'name':
-      if (!validateRequired(value)) return 'Введите ваше имя';
+      if (!validateRequired(value)) return VALIDATION_MESSAGES.NAME_REQUIRED;
       if (!validateName(value)) return VALIDATION_MESSAGES.NAME_TOO_SHORT;
       break;
     case 'title': {

@@ -13,7 +13,7 @@
 }
 
 .slide-row.selected {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgb(59 130 246 / 10%);
 }
 
 .slide-row.hovered {

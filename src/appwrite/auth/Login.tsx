@@ -5,15 +5,11 @@ import { account } from '../client';
 import { useNotifications } from '../hooks/useNotifications';
 import {
   LOGIN_NOTIFICATIONS,
-  VALIDATION_MESSAGES,
   NOTIFICATION_TIMEOUT,
   TRANSITION_DELAY,
-  validateEmail,
-  validatePassword,
-  validateRequired,
+  getFieldValidationMessage,
 } from '../notifications';
 
-// Тип для ошибок Appwrite
 interface AppwriteError {
   code?: number;
   message?: string;
@@ -38,36 +34,29 @@ export default function Login() {
     getValidationMessage,
   } = useNotifications();
 
-  // Проверяем, не авторизован ли пользователь уже
   useEffect(() => {
     const checkExistingSession = async () => {
-      try {
-        await account.get();
-        // Если пользователь уже авторизован, перенаправляем
-        navigate('/presentations');
-      } catch {
-        // Не авторизован - ничего не делаем, это нормально
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _ = undefined; // Чтобы избежать warning о неиспользуемой переменной
-      }
+      await account.get();
+      navigate('/presentations');
     };
 
     checkExistingSession();
   }, [navigate]);
 
-  // Валидация в реальном времени
   useEffect(() => {
     if (touchedFields.has('email') && email) {
-      if (!validateEmail(email)) {
-        addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+      const error = getFieldValidationMessage('email', email);
+      if (error) {
+        addValidationMessage('email', error, 'error');
       } else {
         removeValidationMessage('email');
       }
     }
 
     if (touchedFields.has('password') && password) {
-      if (!validatePassword(password)) {
-        addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+      const error = getFieldValidationMessage('password', password);
+      if (error) {
+        addValidationMessage('password', error, 'error');
       } else {
         removeValidationMessage('password');
       }
@@ -82,19 +71,15 @@ export default function Login() {
     clearValidationMessages();
     let isValid = true;
 
-    if (!validateRequired(email)) {
-      addValidationMessage('email', 'Введите email адрес', 'error');
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+    const emailError = getFieldValidationMessage('email', email);
+    if (emailError) {
+      addValidationMessage('email', emailError, 'error');
       isValid = false;
     }
 
-    if (!validateRequired(password)) {
-      addValidationMessage('password', 'Введите пароль', 'error');
-      isValid = false;
-    } else if (!validatePassword(password)) {
-      addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+    const passwordError = getFieldValidationMessage('password', password);
+    if (passwordError) {
+      addValidationMessage('password', passwordError, 'error');
       isValid = false;
     }
 
@@ -124,16 +109,12 @@ export default function Login() {
     } catch (error: unknown) {
       let errorMessage = LOGIN_NOTIFICATIONS.ERROR.INVALID_CREDENTIALS;
 
-      // Приводим ошибку к типу AppwriteError
       const appwriteError = error as AppwriteError;
 
-      // Проверяем конкретное сообщение
       if (appwriteError.code === 401 && appwriteError.message?.includes('session is active')) {
-        // Уже есть активная сессия - перенаправляем
         addNotification('Вы уже вошли в систему. Перенаправляем...', 'info', 2000);
         setTimeout(() => navigate('/presentations'), 2000);
       } else {
-        // Обычная ошибка аутентификации
         addNotification(errorMessage, 'error', NOTIFICATION_TIMEOUT.ERROR);
       }
     } finally {

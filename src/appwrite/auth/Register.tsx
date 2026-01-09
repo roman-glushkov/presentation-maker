@@ -6,16 +6,11 @@ import { account } from '../client';
 import { useNotifications } from '../hooks/useNotifications';
 import {
   REGISTER_NOTIFICATIONS,
-  VALIDATION_MESSAGES,
   NOTIFICATION_TIMEOUT,
   TRANSITION_DELAY,
-  validateEmail,
-  validatePassword,
-  validateName,
-  validateRequired,
+  getFieldValidationMessage,
 } from '../notifications';
 
-// Тип для ошибок Appwrite
 interface AppwriteError {
   code?: number;
   message?: string;
@@ -42,27 +37,29 @@ export default function Register() {
     hasValidationErrors,
   } = useNotifications();
 
-  // Валидация в реальном времени
   useEffect(() => {
     if (touchedFields.has('name') && name) {
-      if (!validateName(name)) {
-        addValidationMessage('name', VALIDATION_MESSAGES.NAME_TOO_SHORT, 'error');
+      const error = getFieldValidationMessage('name', name);
+      if (error) {
+        addValidationMessage('name', error, 'error');
       } else {
         removeValidationMessage('name');
       }
     }
 
     if (touchedFields.has('email') && email) {
-      if (!validateEmail(email)) {
-        addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+      const error = getFieldValidationMessage('email', email);
+      if (error) {
+        addValidationMessage('email', error, 'error');
       } else {
         removeValidationMessage('email');
       }
     }
 
     if (touchedFields.has('password') && password) {
-      if (!validatePassword(password)) {
-        addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+      const error = getFieldValidationMessage('password', password);
+      if (error) {
+        addValidationMessage('password', error, 'error');
       } else {
         removeValidationMessage('password');
       }
@@ -77,27 +74,21 @@ export default function Register() {
     clearValidationMessages();
     let isValid = true;
 
-    if (!validateRequired(name)) {
-      addValidationMessage('name', 'Введите ваше имя', 'error');
-      isValid = false;
-    } else if (!validateName(name)) {
-      addValidationMessage('name', VALIDATION_MESSAGES.NAME_TOO_SHORT, 'error');
+    const nameError = getFieldValidationMessage('name', name);
+    if (nameError) {
+      addValidationMessage('name', nameError, 'error');
       isValid = false;
     }
 
-    if (!validateRequired(email)) {
-      addValidationMessage('email', 'Введите email адрес', 'error');
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      addValidationMessage('email', VALIDATION_MESSAGES.INVALID_EMAIL, 'error');
+    const emailError = getFieldValidationMessage('email', email);
+    if (emailError) {
+      addValidationMessage('email', emailError, 'error');
       isValid = false;
     }
 
-    if (!validateRequired(password)) {
-      addValidationMessage('password', 'Введите пароль', 'error');
-      isValid = false;
-    } else if (!validatePassword(password)) {
-      addValidationMessage('password', VALIDATION_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+    const passwordError = getFieldValidationMessage('password', password);
+    if (passwordError) {
+      addValidationMessage('password', passwordError, 'error');
       isValid = false;
     }
 
@@ -139,10 +130,8 @@ export default function Register() {
 
       setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
     } catch (error: unknown) {
-      // Используем тип значения, а не ключа
       let errorMessage: string = REGISTER_NOTIFICATIONS.ERROR.GENERIC;
 
-      // Приводим ошибку к типу AppwriteError
       const appwriteError = error as AppwriteError;
 
       if (appwriteError.code === 409) {
@@ -170,7 +159,6 @@ export default function Register() {
   const emailError = getValidationMessage('email');
   const passwordError = getValidationMessage('password');
 
-  // Создаем массив фич с уникальными ключами
   const features = [
     {
       id: 'feature1',

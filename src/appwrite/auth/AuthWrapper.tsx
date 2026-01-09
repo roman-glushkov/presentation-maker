@@ -7,6 +7,7 @@ import { undo, redo } from '../../store/editorSlice';
 import type { RootState } from '../../store';
 import { useNotifications } from '../hooks/useNotifications';
 import { NOTIFICATION_TIMEOUT, GENERAL_NOTIFICATIONS } from '../notifications/messages';
+import type { Notification } from '../notifications/types';
 import '../styles/AuthWrapper.css';
 
 interface AuthWrapperProps {
@@ -57,70 +58,95 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     }
   };
 
+  const handlePlayClick = () => {
+    if (!presentation) return;
+
+    const targetPath = presentationId ? `/player/${presentationId}` : '/player';
+    navigate(targetPath, { state: { presentation } });
+  };
+
+  const renderNotification = ({ id, message, type }: Notification) => (
+    <div key={id} className={`presentation-notification presentation-notification--${type}`}>
+      <div className="presentation-notification-content">
+        <svg
+          className="presentation-notification-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          {type === 'success' ? (
+            <path
+              d="M20 6L9 17l-5-5"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ) : (
+            <path
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+        </svg>
+        <span className="presentation-notification-message">{message}</span>
+      </div>
+      <button className="presentation-notification-close" onClick={() => removeNotification(id)}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path
+            d="M18 6L6 18M6 6l12 12"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+  );
+
+  const renderLoadingScreen = () => (
+    <div className="presentation-loading-container">
+      <div className="presentation-loading-content">
+        <div className="presentation-loading-logo">SlideCraft</div>
+        <div className="presentation-loading-dots">
+          <div className="presentation-loading-dot"></div>
+          <div className="presentation-loading-dot"></div>
+          <div className="presentation-loading-dot"></div>
+        </div>
+        <p className="presentation-loading-text">Загружаем вашу презентацию...</p>
+      </div>
+    </div>
+  );
+
+  const renderToolbarButton = (
+    onClick: () => void,
+    icon: string,
+    title: string,
+    disabled = false,
+    className = ''
+  ) => (
+    <button
+      onClick={onClick}
+      className={`toolbar-button ${className}`}
+      title={title}
+      disabled={disabled}
+    >
+      <span className="toolbar-icon">{icon}</span>
+    </button>
+  );
+
   const renderWithNotifications = (content: ReactNode) => (
     <div className="presentation-body">
       <div className="presentation-notifications-container">
-        {notifications.map(({ id, message, type }) => (
-          <div key={id} className={`presentation-notification presentation-notification--${type}`}>
-            <div className="presentation-notification-content">
-              <svg
-                className="presentation-notification-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                {type === 'success' ? (
-                  <path
-                    d="M20 6L9 17l-5-5"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                ) : (
-                  <path
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                )}
-              </svg>
-              <span className="presentation-notification-message">{message}</span>
-            </div>
-            <button
-              className="presentation-notification-close"
-              onClick={() => removeNotification(id)}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path
-                  d="M18 6L6 18M6 6l12 12"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
-        ))}
+        {notifications.map((n: Notification) => renderNotification(n))}
       </div>
       {content}
     </div>
   );
 
   if (!authChecked) {
-    return renderWithNotifications(
-      <div className="presentation-loading-container">
-        <div className="presentation-loading-content">
-          <div className="presentation-loading-logo">SlideCraft</div>
-          <div className="presentation-loading-dots">
-            <div className="presentation-loading-dot"></div>
-            <div className="presentation-loading-dot"></div>
-            <div className="presentation-loading-dot"></div>
-          </div>
-          <p className="presentation-loading-text">Загружаем вашу презентацию...</p>
-        </div>
-      </div>
-    );
+    return renderWithNotifications(renderLoadingScreen());
   }
 
   if (!isAuthenticated) {
@@ -134,13 +160,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       {showToolbar && (
         <div className="presentation-toolbar">
           <div className="toolbar-left">
-            <button
-              onClick={() => navigate('/presentations')}
-              className="toolbar-button"
-              title="Мои презентации"
-            >
-              <span className="toolbar-icon">📁</span>
-            </button>
+            {renderToolbarButton(() => navigate('/presentations'), '📁', 'Мои презентации')}
 
             <button
               onClick={handleSaveClick}
@@ -155,46 +175,30 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
               )}
             </button>
 
-            <button
-              onClick={() => {
-                if (!presentation) return;
-
-                navigate(presentationId ? `/player/${presentationId}` : '/player', {
-                  state: { presentation },
-                });
-              }}
-              className="toolbar-button"
-              title="Режим слайд-шоу"
-            >
-              <span className="toolbar-icon">▶️</span>
-            </button>
+            {renderToolbarButton(handlePlayClick, '▶️', 'Режим слайд-шоу')}
 
             <div className="toolbar-separator"></div>
 
-            <button
-              onClick={() => dispatch(undo())}
-              className="toolbar-button"
-              title="Отменить (Ctrl+Z)"
-              disabled={!canUndo}
-              style={{ opacity: canUndo ? 1 : 0.5 }}
-            >
-              <span className="toolbar-icon">↶</span>
-            </button>
+            {renderToolbarButton(
+              () => dispatch(undo()),
+              '↶',
+              'Отменить (Ctrl+Z)',
+              !canUndo,
+              canUndo ? 'toolbar-button--active' : 'toolbar-button--disabled'
+            )}
 
-            <button
-              onClick={() => dispatch(redo())}
-              className="toolbar-button"
-              title="Вернуть (Ctrl+Y)"
-              disabled={!canRedo}
-              style={{ opacity: canRedo ? 1 : 0.5 }}
-            >
-              <span className="toolbar-icon">↷</span>
-            </button>
+            {renderToolbarButton(
+              () => dispatch(redo()),
+              '↷',
+              'Вернуть (Ctrl+Y)',
+              !canRedo,
+              canRedo ? 'toolbar-button--active' : 'toolbar-button--disabled'
+            )}
           </div>
         </div>
       )}
 
-      <div style={showToolbar ? { paddingTop: 60 } : undefined}>{children}</div>
+      <div className={showToolbar ? 'presentation-content-with-toolbar' : ''}>{children}</div>
     </>
   );
 }

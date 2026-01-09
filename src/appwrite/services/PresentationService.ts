@@ -62,17 +62,7 @@ export class PresentationService {
 
       const validationResult = validatePresentation(doc);
 
-      if (!validationResult.isValid) {
-        console.warn(`⚠️ Документ ${doc.$id} не прошел валидацию:`, {
-          title: docData.title || 'Без названия',
-          errors: validationResult.errors,
-          formattedError: validationResult.formattedError,
-        });
-
-        console.log('Полные ошибки валидации:', validationResult.errors?.join('\n'));
-
-        continue;
-      }
+      if (!validationResult.isValid) continue;
 
       const slides = validationResult.parsedData?.slides as Slide[];
       const selectedSlideIds = (validationResult.parsedData?.selectedSlideIds as string[]) || [];
@@ -109,14 +99,6 @@ export class PresentationService {
   static async getPresentation(id: string): Promise<StoredPresentation> {
     const doc = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
     const validationResult = validatePresentation(doc);
-
-    if (!validationResult.isValid) {
-      throw new Error(
-        validationResult.formattedError ||
-          validationResult.errors?.join('\n') ||
-          'Ошибка валидации данных'
-      );
-    }
 
     const docData = doc as Record<string, unknown>;
 

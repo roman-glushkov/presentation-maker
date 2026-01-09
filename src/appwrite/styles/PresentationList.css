@@ -5,10 +5,6 @@
   position: relative;
 }
 
-.presentation-list-notifications {
-  margin-bottom: 20px;
-}
-
 .presentation-list-notification {
   display: flex;
   justify-content: space-between;
@@ -17,18 +13,6 @@
   border-radius: 8px;
   margin-bottom: 10px;
   font-size: 14px;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .presentation-list-notification--info {
@@ -66,10 +50,6 @@
   margin-left: 10px;
 }
 
-.presentation-list-notification button:hover {
-  opacity: 1;
-}
-
 .presentation-list-header {
   display: flex;
   justify-content: space-between;
@@ -105,13 +85,7 @@
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s;
   font-family: inherit;
-}
-
-.presentation-list-logout-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgb(220 38 38 / 30%);
 }
 
 .presentation-list-buttons-grid {
@@ -142,21 +116,14 @@
   justify-content: center;
   gap: 10px;
   padding: 12px 20px;
-  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
   height: 40px;
   font-family: inherit;
 }
 
-.presentation-list-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
-}
-
 .presentation-list-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-  transform: none !important;
 }
 
 .presentation-list-button-demo {
@@ -182,11 +149,6 @@
   margin-top: 10px;
   font-weight: 600;
   font-family: inherit;
-  transition: all 0.2s;
-}
-
-.presentation-list-retry-button:hover {
-  background: #dc2626;
 }
 
 .presentation-list-loading {
@@ -206,17 +168,7 @@
   border: 3px solid #e2e8f0;
   border-top: 3px solid #667eea;
   border-radius: 50%;
-  animation: presentation-list-spin 1s linear infinite;
   margin-bottom: 20px;
-}
-
-@keyframes presentation-list-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 .presentation-list-loading p {
@@ -224,6 +176,7 @@
   font-size: 16px;
   color: #64748b;
 }
+
 .presentation-list-count {
   margin-bottom: 15px;
   color: #64748b;
@@ -242,18 +195,12 @@
   border-radius: 12px;
   padding: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
   position: relative;
   min-height: 140px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.presentation-list-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgb(0 0 0 / 10%);
 }
 
 .presentation-list-card-valid {
@@ -319,99 +266,6 @@
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-  animation: slideIn 0.3s ease-out;
-  backdrop-filter: blur(10px);
-  color: white;
-}
-
-.presentation-notification--success {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-left: 4px solid #047857;
-}
-
-.presentation-notification--info {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  border-left: 4px solid #1d4ed8;
-}
-
-.presentation-notification--error {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  border-left: 4px solid #991b1b;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.presentation-notification-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.presentation-notification-icon {
-  width: 20px;
-  height: 20px;
-  stroke-width: 2;
-  flex-shrink: 0;
-}
-
-.presentation-notification-message {
-  font-size: 14px;
-  line-height: 1.4;
-  font-weight: 500;
-}
-
-.presentation-notification-close {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 4px;
-  margin-left: 12px;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-  flex-shrink: 0;
-}
-
-.presentation-notification-close:hover {
-  opacity: 1;
-}
-
-.presentation-notification-close svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2;
-}
-
-.presentation-notifications-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
-}
-
-.presentation-notification {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-  animation: slideIn 0.3s ease-out;
   backdrop-filter: blur(10px);
   color: white;
 }
@@ -436,17 +290,6 @@
   border-left: 4px solid #92400e;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
 .presentation-notification-content {
   display: flex;
   align-items: center;
@@ -476,23 +319,9 @@
   padding: 4px;
   margin-left: 12px;
   opacity: 0.7;
-  transition: opacity 0.2s;
   flex-shrink: 0;
   font-size: 16px;
   line-height: 1;
-}
-
-.presentation-notification-close:hover {
-  opacity: 1;
-}
-
-.presentation-list-notifications,
-.presentation-list-notification,
-.presentation-list-notification--info,
-.presentation-list-notification--success,
-.presentation-list-notification--error,
-.presentation-list-notification--warning {
-  all: unset;
 }
 
 .presentation-list-logout-button {
@@ -507,14 +336,4 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.presentation-list-logout-button:hover {
-  background-color: #dc2626;
-  transform: translateY(-1px);
-}
-
-.presentation-list-logout-button svg {
-  margin-left: 4px;
 }

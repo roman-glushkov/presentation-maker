@@ -26,7 +26,7 @@ export default function NewPresentationModal({
   const [loading, setLoading] = useState(false);
   const [existingTitles, setExistingTitles] = useState<string[]>([]);
   const [touched, setTouched] = useState(false);
-  const [nextPresentationNumber, setNextPresentationNumber] = useState(1);
+  const [, setNextPresentationNumber] = useState(1);
 
   const {
     addValidationMessage,
@@ -45,7 +45,6 @@ export default function NewPresentationModal({
           const titles = presentations.map((p) => p.title?.toLowerCase().trim() || '');
           setExistingTitles(titles.filter((t) => t));
 
-          // Найти максимальный номер в существующих презентациях
           const baseName = 'моя презентация';
           let maxNumber = 0;
 
@@ -62,10 +61,7 @@ export default function NewPresentationModal({
             }
           });
 
-          // Установить следующий номер
           setNextPresentationNumber(maxNumber + 1);
-
-          // Установить имя по умолчанию
           setTitle(`Моя презентация ${maxNumber + 1}`);
         });
 
@@ -106,14 +102,12 @@ export default function NewPresentationModal({
     setLoading(true);
     await onCreate(trimmedTitle);
     onClose();
-    // Не сбрасываем состояние следующего номера, чтобы сохранить прогрессию
     clearValidationMessages();
     setTouched(false);
     setLoading(false);
   };
 
   const handleCancel = () => {
-    // Не сбрасываем title при отмене, чтобы сохранить прогрессию для следующего открытия
     clearValidationMessages();
     setTouched(false);
     onCancel();

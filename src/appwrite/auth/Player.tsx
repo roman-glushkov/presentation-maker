@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PresentationService } from '../services/presentationService';
 import {
@@ -8,6 +8,8 @@ import {
   ImageElement,
   ShapeElement,
 } from '../../store/types/presentation';
+import { renderShape } from '../../common/components/Workspace/utils/shapeRenderer';
+import { GENERAL_NOTIFICATIONS } from '../notifications/messages';
 import '../styles/Player.css';
 
 const EDITOR_SLIDE_WIDTH = 960;
@@ -32,19 +34,19 @@ export default function Player() {
   useEffect(() => {
     if (presentation || !presentationId) return;
 
-    const load = async () => {
+    const loadPresentation = async () => {
       try {
         setLoading(true);
         const loaded = await PresentationService.getPresentation(presentationId);
         setPresentation(loaded);
       } catch {
-        setError('Не удалось загрузить презентацию');
+        setError(GENERAL_NOTIFICATIONS.ERROR.SAVE_FAILED);
       } finally {
         setLoading(false);
       }
     };
 
-    load();
+    loadPresentation();
   }, [presentation, presentationId]);
 
   useEffect(() => {
@@ -54,255 +56,245 @@ export default function Player() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const navigateToEditor = useCallback(() => {
+    navigate(presentationId ? `/editor/${presentationId}` : '/editor');
+  }, [navigate, presentationId]);
+
   useEffect(() => {
     if (!presentation) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
-        e.preventDefault();
-        if (currentSlideIndex < presentation.slides.length - 1) setCurrentSlideIndex((i) => i + 1);
-        else navigate(presentationId ? `/editor/${presentationId}` : '/editor');
+      switch (e.key) {
+        case 'ArrowRight':
+        case ' ':
+        case 'PageDown':
+          e.preventDefault();
+          if (currentSlideIndex < presentation.slides.length - 1) {
+            setCurrentSlideIndex((i) => i + 1);
+          } else {
+            navigateToEditor();
+          }
+          break;
+        case 'ArrowLeft':
+        case 'PageUp':
+          e.preventDefault();
+          if (currentSlideIndex > 0) setCurrentSlideIndex((i) => i - 1);
+          break;
+        case 'Escape':
+          navigateToEditor();
+          break;
       }
-      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-        e.preventDefault();
-        if (currentSlideIndex > 0) setCurrentSlideIndex((i) => i - 1);
-      }
-      if (e.key === 'Escape') navigate(presentationId ? `/editor/${presentationId}` : '/editor');
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [presentation, currentSlideIndex, navigate, presentationId]);
+  }, [presentation, currentSlideIndex, navigateToEditor]);
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (!presentation) return;
-    if (currentSlideIndex < presentation.slides.length - 1) setCurrentSlideIndex((i) => i + 1);
-    else navigate(presentationId ? `/editor/${presentationId}` : '/editor');
-  };
+    if (currentSlideIndex < presentation.slides.length - 1) {
+      setCurrentSlideIndex((i) => i + 1);
+    } else {
+      navigateToEditor();
+    }
+  }, [presentation, currentSlideIndex, navigateToEditor]);
 
-  const handleContextMenu = (e: React.MouseEvent) => {
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    if (currentSlideIndex > 0) setCurrentSlideIndex((i) => i - 1);
-  };
+    setCurrentSlideIndex((i) => Math.max(0, i - 1));
+  }, []);
 
   const scaleX = windowSize.width / EDITOR_SLIDE_WIDTH;
   const scaleY = windowSize.height / EDITOR_SLIDE_HEIGHT;
   const scale = Math.min(scaleX, scaleY);
 
-  // Хелпер для получения стиля тени
-  const getShadowStyle = (shadow?: { color: string; blur: number }) => {
-    if (!shadow) return 'none';
-    return `0 ${2 * scale}px ${shadow.blur * scale}px ${shadow.color}`;
-  };
+  const getShadowStyle = useCallback(
+    (shadow?: { color: string; blur: number }) => {
+      if (!shadow) return 'none';
+      return `0 ${2 * scale}px ${shadow.blur * scale}px ${shadow.color}`;
+    },
+    [scale]
+  );
 
-  // Хелпер для отражения текста
-  const getTextReflectionStyle = (
-    reflection?: number,
-    color?: string,
-    isColored?: boolean
-  ): React.CSSProperties => {
-    if (!reflection || reflection <= 0) {
-      return { display: 'none' };
-    }
+  const getTextReflectionStyle = useCallback(
+    (reflection: number, color?: string, isColored?: boolean): React.CSSProperties => {
+      if (isColored && color) {
+        const opacityHex = Math.round(reflection * 255)
+          .toString(16)
+          .padStart(2, '0');
+        const baseColor = color.startsWith('#') ? color.substring(0, 7) : color;
 
-    // Определяем, цветное ли отражение (значение 0.6 соответствует цветному в константах)
-    const colored = isColored || reflection === 0.6;
-
-    if (colored && color) {
-      const opacityHex = Math.round(reflection * 255)
-        .toString(16)
-        .padStart(2, '0');
-      const baseColor = color.startsWith('#') ? color.substring(0, 7) : color;
+        return {
+          background: `linear-gradient(to bottom, ${baseColor}${opacityHex} 0%, ${baseColor}00 100%)`,
+          opacity: reflection,
+        };
+      }
 
       return {
-        position: 'absolute',
-        bottom: '-100%',
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: `linear-gradient(to bottom, ${baseColor}${opacityHex} 0%, ${baseColor}00 100%)`,
-        transform: 'scaleY(-1)',
-        opacity: reflection,
-        pointerEvents: 'none',
-      };
-    } else {
-      return {
-        position: 'absolute',
-        bottom: '-100%',
-        left: 0,
-        width: '100%',
-        height: '100%',
         background: `linear-gradient(to bottom, rgba(255,255,255,${reflection}) 0%, rgba(255,255,255,0) 100%)`,
-        transform: 'scaleY(-1)',
         opacity: reflection,
-        pointerEvents: 'none',
       };
-    }
-  };
+    },
+    []
+  );
 
-  const renderShape = (el: ShapeElement) => {
-    const w = el.size.width * scale;
-    const h = el.size.height * scale;
-    const sw = el.strokeWidth * scale;
-    const fill = el.fill;
-    const stroke = el.stroke;
-    const radius = Math.min(w, h) / 2;
+  const renderTextElement = useCallback(
+    (el: TextElement) => {
+      const x = (el.position?.x || 0) * scale;
+      const y = (el.position?.y || 0) * scale;
+      const width = (el.size?.width || 0) * scale;
+      const height = (el.size?.height || 0) * scale;
+      const isColoredReflection = el.reflection === 0.6;
 
-    // Стиль для тени фигуры
-    const shadowStyle = getShadowStyle(el.shadow);
-
-    const polygon = (points: string) => (
-      <polygon
-        points={points}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={sw}
-        strokeLinejoin="round"
-        style={{
-          filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
-        }}
-      />
-    );
-    const path = (d: string) => (
-      <path
-        d={d}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={sw}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        style={{
-          filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
-        }}
-      />
-    );
-
-    switch (el.shapeType) {
-      case 'rectangle':
-        return (
-          <rect
-            x={sw / 2}
-            y={sw / 2}
-            width={w - sw}
-            height={h - sw}
-            rx={0}
-            ry={0}
-            fill={fill}
-            stroke={stroke}
-            strokeWidth={sw}
+      return (
+        <div
+          key={el.id}
+          className="player-text-element"
+          style={{
+            left: x,
+            top: y,
+            width,
+            height,
+            fontFamily: el.font || 'Arial, sans-serif',
+            fontSize: `${el.fontSize * scale}px`,
+            color: el.color,
+            backgroundColor: el.backgroundColor || 'transparent',
+            textAlign: el.align || 'left',
+            justifyContent:
+              el.verticalAlign === 'top'
+                ? 'flex-start'
+                : el.verticalAlign === 'middle'
+                  ? 'center'
+                  : 'flex-end',
+            fontWeight: el.bold ? 'bold' : 'normal',
+            fontStyle: el.italic ? 'italic' : 'normal',
+            textDecoration: el.underline ? 'underline' : 'none',
+            textShadow: getShadowStyle(el.shadow),
+            borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
+          }}
+        >
+          <div
+            className="player-text-content"
             style={{
-              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+              borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
+            }}
+            dangerouslySetInnerHTML={{ __html: el.content }}
+          />
+          {el.reflection && el.reflection > 0 && (
+            <div
+              className="text-reflection"
+              style={getTextReflectionStyle(el.reflection, el.color, isColoredReflection)}
+            />
+          )}
+        </div>
+      );
+    },
+    [scale, getShadowStyle, getTextReflectionStyle]
+  );
+
+  const renderImageElement = useCallback(
+    (el: ImageElement) => {
+      const x = (el.position?.x || 0) * scale;
+      const y = (el.position?.y || 0) * scale;
+      const width = (el.size?.width || 0) * scale;
+      const height = (el.size?.height || 0) * scale;
+      const shadowStyle = getShadowStyle(el.shadow);
+
+      return (
+        <div
+          key={el.id}
+          className="player-image-element"
+          style={{
+            left: x,
+            top: y,
+            width,
+            height,
+            filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
+          }}
+        >
+          <img
+            src={el.src}
+            alt="Изображение"
+            className="player-image"
+            draggable={false}
+            style={{
+              borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
             }}
           />
-        );
-      case 'circle':
-        return (
-          <circle
-            cx={w / 2}
-            cy={h / 2}
-            r={radius - sw / 2}
-            fill={fill}
-            stroke={stroke}
-            strokeWidth={sw}
-            style={{
-              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
-            }}
-          />
-        );
-      case 'triangle':
-        return polygon(`${sw},${h - sw} ${w / 2},${sw} ${w - sw},${h - sw}`);
-      case 'star': {
-        const points: string[] = [];
-        for (let i = 0; i < 10; i++) {
-          const r = i % 2 === 0 ? radius * 0.6 : radius * 0.3;
-          const angle = (Math.PI / 5) * i;
-          points.push(`${w / 2 + r * Math.sin(angle)},${h / 2 + r * Math.cos(angle)}`);
-        }
-        return polygon(points.join(' '));
-      }
-      case 'hexagon': {
-        const points: string[] = [];
-        for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI / 3) * i;
-          points.push(`${w / 2 + radius * Math.sin(angle)},${h / 2 + radius * Math.cos(angle)}`);
-        }
-        return polygon(points.join(' '));
-      }
-      case 'heart':
-        return path(`
-          M ${w / 2} ${h * 0.3}
-          Q ${w * 0.7} ${h * 0.1} ${w * 0.8} ${h * 0.3}
-          Q ${w * 0.9} ${h * 0.5} ${w / 2} ${h * 0.8}
-          Q ${w * 0.1} ${h * 0.5} ${w * 0.2} ${h * 0.3}
-          Q ${w * 0.3} ${h * 0.1} ${w / 2} ${h * 0.3} Z
-        `);
-      case 'cloud':
-        return path(`
-          M ${w * 0.25} ${h * 0.6}
-          C ${w * 0.15} ${h * 0.6} ${w * 0.15} ${h * 0.45} ${w * 0.28} ${h * 0.45}
-          C ${w * 0.3} ${h * 0.3} ${w * 0.45} ${h * 0.28} ${w * 0.5} ${h * 0.4}
-          C ${w * 0.58} ${h * 0.25} ${w * 0.78} ${h * 0.3} ${w * 0.78} ${h * 0.45}
-          C ${w * 0.9} ${h * 0.48} ${w * 0.88} ${h * 0.65} ${w * 0.72} ${h * 0.65}
-          H ${w * 0.28}
-          C ${w * 0.26} ${h * 0.65} ${w * 0.25} ${h * 0.62} ${w * 0.25} ${h * 0.6} Z
-        `);
-      case 'callout': {
-        const bodyHeight = h - 16 * scale - sw;
-        const cx = w / 2;
-        const r = 12 * scale;
-        const tailW = 24 * scale;
-        const tailH = 16 * scale;
-        return path(`
-          M ${r} ${sw / 2}
-          H ${w - r}
-          Q ${w} ${sw / 2} ${w} ${r}
-          V ${bodyHeight - r}
-          Q ${w} ${bodyHeight} ${w - r} ${bodyHeight}
-          H ${cx + tailW / 2}
-          L ${cx} ${bodyHeight + tailH}
-          L ${cx - tailW / 2} ${bodyHeight}
-          H ${r}
-          Q ${sw / 2} ${bodyHeight} ${sw / 2} ${bodyHeight - r}
-          V ${r}
-          Q ${sw / 2} ${sw / 2} ${r} ${sw / 2} Z
-        `);
-      }
-      default:
-        return (
-          <rect
-            x={sw / 2}
-            y={sw / 2}
-            width={w - sw}
-            height={h - sw}
-            fill={fill}
-            stroke={stroke}
-            strokeWidth={sw}
-            rx={0}
-            ry={0}
-            style={{
-              filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
-            }}
-          />
-        );
-    }
-  };
+        </div>
+      );
+    },
+    [scale, getShadowStyle]
+  );
 
-  if (loading)
+  const renderShapeElement = useCallback(
+    (el: ShapeElement) => {
+      const x = (el.position?.x || 0) * scale;
+      const y = (el.position?.y || 0) * scale;
+      const width = (el.size?.width || 0) * scale;
+      const height = (el.size?.height || 0) * scale;
+
+      return (
+        <svg
+          key={el.id}
+          className="player-shape-element"
+          width={width}
+          height={height}
+          style={{ left: x, top: y }}
+        >
+          {renderShape({
+            ...el,
+            size: { width: el.size.width * scale, height: el.size.height * scale },
+            strokeWidth: el.strokeWidth * scale,
+          })}
+        </svg>
+      );
+    },
+    [scale]
+  );
+
+  const renderSlideElement = useCallback(
+    (el: SlideElement) => {
+      switch (el.type) {
+        case 'text':
+          return renderTextElement(el as TextElement);
+        case 'image':
+          return renderImageElement(el as ImageElement);
+        case 'shape':
+          return renderShapeElement(el as ShapeElement);
+        default:
+          return null;
+      }
+    },
+    [renderTextElement, renderImageElement, renderShapeElement]
+  );
+
+  if (loading) {
     return (
       <div className="player-loading">
         <div className="player-spinner"></div>
         <p>Загружаем презентацию...</p>
       </div>
     );
-  if (error || !presentation)
+  }
+
+  if (error || !presentation) {
     return (
       <div className="player-error">
         <p>{error || 'Презентация не найдена'}</p>
         <button onClick={() => navigate('/presentations')}>Назад к презентациям</button>
       </div>
     );
+  }
 
   const slide = presentation.slides[currentSlideIndex];
+  const slideStyle = {
+    width: EDITOR_SLIDE_WIDTH * scale,
+    height: EDITOR_SLIDE_HEIGHT * scale,
+    backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
+    backgroundImage: slide.background.type === 'image' ? `url(${slide.background.value})` : 'none',
+  };
 
   return (
     <div className="player-container" onClick={handleClick} onContextMenu={handleContextMenu}>
@@ -313,152 +305,8 @@ export default function Player() {
         <span>Кликните для следующего слайда • Правый клик для предыдущего • Esc для выхода</span>
       </div>
       <div className="player-slide-container">
-        <div
-          className="player-slide"
-          style={{
-            width: EDITOR_SLIDE_WIDTH * scale,
-            height: EDITOR_SLIDE_HEIGHT * scale,
-            backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
-            backgroundImage:
-              slide.background.type === 'image' ? `url(${slide.background.value})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {slide.elements.map((el: SlideElement) => {
-            const x = (el.position?.x || 0) * scale;
-            const y = (el.position?.y || 0) * scale;
-            const width = (el.size?.width || 0) * scale;
-            const height = (el.size?.height || 0) * scale;
-
-            switch (el.type) {
-              case 'text': {
-                const textEl = el as TextElement;
-                const isColoredReflection = textEl.reflection === 0.6;
-
-                return (
-                  <div
-                    key={textEl.id}
-                    style={{
-                      position: 'absolute',
-                      left: x,
-                      top: y,
-                      width,
-                      height,
-                      fontFamily: textEl.font || 'Arial, sans-serif',
-                      fontSize: `${textEl.fontSize * scale}px`,
-                      color: textEl.color,
-                      backgroundColor: textEl.backgroundColor || 'transparent',
-                      textAlign: textEl.align || 'left',
-                      lineHeight: textEl.lineHeight || 1.2,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent:
-                        textEl.verticalAlign === 'top'
-                          ? 'flex-start'
-                          : textEl.verticalAlign === 'middle'
-                            ? 'center'
-                            : 'flex-end',
-                      cursor: 'default',
-                      userSelect: 'none',
-                      padding: 4 * scale,
-                      boxSizing: 'border-box',
-                      whiteSpace: 'pre-wrap',
-                      fontWeight: textEl.bold ? 'bold' : 'normal',
-                      fontStyle: textEl.italic ? 'italic' : 'normal',
-                      textDecoration: textEl.underline ? 'underline' : 'none',
-                      border: 'none',
-                      // Применяем эффекты
-                      textShadow: getShadowStyle(textEl.shadow),
-                      borderRadius: textEl.smoothing ? `${textEl.smoothing * scale}px` : '0',
-                      overflow: 'visible',
-                    }}
-                  >
-                    {/* Основное содержимое текста */}
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        borderRadius: textEl.smoothing ? `${textEl.smoothing * scale}px` : '0',
-                      }}
-                      dangerouslySetInnerHTML={{ __html: textEl.content }}
-                    />
-
-                    {/* Отражение текста */}
-                    {textEl.reflection && textEl.reflection > 0 && (
-                      <div
-                        style={getTextReflectionStyle(
-                          textEl.reflection,
-                          textEl.color,
-                          isColoredReflection
-                        )}
-                      />
-                    )}
-                  </div>
-                );
-              }
-              case 'image': {
-                const imgEl = el as ImageElement;
-                const shadowStyle = getShadowStyle(imgEl.shadow);
-
-                return (
-                  <div
-                    key={imgEl.id}
-                    style={{
-                      position: 'absolute',
-                      left: x,
-                      top: y,
-                      width,
-                      height,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'default',
-                      userSelect: 'none',
-                      pointerEvents: 'auto',
-                      // Применяем эффекты
-                      filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
-                      borderRadius: imgEl.smoothing ? `${imgEl.smoothing * scale}px` : '0',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <img
-                      src={imgEl.src}
-                      alt="Изображение"
-                      draggable={false}
-                      style={{
-                        width: width === 0 ? 'auto' : '100%',
-                        height: height === 0 ? 'auto' : '100%',
-                        objectFit: 'fill',
-                        userSelect: 'none',
-                        borderRadius: imgEl.smoothing ? `${imgEl.smoothing * scale}px` : '0',
-                      }}
-                    />
-                  </div>
-                );
-              }
-              case 'shape': {
-                const shapeEl = el as ShapeElement;
-                return (
-                  <svg
-                    key={shapeEl.id}
-                    width={width}
-                    height={height}
-                    style={{ position: 'absolute', left: x, top: y }}
-                  >
-                    {renderShape(shapeEl)}
-                  </svg>
-                );
-              }
-              default:
-                return null;
-            }
-          })}
+        <div className="player-slide" style={slideStyle}>
+          {slide.elements.map(renderSlideElement)}
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 15%);
   z-index: 1001;
   padding: 12px;
   animation: popupFade 0.15s ease-out;

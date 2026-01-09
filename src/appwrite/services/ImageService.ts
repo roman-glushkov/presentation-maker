@@ -9,7 +9,7 @@ export class ImageService {
   }> {
     const fileId = ID.unique();
 
-    await storage.createFile(STORAGE_BUCKET_ID, fileId, file, ['read("any")']);
+    await storage.createFile(STORAGE_BUCKET_ID, fileId, file);
 
     const fileUrl = storage.getFileDownload(STORAGE_BUCKET_ID, fileId).toString();
 
@@ -37,6 +37,7 @@ export class ImageService {
       };
 
       img.onerror = () => {
+        resolve({ width: 0, height: 0 });
         URL.revokeObjectURL(objectUrl);
       };
 
