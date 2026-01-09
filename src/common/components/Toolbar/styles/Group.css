@@ -59,12 +59,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(
-    to top,
-    rgb(0 0 0 / 70%) 0%,
-    rgb(0 0 0 / 40%) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(to top, rgb(0 0 0 / 70%) 0%, rgb(0 0 0 / 40%) 50%, transparent 100%);
   color: white;
   padding: 8px 6px 4px;
   font-size: 11px;

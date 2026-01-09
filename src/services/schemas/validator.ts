@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { presentationSchema } from './presentationSchema';
+import { presentationSchema } from './PresentationSchema';
 
 const ajv = new Ajv({ allErrors: true, strict: false, coerceTypes: false });
 addFormats(ajv);

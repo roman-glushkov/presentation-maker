@@ -3,12 +3,12 @@ import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption } from '../../../../store/toolbarSlice';
 import { GROUPS, GroupButton, GroupKey } from '../constants/config';
-import { useNotifications } from '../../../../appwrite/hooks/useNotifications';
+import { useNotifications } from '../../../../services/hooks/useNotifications';
 import {
   IMAGE_NOTIFICATIONS,
   NOTIFICATION_TIMEOUT,
-} from '../../../../appwrite/notifications/messages';
-import { ImageService } from '../../../../appwrite/services/imageService';
+} from '../../../../services/notifications/messages';
+import { ImageService } from '../../../../services/services/ImageService';
 import { RootState } from '../../../../store';
 
 import ColorSection from './ColorSection';

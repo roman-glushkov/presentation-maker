@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './appwrite/auth/Login';
-import Register from './appwrite/auth/Register';
-import PresentationList from './appwrite/components/PresentationList';
-import EditorLayout from './appwrite/auth/EditorLayout';
-import AuthWrapper from './appwrite/auth/AuthWrapper';
-import Player from './appwrite/auth/Player';
+import Login from './services/auth/Login';
+import Register from './services/auth/Register';
+import PresentationList from './services/components/PresentationList';
+import EditorLayout from './services/auth/EditorLayout';
+import AuthWrapper from './services/auth/AuthWrapper';
+import Player from './services/auth/Player';
 import './appwrite/styles/AuthStyles.css';
 import './common/view/styles.css';
 

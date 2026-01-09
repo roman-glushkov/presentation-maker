@@ -80,6 +80,5 @@
   transform: scaleY(-1);
   margin-top: 1.6px;
   mask-image: linear-gradient(to bottom, rgb(0 0 0 / 60%), transparent);
-  mask-image: linear-gradient(to bottom, rgb(0 0 0 / 60%), transparent);
   pointer-events: none;
 }
