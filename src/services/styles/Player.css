@@ -146,16 +146,6 @@
   position: absolute;
 }
 
-.text-reflection {
-  position: absolute;
-  bottom: -100%;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform: scaleY(-1);
-  pointer-events: none;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);

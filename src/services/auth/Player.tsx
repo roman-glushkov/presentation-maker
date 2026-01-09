@@ -116,35 +116,12 @@ export default function Player() {
     [scale]
   );
 
-  const getTextReflectionStyle = useCallback(
-    (reflection: number, color?: string, isColored?: boolean): React.CSSProperties => {
-      if (isColored && color) {
-        const opacityHex = Math.round(reflection * 255)
-          .toString(16)
-          .padStart(2, '0');
-        const baseColor = color.startsWith('#') ? color.substring(0, 7) : color;
-
-        return {
-          background: `linear-gradient(to bottom, ${baseColor}${opacityHex} 0%, ${baseColor}00 100%)`,
-          opacity: reflection,
-        };
-      }
-
-      return {
-        background: `linear-gradient(to bottom, rgba(255,255,255,${reflection}) 0%, rgba(255,255,255,0) 100%)`,
-        opacity: reflection,
-      };
-    },
-    []
-  );
-
   const renderTextElement = useCallback(
     (el: TextElement) => {
       const x = (el.position?.x || 0) * scale;
       const y = (el.position?.y || 0) * scale;
       const width = (el.size?.width || 0) * scale;
       const height = (el.size?.height || 0) * scale;
-      const isColoredReflection = el.reflection === 0.6;
 
       return (
         <div
@@ -180,16 +157,10 @@ export default function Player() {
             }}
             dangerouslySetInnerHTML={{ __html: el.content }}
           />
-          {el.reflection && el.reflection > 0 && (
-            <div
-              className="text-reflection"
-              style={getTextReflectionStyle(el.reflection, el.color, isColoredReflection)}
-            />
-          )}
         </div>
       );
     },
-    [scale, getShadowStyle, getTextReflectionStyle]
+    [scale, getShadowStyle]
   );
 
   const renderImageElement = useCallback(
