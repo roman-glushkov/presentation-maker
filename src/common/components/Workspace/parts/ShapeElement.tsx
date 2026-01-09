@@ -6,6 +6,18 @@ import {
 import { createElementComponent } from './BaseElement';
 import { renderShape } from '../utils/shapeRenderer';
 
+// Исправленная функция согласно вашим типам
+const getShadowStyle = (shadow: ShapeElementType['shadow'], scale: number = 1): string => {
+  if (!shadow) return 'none';
+
+  // Согласно вашим типам, у shadow только color и blur
+  // Используем значения по умолчанию для offset
+  const offsetX = 0;
+  const offsetY = 2;
+
+  return `${offsetX * scale}px ${offsetY * scale}px ${shadow.blur * scale}px ${shadow.color}`;
+};
+
 interface ShapeElementProps {
   elementId: string;
   preview: boolean;
@@ -15,12 +27,17 @@ interface ShapeElementProps {
 }
 
 const ShapeElementContent = ({ element }: { element: ShapeElementType }) => {
+  const shadowStyle = getShadowStyle(element.shadow);
+
   return (
     <svg
       viewBox={`0 0 ${element.size.width} ${element.size.height}`}
       width="100%"
       height="100%"
       preserveAspectRatio="none"
+      style={{
+        filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+      }}
     >
       {renderShape(element)}
     </svg>

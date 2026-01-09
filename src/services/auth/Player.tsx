@@ -234,24 +234,31 @@ export default function Player() {
       const y = (el.position?.y || 0) * scale;
       const width = (el.size?.width || 0) * scale;
       const height = (el.size?.height || 0) * scale;
+      const shadowStyle = getShadowStyle(el.shadow);
 
       return (
-        <svg
+        <div
           key={el.id}
           className="player-shape-element"
-          width={width}
-          height={height}
-          style={{ left: x, top: y }}
+          style={{
+            left: x,
+            top: y,
+            width,
+            height,
+            filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+          }}
         >
-          {renderShape({
-            ...el,
-            size: { width: el.size.width * scale, height: el.size.height * scale },
-            strokeWidth: el.strokeWidth * scale,
-          })}
-        </svg>
+          <svg width={width} height={height} style={{ display: 'block' }}>
+            {renderShape({
+              ...el,
+              size: { width, height },
+              strokeWidth: el.strokeWidth * scale,
+            })}
+          </svg>
+        </div>
       );
     },
-    [scale]
+    [scale, getShadowStyle]
   );
 
   const renderSlideElement = useCallback(
