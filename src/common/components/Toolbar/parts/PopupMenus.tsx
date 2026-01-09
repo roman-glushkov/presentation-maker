@@ -3,7 +3,6 @@ import { SHAPE_OPTIONS } from '../constants/shapes';
 import {
   SHAPE_SMOOTHING_OPTIONS,
   TEXT_SHADOW_OPTIONS,
-  TEXT_REFLECTION_OPTIONS,
   TEXT_ALIGN_OPTIONS,
   TEXT_VERTICAL_ALIGN_OPTIONS,
   FONT_FAMILY_OPTIONS,
@@ -79,20 +78,6 @@ export function TextShadowMenu({ onSelect }: TextShadowMenuProps) {
   }));
 
   return <BasePopup items={items} onSelect={onSelect} />;
-}
-
-export interface TextReflectionMenuProps {
-  onSelect: (key: string, value: number) => void;
-}
-
-export function TextReflectionMenu({ onSelect }: TextReflectionMenuProps) {
-  const items = TEXT_REFLECTION_OPTIONS.map((option) => ({
-    key: option.key,
-    label: option.label,
-    value: option.value,
-  }));
-
-  return <BasePopup items={items} onSelect={(key, value) => onSelect(key, value as number)} />;
 }
 
 export interface FontPopupProps {
