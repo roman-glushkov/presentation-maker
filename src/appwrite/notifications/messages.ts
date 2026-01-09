@@ -16,6 +16,8 @@ export const REGISTER_NOTIFICATIONS = {
   },
 } as const;
 
+export type RegisterErrorType = keyof typeof REGISTER_NOTIFICATIONS.ERROR;
+
 export const LOGIN_NOTIFICATIONS = {
   INFO: {
     LOGGING_IN: 'Выполняем вход...',
@@ -27,6 +29,8 @@ export const LOGIN_NOTIFICATIONS = {
   ERROR: {
     INVALID_CREDENTIALS: 'Неверный email или пароль',
     USER_NOT_FOUND: 'Пользователь не найден',
+    UNAUTHORIZED: 'Неавторизованный доступ. Проверьте учетные данные',
+    USER_NOT_VERIFIED: 'Email не подтвержден. Проверьте почту',
   },
 } as const;
 

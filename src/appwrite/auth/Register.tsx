@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ID } from 'appwrite';
@@ -15,6 +14,13 @@ import {
   validateName,
   validateRequired,
 } from '../notifications';
+
+// Тип для ошибок Appwrite
+interface AppwriteError {
+  code?: number;
+  message?: string;
+  type?: string;
+}
 
 export default function Register() {
   const navigate = useNavigate();
@@ -133,16 +139,23 @@ export default function Register() {
 
       setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
     } catch (error: unknown) {
-      const errorCode =
-        typeof error === 'object' && error !== null && 'code' in error
-          ? (error as { code: string }).code
-          : undefined;
+      // Используем тип значения, а не ключа
+      let errorMessage: string = REGISTER_NOTIFICATIONS.ERROR.GENERIC;
 
-      const message =
-        REGISTER_NOTIFICATIONS.ERROR[errorCode as keyof typeof REGISTER_NOTIFICATIONS.ERROR] ??
-        REGISTER_NOTIFICATIONS.ERROR.GENERIC;
+      // Приводим ошибку к типу AppwriteError
+      const appwriteError = error as AppwriteError;
 
-      addNotification(message, 'error', NOTIFICATION_TIMEOUT.ERROR);
+      if (appwriteError.code === 409) {
+        errorMessage = REGISTER_NOTIFICATIONS.ERROR.USER_EXISTS;
+      } else if (appwriteError.code === 401) {
+        errorMessage = REGISTER_NOTIFICATIONS.ERROR.INVALID_CREDENTIALS;
+      } else if (appwriteError.message?.toLowerCase().includes('password')) {
+        errorMessage = REGISTER_NOTIFICATIONS.ERROR.WEAK_PASSWORD;
+      } else if (appwriteError.message?.toLowerCase().includes('network')) {
+        errorMessage = REGISTER_NOTIFICATIONS.ERROR.NETWORK;
+      }
+
+      addNotification(errorMessage, 'error', NOTIFICATION_TIMEOUT.ERROR);
     } finally {
       setLoading(false);
     }
@@ -156,6 +169,57 @@ export default function Register() {
   const nameError = getValidationMessage('name');
   const emailError = getValidationMessage('email');
   const passwordError = getValidationMessage('password');
+
+  // Создаем массив фич с уникальными ключами
+  const features = [
+    {
+      id: 'feature1',
+      title: 'Текстовые и графические элементы',
+      text: 'Добавляйте текст, изображения, фигуры и настраивайте их оформление',
+      icon: (
+        <>
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </>
+      ),
+    },
+    {
+      id: 'feature2',
+      title: 'Гибкое редактирование слайдов',
+      text: 'Изменяйте размер, положение и стиль элементов, перетаскивайте их мышью',
+      icon: (
+        <>
+          <path d="M3 6h18" />
+          <path d="M3 12h18" />
+          <path d="M3 18h18" />
+        </>
+      ),
+    },
+    {
+      id: 'feature3',
+      title: 'Управление несколькими слайдами',
+      text: 'Создавайте, удаляйте, дублируйте и переупорядочивайте слайды',
+      icon: (
+        <>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="9" y1="21" x2="9" y2="9" />
+        </>
+      ),
+    },
+    {
+      id: 'feature4',
+      title: 'Сохранение и загрузка проектов',
+      text: 'Храните презентации в облаке и возвращайтесь к ним позже',
+      icon: (
+        <>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </>
+      ),
+    },
+  ];
 
   return (
     <div className="presentation-body">
@@ -218,52 +282,8 @@ export default function Register() {
             </p>
 
             <div className="presentation-features">
-              {[
-                {
-                  title: 'Текстовые и графические элементы',
-                  text: 'Добавляйте текст, изображения, фигуры и настраивайте их оформление',
-                  icon: (
-                    <>
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </>
-                  ),
-                },
-                {
-                  title: 'Гибкое редактирование слайдов',
-                  text: 'Изменяйте размер, положение и стиль элементов, перетаскивайте их мышью',
-                  icon: (
-                    <>
-                      <path d="M3 6h18" />
-                      <path d="M3 12h18" />
-                      <path d="M3 18h18" />
-                    </>
-                  ),
-                },
-                {
-                  title: 'Управление несколькими слайдами',
-                  text: 'Создавайте, удаляйте, дублируйте и переупорядочивайте слайды',
-                  icon: (
-                    <>
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                      <line x1="3" y1="9" x2="21" y2="9" />
-                      <line x1="9" y1="21" x2="9" y2="9" />
-                    </>
-                  ),
-                },
-                {
-                  title: 'Сохранение и загрузка проектов',
-                  text: 'Храните презентации в облаке и возвращайтесь к ним позже',
-                  icon: (
-                    <>
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </>
-                  ),
-                },
-              ].map(({ title, text, icon }) => (
-                <div className="presentation-feature" key={title}>
+              {features.map(({ id, title, text, icon }) => (
+                <div className="presentation-feature" key={id}>
                   <div className="presentation-feature-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       {icon}

@@ -13,6 +13,13 @@ import {
   validateRequired,
 } from '../notifications';
 
+// Тип для ошибок Appwrite
+interface AppwriteError {
+  code?: number;
+  message?: string;
+  type?: string;
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -31,6 +38,24 @@ export default function Login() {
     getValidationMessage,
   } = useNotifications();
 
+  // Проверяем, не авторизован ли пользователь уже
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        await account.get();
+        // Если пользователь уже авторизован, перенаправляем
+        navigate('/presentations');
+      } catch {
+        // Не авторизован - ничего не делаем, это нормально
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _ = undefined; // Чтобы избежать warning о неиспользуемой переменной
+      }
+    };
+
+    checkExistingSession();
+  }, [navigate]);
+
+  // Валидация в реальном времени
   useEffect(() => {
     if (touchedFields.has('email') && email) {
       if (!validateEmail(email)) {
@@ -94,24 +119,23 @@ export default function Login() {
         'success',
         NOTIFICATION_TIMEOUT.SUCCESS
       );
-      addNotification(
-        LOGIN_NOTIFICATIONS.SUCCESS.WELCOME_BACK,
-        'success',
-        NOTIFICATION_TIMEOUT.SUCCESS
-      );
 
       setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
     } catch (error: unknown) {
-      const errorCode =
-        typeof error === 'object' && error !== null && 'code' in error
-          ? (error as { code: string }).code
-          : undefined;
+      let errorMessage = LOGIN_NOTIFICATIONS.ERROR.INVALID_CREDENTIALS;
 
-      const message =
-        LOGIN_NOTIFICATIONS.ERROR[errorCode as keyof typeof LOGIN_NOTIFICATIONS.ERROR] ??
-        LOGIN_NOTIFICATIONS.ERROR.USER_NOT_FOUND;
+      // Приводим ошибку к типу AppwriteError
+      const appwriteError = error as AppwriteError;
 
-      addNotification(message, 'error', NOTIFICATION_TIMEOUT.ERROR);
+      // Проверяем конкретное сообщение
+      if (appwriteError.code === 401 && appwriteError.message?.includes('session is active')) {
+        // Уже есть активная сессия - перенаправляем
+        addNotification('Вы уже вошли в систему. Перенаправляем...', 'info', 2000);
+        setTimeout(() => navigate('/presentations'), 2000);
+      } else {
+        // Обычная ошибка аутентификации
+        addNotification(errorMessage, 'error', NOTIFICATION_TIMEOUT.ERROR);
+      }
     } finally {
       setLoading(false);
     }

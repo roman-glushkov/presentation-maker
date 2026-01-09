@@ -1,26 +1,25 @@
 import React from 'react';
 import { useRef } from 'react';
-import type { Slide, SlideElement } from '../../../../store/types/presentation';
+import { useDragResizeCore, createPointerHandlers } from './useDragResizeCore';
+import type { SlideElement } from '../../../../store/types/presentation';
 
-type UpdateSlideFn = (updater: (s: Slide) => Slide) => void;
-
-interface Args {
+interface DragArgs {
   preview?: boolean;
   setSelElId?: (id: string) => void;
   bringToFront?: (id: string) => void;
-  updateSlide: UpdateSlideFn;
+  updateSlide: Parameters<typeof useDragResizeCore>[0]['updateSlide'];
 }
 
-export default function useDrag({ preview, setSelElId, bringToFront, updateSlide }: Args) {
+export default function useDrag({ preview, setSelElId, bringToFront, updateSlide }: DragArgs) {
+  const { handlePointerEvent } = useDragResizeCore({ preview, updateSlide });
   const dragStateRef = useRef<{
     draggingIds: string[];
     startX: number;
     startY: number;
     origPositions: Map<string, { x: number; y: number }>;
-    raf?: number;
   } | null>(null);
 
-  const startDrag = (
+  return (
     e: React.PointerEvent,
     el: SlideElement,
     selectedElementIds: string[] = [],
@@ -30,73 +29,46 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
     e.stopPropagation();
 
     const elementsToDrag = selectedElementIds.includes(el.id) ? selectedElementIds : [el.id];
-
-    if (!selectedElementIds.includes(el.id)) {
-      setSelElId?.(el.id);
-    }
-
+    if (!selectedElementIds.includes(el.id)) setSelElId?.(el.id);
     elementsToDrag.forEach((id) => bringToFront?.(id));
 
     const allElements = getAllElements();
-    const origPositions = new Map();
+    const origPositions = new Map(
+      allElements
+        .filter((element) => elementsToDrag.includes(element.id))
+        .map((element) => [element.id, { x: element.position.x, y: element.position.y }])
+    );
 
-    allElements.forEach((element) => {
-      if (elementsToDrag.includes(element.id)) {
-        origPositions.set(element.id, {
-          x: element.position.x,
-          y: element.position.y,
-        });
-      }
-    });
-
-    const ds = {
+    dragStateRef.current = {
       draggingIds: elementsToDrag,
       startX: e.clientX,
       startY: e.clientY,
       origPositions,
     };
-    dragStateRef.current = ds;
 
-    const onPointerMove = (ev: PointerEvent) => {
-      const cur = dragStateRef.current;
-      if (!cur) return;
+    const cleanup = handlePointerEvent(e, (dx, dy) => {
+      if (!dragStateRef.current) return;
 
-      const dx = ev.clientX - cur.startX;
-      const dy = ev.clientY - cur.startY;
+      updateSlide((s) => ({
+        ...s,
+        elements: s.elements.map((item) => {
+          if (!dragStateRef.current!.draggingIds.includes(item.id)) return item;
+          const origPos = dragStateRef.current!.origPositions.get(item.id);
+          return origPos ? { ...item, position: { x: origPos.x + dx, y: origPos.y + dy } } : item;
+        }),
+      }));
+    });
 
-      if (cur.raf) cancelAnimationFrame(cur.raf);
-      cur.raf = requestAnimationFrame(() => {
-        updateSlide((s: Slide) => ({
-          ...s,
-          elements: s.elements.map((item) => {
-            if (cur.draggingIds.includes(item.id)) {
-              const origPos = cur.origPositions.get(item.id);
-              if (origPos) {
-                return {
-                  ...item,
-                  position: {
-                    x: origPos.x + dx,
-                    y: origPos.y + dy,
-                  },
-                };
-              }
-            }
-            return item;
-          }),
-        }));
-      });
+    const cleanupPointerHandlers = createPointerHandlers(
+      () => {},
+      () => {
+        dragStateRef.current = null;
+        if (cleanup) cleanup();
+      }
+    );
+
+    return () => {
+      cleanupPointerHandlers();
     };
-
-    const onPointerUp = () => {
-      if (dragStateRef.current?.raf) cancelAnimationFrame(dragStateRef.current.raf);
-      dragStateRef.current = null;
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
   };
-
-  return startDrag;
 }

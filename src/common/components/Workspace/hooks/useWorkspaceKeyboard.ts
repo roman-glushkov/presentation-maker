@@ -2,41 +2,32 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { ElementActions } from '../utils/elementActions';
+import { AppDispatch } from '../../../../store';
+
+const isTextInput = (el: Element | null) =>
+  el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA' || el?.hasAttribute('contenteditable');
+
+const keyActions: Record<string, (dispatch: AppDispatch, selectedElementIds: string[]) => void> = {
+  KeyC: (dispatch, selectedElementIds) => ElementActions.copy(selectedElementIds),
+  KeyV: (dispatch, selectedElementIds) => ElementActions.paste(selectedElementIds, dispatch),
+  KeyD: (dispatch, selectedElementIds) => ElementActions.duplicate(selectedElementIds, dispatch),
+};
 
 export default function useWorkspaceKeyboard(preview?: boolean) {
-  const dispatch = useDispatch();
-
+  const dispatch = useDispatch<AppDispatch>();
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
-  const selectedSlideIds = useSelector((state: RootState) => state.editor.selectedSlideIds);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (preview) return;
+      if (preview || isTextInput(document.activeElement)) return;
 
       const isCtrl = e.ctrlKey || e.metaKey;
-      const isTextInputFocused =
-        document.activeElement?.tagName === 'INPUT' ||
-        document.activeElement?.tagName === 'TEXTAREA' ||
-        document.activeElement?.hasAttribute('contenteditable');
+      const keyAction = keyActions[e.code];
 
-      if (isTextInputFocused) return;
-
-      if (isCtrl && e.code === 'KeyC' && selectedElementIds.length > 0) {
+      if (isCtrl && keyAction && selectedElementIds.length > 0) {
         e.preventDefault();
         e.stopPropagation();
-        ElementActions.copy(selectedElementIds);
-      }
-
-      if (isCtrl && e.code === 'KeyV') {
-        e.preventDefault();
-        e.stopPropagation();
-        ElementActions.paste(selectedElementIds, dispatch);
-      }
-
-      if (isCtrl && e.code === 'KeyD' && selectedElementIds.length > 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        ElementActions.duplicate(selectedElementIds, dispatch);
+        keyAction(dispatch, selectedElementIds);
       }
 
       if (
@@ -51,9 +42,6 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [dispatch, preview, selectedElementIds, selectedSlideIds]);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [dispatch, preview, selectedElementIds]);
 }

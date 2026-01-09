@@ -4,16 +4,20 @@ import { RootState } from '../../../../store';
 import { SlideElement } from '../../../../store/types/presentation';
 import { ElementActions } from '../utils/elementActions';
 import { handleAction } from '../../../../store/editorSlice';
+import { AppDispatch } from '../../../../store';
 
-export interface MenuState {
+type ColorType = 'text' | 'fill' | 'stroke' | 'background';
+type TargetType = 'text' | 'image' | 'shape' | 'slide' | 'none';
+
+interface MenuState {
   visible: boolean;
   x: number;
   y: number;
-  targetType: 'text' | 'image' | 'shape' | 'slide' | 'none';
+  targetType: TargetType;
   selectedElement: SlideElement | null;
 }
 
-export interface ContextMenuHandlers {
+interface ContextMenuHandlers {
   menu: MenuState;
   handleContextMenu: (e: React.MouseEvent, element?: SlideElement, isSlideArea?: boolean) => void;
   handleCopy: () => void;
@@ -27,13 +31,8 @@ export interface ContextMenuHandlers {
   handleChangeFill: () => void;
   handleChangeBorderColor: () => void;
   closeMenu: () => void;
-  currentColors: {
-    slideBackground?: string;
-    textColor?: string;
-    fillColor?: string;
-    borderColor?: string;
-  };
-  applyColor: (color: string, type: 'text' | 'fill' | 'stroke' | 'background') => void;
+  currentColors: Record<string, string>;
+  applyColor: (color: string, type: ColorType) => void;
 }
 
 export default function useWorkspaceContextMenu(): ContextMenuHandlers {
@@ -45,38 +44,29 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
     selectedElement: null,
   });
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
   const currentSlideId = useSelector((state: RootState) => state.editor.selectedSlideId);
-
   const currentSlide = useSelector((state: RootState) =>
     state.editor.presentation.slides.find((s) => s.id === state.editor.selectedSlideId)
   );
 
   const currentColors = useMemo(() => {
-    const colors: {
-      slideBackground?: string;
-      textColor?: string;
-      fillColor?: string;
-      borderColor?: string;
-    } = {};
+    const colors: Record<string, string> = { slideBackground: '#ffffff' };
 
     if (currentSlide?.background?.type === 'color') {
       colors.slideBackground = currentSlide.background.value;
-    } else {
-      colors.slideBackground = '#ffffff';
     }
 
     if (menu.selectedElement) {
-      switch (menu.selectedElement.type) {
-        case 'text':
-          colors.textColor = menu.selectedElement.color || '#000000';
-          colors.fillColor = menu.selectedElement.backgroundColor || 'transparent';
-          break;
-        case 'shape':
-          colors.fillColor = menu.selectedElement.fill || 'transparent';
-          colors.borderColor = menu.selectedElement.stroke || '#000000';
-          break;
+      const { type } = menu.selectedElement;
+      if (type === 'text') {
+        colors.textColor = menu.selectedElement.color || '#000000';
+        colors.fillColor = menu.selectedElement.backgroundColor || 'transparent';
+      }
+      if (type === 'shape') {
+        colors.fillColor = menu.selectedElement.fill || 'transparent';
+        colors.borderColor = menu.selectedElement.stroke || '#000000';
       }
     }
 
@@ -86,24 +76,13 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   const handleContextMenu = useCallback(
     (e: React.MouseEvent, element?: SlideElement, isSlideArea?: boolean) => {
       e.preventDefault();
-
-      if (element) {
-        dispatch(handleAction(`SELECT_ELEMENT:${element.id}`));
-      }
-
-      let targetType: 'text' | 'image' | 'shape' | 'slide' | 'none' = 'none';
-
-      if (isSlideArea) {
-        targetType = 'slide';
-      } else if (element) {
-        targetType = element.type;
-      }
+      if (element) dispatch(handleAction(`SELECT_ELEMENT:${element.id}`));
 
       setMenu({
         visible: true,
         x: e.clientX,
         y: e.clientY,
-        targetType,
+        targetType: isSlideArea ? 'slide' : element?.type || 'none',
         selectedElement: element ?? null,
       });
     },
@@ -133,7 +112,7 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   const handleDelete = useCallback(() => {
     if (menu.targetType === 'slide') {
       if (currentSlideId) {
-        // Удаление слайда можно реализовать здесь
+        console.log('Delete slide');
       }
     } else if (selectedElementIds.length > 0) {
       ElementActions.deleteElements(selectedElementIds, dispatch);
@@ -158,37 +137,31 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   const handleChangeBorderColor = useCallback(() => {}, []);
 
   const applyColor = useCallback(
-    (color: string, type: 'text' | 'fill' | 'stroke' | 'background') => {
+    (color: string, type: ColorType) => {
       const selectedElement =
-        menu.selectedElement ??
+        menu.selectedElement ||
         (selectedElementIds.length > 0 && currentSlide
           ? currentSlide.elements.find((el) => el.id === selectedElementIds[0])
           : null);
 
-      switch (type) {
-        case 'text':
-          if (selectedElement?.type === 'text') {
-            dispatch(handleAction(`TEXT_COLOR:${color}`));
-          }
-          break;
-        case 'fill':
-          if (
-            selectedElement &&
-            (selectedElement.type === 'text' || selectedElement.type === 'shape')
-          ) {
-            dispatch(handleAction(`SHAPE_FILL:${color}`));
-          }
-          break;
-        case 'stroke':
-          if (selectedElement?.type === 'shape') {
-            dispatch(handleAction(`SHAPE_STROKE:${color}`));
-          }
-          break;
-        case 'background':
-          if (currentSlideId) {
-            dispatch(handleAction(`SLIDE_BACKGROUND:${color}`));
-          }
-          break;
+      const actionMap: Record<ColorType, string> = {
+        text: `TEXT_COLOR:${color}`,
+        fill: `SHAPE_FILL:${color}`,
+        stroke: `SHAPE_STROKE:${color}`,
+        background: `SLIDE_BACKGROUND:${color}`,
+      };
+
+      if (selectedElement && type !== 'background') {
+        const isValid =
+          (type === 'text' && selectedElement.type === 'text') ||
+          (type === 'fill' &&
+            (selectedElement.type === 'text' || selectedElement.type === 'shape')) ||
+          (type === 'stroke' && selectedElement.type === 'shape');
+        if (isValid) dispatch(handleAction(actionMap[type]));
+      }
+
+      if (type === 'background' && currentSlideId) {
+        dispatch(handleAction(actionMap.background));
       }
     },
     [dispatch, selectedElementIds, currentSlide, currentSlideId, menu.selectedElement]
