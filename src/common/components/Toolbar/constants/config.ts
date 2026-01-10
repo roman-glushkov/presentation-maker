@@ -8,6 +8,7 @@ import GreyPreview from '../assets/wallpaper/Grey.jpg';
 import NeiroPreview from '../assets/wallpaper/Neiro.jpg';
 import PlanePreview from '../assets/wallpaper/plane.jpg';
 import SchoolPreview from '../assets/wallpaper/School.jpg';
+import FutureBackground from '../assets/wallpaper/blue_white.jpg';
 
 export type GroupKey = 'main' | 'insert' | 'colors' | 'effects' | 'design';
 
@@ -91,6 +92,10 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     {
       action: 'DESIGN_THEME:school',
       previewImage: SchoolPreview,
+    },
+    {
+      action: 'DESIGN_THEME:blue_white',
+      previewImage: FutureBackground,
     },
   ],
 };

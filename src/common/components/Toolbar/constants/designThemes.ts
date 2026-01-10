@@ -8,6 +8,7 @@ import GreyBackground from '../assets/wallpaper/Grey.jpg';
 import NeiroBackground from '../assets/wallpaper/Neiro.jpg';
 import PlaneBackground from '../assets/wallpaper/plane.jpg';
 import SchoolBackground from '../assets/wallpaper/School.jpg';
+import FutureBackground from '../assets/wallpaper/blue_white.jpg';
 
 export interface DesignTheme {
   id: string;
@@ -102,6 +103,14 @@ export const DESIGN_THEMES: Record<string, DesignTheme> = {
     id: 'school',
     name: 'Школа',
     backgroundImage: SchoolBackground,
+    isLocked: true,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  },
+  blue_white: {
+    id: 'future',
+    name: 'Будущее',
+    backgroundImage: FutureBackground,
     isLocked: true,
     backgroundSize: 'cover',
     backgroundPosition: 'center',

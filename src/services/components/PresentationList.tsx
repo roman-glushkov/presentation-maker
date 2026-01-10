@@ -126,7 +126,7 @@ export default function PresentationList() {
     addNotification(PRESENTATION_NOTIFICATIONS.INFO.DEMO_LOADED, 'info', NOTIFICATION_TIMEOUT.INFO);
     setTimeout(() => {
       navigate('/editor');
-    }, 2000);
+    }, 0);
   };
 
   const handleLoadPresentation = async (presentation: StoredPresentation) => {
@@ -148,7 +148,7 @@ export default function PresentationList() {
       );
       setTimeout(() => {
         navigate(`/editor/${full.id || full.$id}`);
-      }, 2000);
+      }, 0);
     } catch {
       addNotification(
         PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
