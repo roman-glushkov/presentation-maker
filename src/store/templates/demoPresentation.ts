@@ -5,6 +5,7 @@ import thinkImage from '../../common/components/Toolbar/assets/presentation/thin
 import workerImage from '../../common/components/Toolbar/assets/presentation/worker.jpg';
 import templatesImage from '../../common/components/Toolbar/assets/presentation/templates.png';
 import keyboardImage from '../../common/components/Toolbar/assets/presentation/keyboard.jpg';
+import reactImage from '../../common/components/Toolbar/assets/presentation/react.jpg';
 
 export const demoPresentation: Presentation = {
   title: 'SlideCraft — Демонстрация',
@@ -762,6 +763,311 @@ export const demoPresentation: Presentation = {
           position: { x: 30, y: 120 },
           size: { width: 300, height: 300 },
           smoothing: 10,
+        },
+      ],
+    },
+    {
+      id: 'slide6',
+      background: {
+        type: 'image',
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
+        size: 'cover',
+        position: 'center',
+      },
+      elements: [
+        {
+          id: 'tt61',
+          type: 'text',
+          content: 'Разнообразные Элементы Слайдов',
+          fontSize: 36,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: true,
+          position: { x: 420, y: 50 },
+          size: { width: 500, height: 100 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '1rect6',
+          type: 'shape',
+          shapeType: 'circle', // тип фигуры
+          fill: '#daedf3', // цвет заливки (синий)
+          stroke: '#0071c2', // цвет контура (темно-синий)
+          strokeWidth: 4, // толщина контура в px
+          position: { x: 420, y: 170 }, // позиция
+          size: { width: 50, height: 50 }, // размер
+        },
+        {
+          id: 'tt62',
+          type: 'text',
+          content: 'Текст',
+          fontSize: 18,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 420, y: 220 },
+          size: { width: 500, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt63',
+          type: 'text',
+          content: 'Шрифт, размер, цвет, выравнивание, тени, фон.',
+          fontSize: 18,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 420, y: 250 },
+          size: { width: 500, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '2rect6',
+          type: 'shape',
+          shapeType: 'circle', // тип фигуры
+          fill: '#daedf3', // цвет заливки (синий)
+          stroke: '#0071c2', // цвет контура (темно-синий)
+          strokeWidth: 4, // толщина контура в px
+          position: { x: 420, y: 290 }, // позиция
+          size: { width: 50, height: 50 }, // размер
+        },
+        {
+          id: 'tt64',
+          type: 'text',
+          content: 'Изображения',
+          fontSize: 18,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 420, y: 340 },
+          size: { width: 500, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt65',
+          type: 'text',
+          content: 'Загрузка, эффекты, тени, скругление.',
+          fontSize: 18,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 420, y: 370 },
+          size: { width: 500, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '3rect6',
+          type: 'shape',
+          shapeType: 'circle', // тип фигуры
+          fill: '#daedf3', // цвет заливки (синий)
+          stroke: '#0071c2', // цвет контура (темно-синий)
+          strokeWidth: 4, // толщина контура в px
+          position: { x: 420, y: 410 }, // позиция
+          size: { width: 50, height: 50 }, // размер
+        },
+        {
+          id: 'tt66',
+          type: 'text',
+          content: 'Фигуры',
+          fontSize: 18,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 420, y: 460 },
+          size: { width: 500, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt67',
+          type: 'text',
+          content: '8 типов, SVG-рендеринг, полная стилизация.',
+          fontSize: 18,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 420, y: 490 },
+          size: { width: 500, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '4rect6',
+          type: 'shape',
+          shapeType: 'rectangle', // тип фигуры
+          fill: '#c00000', // цвет заливки (синий)
+          stroke: '#843e0d', // цвет контура (темно-синий)
+          strokeWidth: 10, // толщина контура в px
+          position: { x: 10, y: 10 }, // позиция
+          size: { width: 85, height: 80 }, // размер
+          shadow: {
+            color: 'rgba(0, 0, 0, 0.5)',
+            blur: 8,
+          },
+        },
+        {
+          id: '5rect6',
+          type: 'shape',
+          shapeType: 'circle', // тип фигуры
+          fill: '#ff0101', // цвет заливки (синий)
+          stroke: '#bf9100', // цвет контура (темно-синий)
+          strokeWidth: 8, // толщина контура в px
+          position: { x: 115, y: 10 }, // позиция
+          size: { width: 85, height: 80 }, // размер
+          shadow: {
+            color: 'rgba(255, 0, 0, 0.5)',
+            blur: 6,
+          },
+        },
+        {
+          id: '6rect6',
+          type: 'shape',
+          shapeType: 'triangle', // тип фигуры
+          fill: '#febe00', // цвет заливки (синий)
+          stroke: '#7e6000', // цвет контура (темно-синий)
+          strokeWidth: 6, // толщина контура в px
+          position: { x: 220, y: 10 }, // позиция
+          size: { width: 85, height: 80 }, // размер
+          shadow: {
+            color: 'rgba(0, 123, 255, 0.5)',
+            blur: 6,
+          },
+        },
+        {
+          id: '7rect6',
+          type: 'shape',
+          shapeType: 'star', // тип фигуры
+          fill: '#ffc000', // цвет заливки (синий)
+          stroke: '#2e75b5', // цвет контура (темно-синий)
+          strokeWidth: 5, // толщина контура в px
+          position: { x: 325, y: 10 }, // позиция
+          size: { width: 85, height: 80 }, // размер
+          shadow: {
+            color: 'rgba(0, 128, 0, 0.5)',
+            blur: 6,
+          },
+        },
+        {
+          id: '8rect6',
+          type: 'shape',
+          shapeType: 'hexagon', // тип фигуры
+          fill: '#8fd04e', // цвет заливки (синий)
+          stroke: '#a7d08c', // цвет контура (темно-синий)
+          strokeWidth: 4, // толщина контура в px
+          position: { x: 10, y: 90 }, // позиция
+          size: { width: 85, height: 90 }, // размер
+          shadow: {
+            color: 'rgba(255, 215, 0, 0.7)',
+            blur: 10,
+          },
+        },
+        {
+          id: '9rect6',
+          type: 'shape',
+          shapeType: 'cloud', // тип фигуры
+          fill: '#00af50', // цвет заливки (синий)
+          stroke: '#012060', // цвет контура (темно-синий)
+          strokeWidth: 3, // толщина контура в px
+          position: { x: 115, y: 100 }, // позиция
+          size: { width: 85, height: 80 }, // размер
+          shadow: {
+            color: 'rgba(128, 0, 128, 0.6)',
+            blur: 8,
+          },
+        },
+        {
+          id: '10rect6',
+          type: 'shape',
+          shapeType: 'callout', // тип фигуры
+          fill: '#01b0f1', // цвет заливки (синий)
+          stroke: '#222834', // цвет контура (темно-синий)
+          strokeWidth: 2, // толщина контура в px
+          position: { x: 220, y: 100 }, // позиция
+          size: { width: 85, height: 80 }, // размер
+          shadow: {
+            color: 'rgba(255, 105, 180, 0.5)',
+            blur: 6,
+          },
+        },
+        {
+          id: '11rect6',
+          type: 'shape',
+          shapeType: 'heart', // тип фигуры
+          fill: '#7030a0', // цвет заливки (синий)
+          stroke: '#bdd7ee', // цвет контура (темно-синий)
+          strokeWidth: 1, // толщина контура в px
+          position: { x: 325, y: 100 }, // позиция
+          size: { width: 85, height: 80 }, // размер
+          shadow: {
+            color: 'rgba(0, 0, 0, 0.15)',
+            blur: 3,
+          },
+        },
+        {
+          id: 'tt68',
+          type: 'text',
+          content: 'Шрифт',
+          fontSize: 96,
+          font: 'Impact, sans-serif',
+          color: '#ffffffff',
+          backgroundColor: '#000000ff',
+          align: 'center',
+          verticalAlign: 'middle',
+          bold: true,
+          italic: true,
+          underline: true,
+          position: { x: 10, y: 190 },
+          size: { width: 400, height: 170 },
+          smoothing: 100,
+          shadow: {
+            color: 'rgba(255, 255, 255, 0.8)',
+            blur: 12,
+          },
+        },
+        {
+          type: 'image',
+          id: '61',
+          src: reactImage,
+          position: { x: 70, y: 370 },
+          size: { width: 280, height: 140 },
+          smoothing: 50,
+          shadow: {
+            color: 'rgba(0, 123, 255, 0.5)',
+            blur: 6,
+          },
         },
       ],
     },
