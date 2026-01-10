@@ -106,7 +106,7 @@ export const demoPresentation: Presentation = {
           verticalAlign: 'top',
           bold: false,
           position: { x: 50, y: 500 },
-          size: { width: 550, height: 50 },
+          size: { width: 550, height: 35 },
           shadow: {
             color: '0',
             blur: 0,
@@ -578,6 +578,181 @@ export const demoPresentation: Presentation = {
           position: { x: 50, y: 50 },
           size: { width: 242, height: 450 },
           smoothing: 10,
+        },
+      ],
+    },
+    {
+      id: 'slide5',
+      background: {
+        type: 'image',
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
+        size: 'cover',
+        position: 'center',
+      },
+      elements: [
+        {
+          id: 'tt51',
+          type: 'text',
+          content: 'Быстрая Навигация и Удобство',
+          fontSize: 36,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: true,
+          position: { x: 360, y: 50 },
+          size: { width: 560, height: 50 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '1rect5',
+          type: 'shape',
+          shapeType: 'hexagon', // тип фигуры
+          fill: '#daedf3', // цвет заливки (синий)
+          stroke: '#0071c2', // цвет контура (темно-синий)
+          strokeWidth: 4, // толщина контура в px
+          position: { x: 360, y: 130 }, // позиция
+          size: { width: 80, height: 100 }, // размер
+        },
+        {
+          id: 'tt52',
+          type: 'text',
+          content: '1',
+          fontSize: 28,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'center',
+          verticalAlign: 'middle',
+          bold: false,
+          position: { x: 360, y: 130 },
+          size: { width: 80, height: 100 },
+        },
+        {
+          id: 'tt55',
+          type: 'text',
+          content: 'Стрелочные клавиши',
+          fontSize: 20,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 460, y: 145 },
+          size: { width: 400, height: 30 },
+        },
+        {
+          id: 'tt56',
+          type: 'text',
+          content: 'Мгновенное перемещение.',
+          fontSize: 20,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 460, y: 185 },
+          size: { width: 400, height: 30 },
+        },
+        {
+          id: '2rect5',
+          type: 'shape',
+          shapeType: 'hexagon', // тип фигуры
+          fill: '#daedf3', // цвет заливки (синий)
+          stroke: '#0071c2', // цвет контура (темно-синий)
+          strokeWidth: 4, // толщина контура в px
+          position: { x: 360, y: 230 }, // позиция
+          size: { width: 80, height: 100 }, // размер
+        },
+        {
+          id: 'tt53',
+          type: 'text',
+          content: '2',
+          fontSize: 28,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'center',
+          verticalAlign: 'middle',
+          bold: false,
+          position: { x: 360, y: 230 },
+          size: { width: 80, height: 100 },
+        },
+        {
+          id: 'tt57',
+          type: 'text',
+          content: 'Smart-scrolling',
+          fontSize: 20,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 460, y: 245 },
+          size: { width: 400, height: 30 },
+        },
+        {
+          id: 'tt58',
+          type: 'text',
+          content: 'Плавная прокрутка.',
+          fontSize: 20,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 460, y: 285 },
+          size: { width: 400, height: 30 },
+        },
+        {
+          id: '3rect5',
+          type: 'shape',
+          shapeType: 'hexagon', // тип фигуры
+          fill: '#daedf3', // цвет заливки (синий)
+          stroke: '#0071c2', // цвет контура (темно-синий)
+          strokeWidth: 4, // толщина контура в px
+          position: { x: 360, y: 330 }, // позиция
+          size: { width: 80, height: 130 }, // размер
+        },
+        {
+          id: 'tt54',
+          type: 'text',
+          content: '3',
+          fontSize: 28,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'center',
+          verticalAlign: 'middle',
+          bold: false,
+          position: { x: 360, y: 330 },
+          size: { width: 80, height: 130 },
+        },
+        {
+          id: 'tt59',
+          type: 'text',
+          content: 'Без отвлечений',
+          fontSize: 20,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 460, y: 345 },
+          size: { width: 400, height: 30 },
+        },
+        {
+          id: 'tt510',
+          type: 'text',
+          content: 'Игнорирование навигации во время редактирования текста.',
+          fontSize: 20,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 460, y: 385 },
+          size: { width: 400, height: 30 },
         },
       ],
     },

@@ -7,7 +7,7 @@ export const THEME_COLUMNS: string[][] = [
   ['#fae3d3', '#f8cbac', '#f4b184', '#c55b11', '#843e0d'],
   ['#ededed', '#dbdbdb', '#c9c9c9', '#7b7b7b', '#525252'],
   ['#fff2cd', '#ffe59a', '#fed966', '#bf9100', '#7e6000'],
-  ['#d9e2f3', '#b2c5e5', '#8eaada', ' #81c6d5', '#203864'],
+  ['#d9e2f3', '#daedf3', '#b2c5e5', '#81c6d5', '#203864'],
   ['#e2f0d9', '#c5e0b3', '#a7d08c', '#538136', '#385624'],
 ];
 
