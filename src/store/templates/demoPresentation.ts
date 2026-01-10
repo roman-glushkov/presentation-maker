@@ -4,6 +4,7 @@ import logoImage from '../../common/components/Toolbar/assets/presentation/logo.
 import thinkImage from '../../common/components/Toolbar/assets/presentation/think.jpg';
 import workerImage from '../../common/components/Toolbar/assets/presentation/worker.jpg';
 import templatesImage from '../../common/components/Toolbar/assets/presentation/templates.png';
+import keyboardImage from '../../common/components/Toolbar/assets/presentation/keyboard.jpg';
 
 export const demoPresentation: Presentation = {
   title: 'SlideCraft — Демонстрация',
@@ -752,7 +753,15 @@ export const demoPresentation: Presentation = {
           verticalAlign: 'top',
           bold: false,
           position: { x: 460, y: 385 },
-          size: { width: 400, height: 30 },
+          size: { width: 400, height: 60 },
+        },
+        {
+          type: 'image',
+          id: '51',
+          src: keyboardImage,
+          position: { x: 30, y: 120 },
+          size: { width: 300, height: 300 },
+          smoothing: 10,
         },
       ],
     },

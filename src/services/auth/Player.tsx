@@ -64,25 +64,22 @@ export default function Player() {
     if (!presentation) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowRight':
-        case ' ':
-        case 'PageDown':
-          e.preventDefault();
-          if (currentSlideIndex < presentation.slides.length - 1) {
-            setCurrentSlideIndex((i) => i + 1);
-          } else {
-            navigateToEditor();
-          }
-          break;
-        case 'ArrowLeft':
-        case 'PageUp':
-          e.preventDefault();
-          if (currentSlideIndex > 0) setCurrentSlideIndex((i) => i - 1);
-          break;
-        case 'Escape':
+      if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) {
+        e.preventDefault();
+        if (currentSlideIndex < presentation.slides.length - 1) {
+          setCurrentSlideIndex((i) => i + 1);
+        } else {
           navigateToEditor();
-          break;
+        }
+      }
+
+      if (['ArrowLeft', 'PageUp'].includes(e.key)) {
+        e.preventDefault();
+        setCurrentSlideIndex((i) => Math.max(0, i - 1));
+      }
+
+      if (e.key === 'Escape') {
+        navigateToEditor();
       }
     };
 
@@ -104,9 +101,10 @@ export default function Player() {
     setCurrentSlideIndex((i) => Math.max(0, i - 1));
   }, []);
 
-  const scaleX = windowSize.width / EDITOR_SLIDE_WIDTH;
-  const scaleY = windowSize.height / EDITOR_SLIDE_HEIGHT;
-  const scale = Math.min(scaleX, scaleY);
+  const scale = Math.min(
+    windowSize.width / EDITOR_SLIDE_WIDTH,
+    windowSize.height / EDITOR_SLIDE_HEIGHT
+  );
 
   const getShadowStyle = useCallback(
     (shadow?: { color: string; blur: number }) => {
@@ -118,10 +116,20 @@ export default function Player() {
 
   const renderTextElement = useCallback(
     (el: TextElement) => {
-      const x = (el.position?.x || 0) * scale;
-      const y = (el.position?.y || 0) * scale;
-      const width = (el.size?.width || 0) * scale;
-      const height = (el.size?.height || 0) * scale;
+      const x = el.position.x * scale;
+      const y = el.position.y * scale;
+      const width = el.size.width * scale;
+      const height = el.size.height * scale;
+
+      const justifyContent =
+        el.verticalAlign === 'top'
+          ? 'flex-start'
+          : el.verticalAlign === 'middle'
+            ? 'center'
+            : 'flex-end';
+
+      const alignItems =
+        el.align === 'center' ? 'center' : el.align === 'right' ? 'flex-end' : 'flex-start';
 
       return (
         <div
@@ -132,28 +140,29 @@ export default function Player() {
             top: y,
             width,
             height,
-            fontFamily: el.font || 'Arial, sans-serif',
-            fontSize: `${el.fontSize * scale}px`,
-            color: el.color,
             backgroundColor: el.backgroundColor || 'transparent',
-            textAlign: el.align || 'left',
-            justifyContent:
-              el.verticalAlign === 'top'
-                ? 'flex-start'
-                : el.verticalAlign === 'middle'
-                  ? 'center'
-                  : 'flex-end',
-            fontWeight: el.bold ? 'bold' : 'normal',
-            fontStyle: el.italic ? 'italic' : 'normal',
-            textDecoration: el.underline ? 'underline' : 'none',
-            textShadow: getShadowStyle(el.shadow),
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent,
+            alignItems,
+            boxSizing: 'border-box',
+            padding: `${4 * scale}px`,
             borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
           }}
         >
           <div
             className="player-text-content"
             style={{
-              borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
+              fontFamily: el.font,
+              fontSize: `${el.fontSize * scale}px`,
+              lineHeight: el.lineHeight || 1.2,
+              fontWeight: el.bold ? 'bold' : 'normal',
+              fontStyle: el.italic ? 'italic' : 'normal',
+              textDecoration: el.underline ? 'underline' : 'none',
+              textAlign: el.align || 'left',
+              color: el.color,
+              whiteSpace: 'pre-wrap',
+              textShadow: getShadowStyle(el.shadow),
             }}
             dangerouslySetInnerHTML={{ __html: el.content }}
           />
@@ -165,11 +174,10 @@ export default function Player() {
 
   const renderImageElement = useCallback(
     (el: ImageElement) => {
-      const x = (el.position?.x || 0) * scale;
-      const y = (el.position?.y || 0) * scale;
-      const width = (el.size?.width || 0) * scale;
-      const height = (el.size?.height || 0) * scale;
-      const shadowStyle = getShadowStyle(el.shadow);
+      const x = el.position.x * scale;
+      const y = el.position.y * scale;
+      const width = el.size.width * scale;
+      const height = el.size.height * scale;
 
       return (
         <div
@@ -180,16 +188,17 @@ export default function Player() {
             top: y,
             width,
             height,
-            filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            filter: el.shadow ? `drop-shadow(${getShadowStyle(el.shadow)})` : 'none',
             borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
           }}
         >
           <img
             src={el.src}
-            alt="Изображение"
-            className="player-image"
+            alt=""
             draggable={false}
             style={{
+              width: '100%',
+              height: '100%',
               borderRadius: el.smoothing ? `${el.smoothing * scale}px` : '0',
             }}
           />
@@ -201,11 +210,10 @@ export default function Player() {
 
   const renderShapeElement = useCallback(
     (el: ShapeElement) => {
-      const x = (el.position?.x || 0) * scale;
-      const y = (el.position?.y || 0) * scale;
-      const width = (el.size?.width || 0) * scale;
-      const height = (el.size?.height || 0) * scale;
-      const shadowStyle = getShadowStyle(el.shadow);
+      const x = el.position.x * scale;
+      const y = el.position.y * scale;
+      const width = el.size.width * scale;
+      const height = el.size.height * scale;
 
       return (
         <div
@@ -216,10 +224,10 @@ export default function Player() {
             top: y,
             width,
             height,
-            filter: shadowStyle !== 'none' ? `drop-shadow(${shadowStyle})` : 'none',
+            filter: el.shadow ? `drop-shadow(${getShadowStyle(el.shadow)})` : 'none',
           }}
         >
-          <svg width={width} height={height} style={{ display: 'block' }}>
+          <svg width={width} height={height}>
             {renderShape({
               ...el,
               size: { width, height },
@@ -234,16 +242,10 @@ export default function Player() {
 
   const renderSlideElement = useCallback(
     (el: SlideElement) => {
-      switch (el.type) {
-        case 'text':
-          return renderTextElement(el as TextElement);
-        case 'image':
-          return renderImageElement(el as ImageElement);
-        case 'shape':
-          return renderShapeElement(el as ShapeElement);
-        default:
-          return null;
-      }
+      if (el.type === 'text') return renderTextElement(el as TextElement);
+      if (el.type === 'image') return renderImageElement(el as ImageElement);
+      if (el.type === 'shape') return renderShapeElement(el as ShapeElement);
+      return null;
     },
     [renderTextElement, renderImageElement, renderShapeElement]
   );
@@ -251,7 +253,7 @@ export default function Player() {
   if (loading) {
     return (
       <div className="player-loading">
-        <div className="player-spinner"></div>
+        <div className="player-spinner" />
         <p>Загружаем презентацию...</p>
       </div>
     );
@@ -267,23 +269,23 @@ export default function Player() {
   }
 
   const slide = presentation.slides[currentSlideIndex];
-  const slideStyle = {
-    width: EDITOR_SLIDE_WIDTH * scale,
-    height: EDITOR_SLIDE_HEIGHT * scale,
-    backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
-    backgroundImage: slide.background.type === 'image' ? `url(${slide.background.value})` : 'none',
-  };
 
   return (
     <div className="player-container" onClick={handleClick} onContextMenu={handleContextMenu}>
       <div className="player-slide-counter">
         {currentSlideIndex + 1} / {presentation.slides.length}
       </div>
-      <div className="player-hint">
-        <span>Кликните для следующего слайда • Правый клик для предыдущего • Esc для выхода</span>
-      </div>
       <div className="player-slide-container">
-        <div className="player-slide" style={slideStyle}>
+        <div
+          className="player-slide"
+          style={{
+            width: EDITOR_SLIDE_WIDTH * scale,
+            height: EDITOR_SLIDE_HEIGHT * scale,
+            backgroundColor: slide.background.type === 'color' ? slide.background.value : 'white',
+            backgroundImage:
+              slide.background.type === 'image' ? `url(${slide.background.value})` : 'none',
+          }}
+        >
           {slide.elements.map(renderSlideElement)}
         </div>
       </div>
