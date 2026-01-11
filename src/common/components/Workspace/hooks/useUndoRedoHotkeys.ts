@@ -5,11 +5,29 @@ import { undo, redo } from '../../../../store/editorSlice';
 const isTextInput = (el: Element | null) =>
   el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA' || el?.hasAttribute('contenteditable');
 
+// Функция проверки редактирования текста
+const isEditingTextElement = (): boolean => {
+  const activeElement = document.activeElement;
+  if (!activeElement) return false;
+
+  if (activeElement.tagName === 'TEXTAREA' || activeElement.hasAttribute('contenteditable')) {
+    return true;
+  }
+
+  const closestTextElement = activeElement.closest('.text-edit-area, [data-text-editing="true"]');
+  return !!closestTextElement;
+};
+
 export default function useUndoRedoHotkeys() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Пропускаем, если редактируется текст
+      if (isEditingTextElement()) {
+        return;
+      }
+
       const isMac = navigator.platform.toUpperCase().includes('MAC');
       const ctrl = isMac ? e.metaKey : e.ctrlKey;
       if (!ctrl || isTextInput(document.activeElement)) return;

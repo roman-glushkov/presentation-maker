@@ -26,6 +26,7 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
     getAllElements: () => SlideElement[]
   ) => {
     if (preview) return;
+
     e.stopPropagation();
 
     const elementsToDrag = selectedElementIds.includes(el.id) ? selectedElementIds : [el.id];

@@ -23,6 +23,7 @@ const TextElementRenderer = ({
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [localContent, setLocalContent] = useState(element.content || '');
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setLocalContent(element.content);
@@ -38,7 +39,16 @@ const TextElementRenderer = ({
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!preview) setIsEditing(true);
+    if (!preview) {
+      setIsEditing(true);
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
+            localContent.length;
+        }
+      }, 0);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -47,14 +57,20 @@ const TextElementRenderer = ({
     }
   };
 
+  const handleBlur = () => {
+    setIsEditing(false);
+  };
+
   return (
     <div
       className={containerClasses}
       onDoubleClick={handleDoubleClick}
       style={dynamicContainerStyle}
+      data-text-editing={isEditing}
     >
       {!preview && isEditing ? (
         <textarea
+          ref={textareaRef}
           autoFocus
           value={localContent}
           placeholder={element.placeholder}
@@ -64,9 +80,12 @@ const TextElementRenderer = ({
             dispatch(updateTextContent({ elementId: element.id, content: value }));
           }}
           onKeyDown={handleKeyDown}
-          onBlur={() => setIsEditing(false)}
+          onBlur={handleBlur}
           className="text-edit-area"
           style={dynamicTextStyle}
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          data-text-editing="true"
         />
       ) : (
         <div className="text-content" style={dynamicTextStyle}>

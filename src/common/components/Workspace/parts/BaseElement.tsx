@@ -55,6 +55,11 @@ export function BaseElement({
   if (!element || element.type !== elementType) return null;
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    // Простая проверка - если клик по textarea, не начинаем drag
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'TEXTAREA' || target.closest('textarea')) {
+      return;
+    }
     startDrag(e, element, selectedElementIds, getAllElements);
   };
 
@@ -63,6 +68,10 @@ export function BaseElement({
     corner: 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w'
   ) => {
     startResize(e, element, corner);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    onElementClick(e, elementId);
   };
 
   const elementStyle: React.CSSProperties = {
@@ -78,7 +87,7 @@ export function BaseElement({
   return (
     <div
       className={`element ${elementType}-element ${isSelected ? 'selected' : ''}`}
-      onClick={(e) => onElementClick(e, elementId)}
+      onClick={handleClick}
       onPointerDown={handlePointerDown}
       style={elementStyle}
       data-type={elementType}

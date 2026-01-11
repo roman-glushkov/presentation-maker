@@ -3,11 +3,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PresentationService, StoredPresentation } from '../services/PresentationService';
 import { account, AccountUser } from '../client';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { useDispatch } from 'react-redux';
 import {
   loadDemoPresentation,
-  createNewPresentation,
   setPresentationId,
   loadExistingPresentation,
 } from '../../store/editorSlice';
@@ -15,6 +13,7 @@ import { Presentation } from '../../store/types/presentation';
 import NewPresentationModal from './NewPresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications';
+import { slideTitle } from '../../store/templates/slide'; // Импортируем шаблон
 import '../styles/PresentationList.css';
 
 export default function PresentationList() {
@@ -27,7 +26,6 @@ export default function PresentationList() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const dispatch = useDispatch();
-  const currentPresentation = useSelector((state: RootState) => state.editor.presentation);
   const { notifications, addNotification, removeNotification } = useNotifications();
 
   useEffect(() => {
@@ -78,18 +76,35 @@ export default function PresentationList() {
   const handleCreatePresentation = async (title: string) => {
     setCreatingNew(true);
     try {
-      dispatch(createNewPresentation());
-      const presentationToSave = { ...currentPresentation, title: title || 'Новая презентация' };
-      const currentUser = await account.get<AccountUser>();
+      // Создаем титульный слайд на основе шаблона
+      const newSlideId = `slide-${Date.now()}`;
 
+      const titleSlide = {
+        ...slideTitle,
+        id: newSlideId,
+      };
+
+      // Генерируем уникальные ID для элементов
+      titleSlide.elements = titleSlide.elements.map((el) => ({
+        ...el,
+        id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      }));
+
+      const presentation: Presentation = {
+        title: title || 'Новая презентация',
+        slides: [titleSlide],
+        currentSlideId: newSlideId,
+        selectedSlideIds: [newSlideId],
+      };
+
+      const currentUser = await account.get<AccountUser>();
       const saved = await PresentationService.savePresentation(
-        presentationToSave,
+        presentation, // Используем презентацию с титульным слайдом
         currentUser.$id,
         currentUser.name || currentUser.email || ''
       );
 
       const loaded = await PresentationService.getPresentation(saved.$id);
-
       const presForEditor: Presentation = {
         title: loaded.title,
         slides: loaded.slides,
@@ -97,6 +112,7 @@ export default function PresentationList() {
         selectedSlideIds: loaded.selectedSlideIds || [loaded.slides[0]?.id || ''],
       };
 
+      // ДИСПАТЧИМ ПОСЛЕ сохранения в БД
       dispatch(loadExistingPresentation(presForEditor));
       dispatch(setPresentationId(saved.$id));
 
@@ -120,6 +136,7 @@ export default function PresentationList() {
     }
   };
 
+  // ... остальной код без изменений ...
   const handleLoadDemo = () => {
     dispatch(setPresentationId('demo'));
     dispatch(loadDemoPresentation());

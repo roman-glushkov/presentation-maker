@@ -2,7 +2,7 @@
   position: fixed;
   width: 280px;
   background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 10px;
   box-shadow: 0 4px 20px rgb(0 0 0 / 25%);
   z-index: 1001;
@@ -14,7 +14,7 @@
 .color-picker-header {
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgb(255 255 255 / 20%);
 }
 
 .color-picker-header h4 {
@@ -33,7 +33,7 @@
   color: #fff !important;
   margin-bottom: 8px;
   padding-bottom: 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgb(255 255 255 / 20%);
 }
 
 .theme-colors {
@@ -59,15 +59,15 @@
 .color-picker-actions {
   margin-top: 12px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgb(255 255 255 / 20%);
   display: flex;
   justify-content: flex-end;
 }
 
 .color-picker-button {
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgb(255 255 255 / 10%);
+  border: 1px solid rgb(255 255 255 / 30%);
   border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
@@ -76,11 +76,11 @@
 }
 
 .color-picker-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 20%);
 }
 
 .color-picker-context .color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgb(255 255 255 / 25%);
   box-shadow: 0 1px 2px rgb(0 0 0 / 30%);
   transition:
     transform 0.12s ease,
