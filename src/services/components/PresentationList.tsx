@@ -67,10 +67,13 @@ export default function PresentationList() {
     }
   }, [user, addNotification]);
 
+  const hasLoadedRef = React.useRef(false);
+
   useEffect(() => {
-    if (user) {
-      loadPresentations();
-    }
+    if (!user || hasLoadedRef.current) return;
+
+    hasLoadedRef.current = true;
+    loadPresentations();
   }, [user, loadPresentations]);
 
   const handleCreatePresentation = async (title: string) => {
@@ -136,14 +139,13 @@ export default function PresentationList() {
     }
   };
 
-  // ... остальной код без изменений ...
   const handleLoadDemo = () => {
     dispatch(setPresentationId('demo'));
     dispatch(loadDemoPresentation());
     addNotification(PRESENTATION_NOTIFICATIONS.INFO.DEMO_LOADED, 'info', NOTIFICATION_TIMEOUT.INFO);
     setTimeout(() => {
       navigate('/editor');
-    }, 0);
+    }, 2000);
   };
 
   const handleLoadPresentation = async (presentation: StoredPresentation) => {
@@ -165,7 +167,7 @@ export default function PresentationList() {
       );
       setTimeout(() => {
         navigate(`/editor/${full.id || full.$id}`);
-      }, 0);
+      }, 2000);
     } catch {
       addNotification(
         PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
