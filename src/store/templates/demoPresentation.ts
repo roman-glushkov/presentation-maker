@@ -1,11 +1,14 @@
 import { Presentation } from '../types/presentation';
-import { DESIGN_THEMES } from '../../common/components/Toolbar/constants/designThemes'; // путь к вашим константам
+import { DESIGN_THEMES } from '../../common/components/Toolbar/constants/designThemes';
 import logoImage from '../../common/components/Toolbar/assets/presentation/logo.png';
 import thinkImage from '../../common/components/Toolbar/assets/presentation/think.jpg';
 import workerImage from '../../common/components/Toolbar/assets/presentation/worker.jpg';
 import templatesImage from '../../common/components/Toolbar/assets/presentation/templates.png';
 import keyboardImage from '../../common/components/Toolbar/assets/presentation/keyboard.jpg';
 import reactImage from '../../common/components/Toolbar/assets/presentation/react.jpg';
+import treedImage from '../../common/components/Toolbar/assets/presentation/treed.png';
+import notebookImage from '../../common/components/Toolbar/assets/presentation/notebook.jpg';
+import pictureImage from '../../common/components/Toolbar/assets/presentation/picture.jpg';
 
 export const demoPresentation: Presentation = {
   title: 'SlideCraft — Демонстрация',
@@ -31,7 +34,7 @@ export const demoPresentation: Presentation = {
           verticalAlign: 'bottom',
           bold: true,
           position: { x: 50, y: 170 },
-          size: { width: 180, height: 50 },
+          size: { width: 190, height: 50 },
           shadow: {
             color: '0',
             blur: 0,
@@ -75,7 +78,7 @@ export const demoPresentation: Presentation = {
           id: 'text3',
           type: 'text',
           content:
-            'Здравствуйте! Сегодня я рад представить вам SlideCraft - инновационное веб-приложение для созадния современных и интерактивных презентаций прямо в браузере',
+            'Здравствуйте! Сегодня я рад представить вам SlideCraft - инновационное веб-приложение для создания современных и интерактивных презентаций прямо в браузере',
           fontSize: 18,
           font: 'Arial, sans-serif',
           color: '#012060',
@@ -95,7 +98,7 @@ export const demoPresentation: Presentation = {
           src: logoImage,
           position: { x: 600, y: 170 },
           size: { width: 350, height: 230 },
-          smoothing: 10, // скругленные углы
+          smoothing: 10,
         },
         {
           id: 'text4',
@@ -116,13 +119,11 @@ export const demoPresentation: Presentation = {
         },
       ],
     },
-
-    // Следующий слайд с ТОЙ ЖЕ ТЕМОЙ
     {
       id: 'slide2',
       background: {
         type: 'image',
-        value: DESIGN_THEMES.blue_white.backgroundImage!, // тот же фон
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
         size: 'cover',
         position: 'center',
       },
@@ -147,27 +148,27 @@ export const demoPresentation: Presentation = {
         {
           id: 'rect1',
           type: 'shape',
-          shapeType: 'rectangle', // тип фигуры
-          fill: 'transparent', // цвет заливки (синий)
-          stroke: '#81c6d5', // цвет контура (темно-синий)
-          strokeWidth: 2, // толщина контура в px
-          position: { x: 410, y: 115 }, // позиция
-          size: { width: 260, height: 180 }, // размер
+          shapeType: 'rectangle',
+          fill: 'transparent',
+          stroke: '#81c6d5',
+          strokeWidth: 2,
+          position: { x: 410, y: 115 },
+          size: { width: 260, height: 180 },
         },
         {
           id: 'rect2',
           type: 'shape',
-          shapeType: 'rectangle', // тип фигуры
-          fill: '#81c6d5', // цвет заливки (синий)
-          stroke: '#81c6d5', // цвет контура (темно-синий)
-          strokeWidth: 1, // толщина контура в px
-          position: { x: 410, y: 115 }, // позиция
-          size: { width: 10, height: 180 }, // размер
+          shapeType: 'rectangle',
+          fill: '#81c6d5',
+          stroke: '#81c6d5',
+          strokeWidth: 1,
+          position: { x: 410, y: 115 },
+          size: { width: 10, height: 180 },
         },
         {
           id: 'text5',
           type: 'text',
-          content: 'Перегруженные интсрументы',
+          content: 'Перегруженные инструменты',
           fontSize: 18,
           font: "'Trebuchet MS', sans-serif",
           color: '#012060',
@@ -202,22 +203,22 @@ export const demoPresentation: Presentation = {
         {
           id: '2rect1',
           type: 'shape',
-          shapeType: 'rectangle', // тип фигуры
-          fill: 'transparent', // цвет заливки (синий)
-          stroke: '#81c6d5', // цвет контура (темно-синий)
-          strokeWidth: 2, // толщина контура в px
-          position: { x: 680, y: 115 }, // позиция
-          size: { width: 260, height: 180 }, // размер
+          shapeType: 'rectangle',
+          fill: 'transparent',
+          stroke: '#81c6d5',
+          strokeWidth: 2,
+          position: { x: 680, y: 115 },
+          size: { width: 260, height: 180 },
         },
         {
           id: '2rect2',
           type: 'shape',
-          shapeType: 'rectangle', // тип фигуры
-          fill: '#81c6d5', // цвет заливки (синий)
-          stroke: '#81c6d5', // цвет контура (темно-синий)
-          strokeWidth: 1, // толщина контура в px
-          position: { x: 680, y: 115 }, // позиция
-          size: { width: 10, height: 180 }, // размер
+          shapeType: 'rectangle',
+          fill: '#81c6d5',
+          stroke: '#81c6d5',
+          strokeWidth: 1,
+          position: { x: 680, y: 115 },
+          size: { width: 10, height: 180 },
         },
         {
           id: '2text5',
@@ -257,22 +258,22 @@ export const demoPresentation: Presentation = {
         {
           id: '3rect1',
           type: 'shape',
-          shapeType: 'rectangle', // тип фигуры
-          fill: 'transparent', // цвет заливки (синий)
-          stroke: '#81c6d5', // цвет контура (темно-синий)
-          strokeWidth: 2, // толщина контура в px
-          position: { x: 410, y: 305 }, // позиция
-          size: { width: 260, height: 180 }, // размер
+          shapeType: 'rectangle',
+          fill: 'transparent',
+          stroke: '#81c6d5',
+          strokeWidth: 2,
+          position: { x: 410, y: 305 },
+          size: { width: 260, height: 180 },
         },
         {
           id: '3rect2',
           type: 'shape',
-          shapeType: 'rectangle', // тип фигуры
-          fill: '#81c6d5', // цвет заливки (синий)
-          stroke: '#81c6d5', // цвет контура (темно-синий)
-          strokeWidth: 1, // толщина контура в px
-          position: { x: 410, y: 305 }, // позиция
-          size: { width: 10, height: 180 }, // размер
+          shapeType: 'rectangle',
+          fill: '#81c6d5',
+          stroke: '#81c6d5',
+          strokeWidth: 1,
+          position: { x: 410, y: 305 },
+          size: { width: 10, height: 180 },
         },
         {
           id: '3text5',
@@ -392,7 +393,7 @@ export const demoPresentation: Presentation = {
         {
           id: 'tt33',
           type: 'text',
-          content: '- это полноценный онлайн-редактор прзентаций.',
+          content: '- это полноценный онлайн-редактор презентаций.',
           fontSize: 18,
           font: "'Trebuchet MS', sans-serif",
           color: '#203864',
@@ -612,12 +613,12 @@ export const demoPresentation: Presentation = {
         {
           id: '1rect5',
           type: 'shape',
-          shapeType: 'hexagon', // тип фигуры
-          fill: '#daedf3', // цвет заливки (синий)
-          stroke: '#0071c2', // цвет контура (темно-синий)
-          strokeWidth: 4, // толщина контура в px
-          position: { x: 360, y: 130 }, // позиция
-          size: { width: 80, height: 100 }, // размер
+          shapeType: 'hexagon',
+          fill: '#daedf3',
+          stroke: '#0071c2',
+          strokeWidth: 4,
+          position: { x: 360, y: 130 },
+          size: { width: 80, height: 100 },
         },
         {
           id: 'tt52',
@@ -661,12 +662,12 @@ export const demoPresentation: Presentation = {
         {
           id: '2rect5',
           type: 'shape',
-          shapeType: 'hexagon', // тип фигуры
-          fill: '#daedf3', // цвет заливки (синий)
-          stroke: '#0071c2', // цвет контура (темно-синий)
-          strokeWidth: 4, // толщина контура в px
-          position: { x: 360, y: 230 }, // позиция
-          size: { width: 80, height: 100 }, // размер
+          shapeType: 'hexagon',
+          fill: '#daedf3',
+          stroke: '#0071c2',
+          strokeWidth: 4,
+          position: { x: 360, y: 230 },
+          size: { width: 80, height: 100 },
         },
         {
           id: 'tt53',
@@ -710,12 +711,12 @@ export const demoPresentation: Presentation = {
         {
           id: '3rect5',
           type: 'shape',
-          shapeType: 'hexagon', // тип фигуры
-          fill: '#daedf3', // цвет заливки (синий)
-          stroke: '#0071c2', // цвет контура (темно-синий)
-          strokeWidth: 4, // толщина контура в px
-          position: { x: 360, y: 330 }, // позиция
-          size: { width: 80, height: 130 }, // размер
+          shapeType: 'hexagon',
+          fill: '#daedf3',
+          stroke: '#0071c2',
+          strokeWidth: 4,
+          position: { x: 360, y: 330 },
+          size: { width: 80, height: 130 },
         },
         {
           id: 'tt54',
@@ -795,12 +796,12 @@ export const demoPresentation: Presentation = {
         {
           id: '1rect6',
           type: 'shape',
-          shapeType: 'circle', // тип фигуры
-          fill: '#daedf3', // цвет заливки (синий)
-          stroke: '#0071c2', // цвет контура (темно-синий)
-          strokeWidth: 4, // толщина контура в px
-          position: { x: 420, y: 170 }, // позиция
-          size: { width: 50, height: 50 }, // размер
+          shapeType: 'circle',
+          fill: '#daedf3',
+          stroke: '#0071c2',
+          strokeWidth: 4,
+          position: { x: 420, y: 170 },
+          size: { width: 50, height: 50 },
         },
         {
           id: 'tt62',
@@ -839,12 +840,12 @@ export const demoPresentation: Presentation = {
         {
           id: '2rect6',
           type: 'shape',
-          shapeType: 'circle', // тип фигуры
-          fill: '#daedf3', // цвет заливки (синий)
-          stroke: '#0071c2', // цвет контура (темно-синий)
-          strokeWidth: 4, // толщина контура в px
-          position: { x: 420, y: 290 }, // позиция
-          size: { width: 50, height: 50 }, // размер
+          shapeType: 'circle',
+          fill: '#daedf3',
+          stroke: '#0071c2',
+          strokeWidth: 4,
+          position: { x: 420, y: 290 },
+          size: { width: 50, height: 50 },
         },
         {
           id: 'tt64',
@@ -883,12 +884,12 @@ export const demoPresentation: Presentation = {
         {
           id: '3rect6',
           type: 'shape',
-          shapeType: 'circle', // тип фигуры
-          fill: '#daedf3', // цвет заливки (синий)
-          stroke: '#0071c2', // цвет контура (темно-синий)
-          strokeWidth: 4, // толщина контура в px
-          position: { x: 420, y: 410 }, // позиция
-          size: { width: 50, height: 50 }, // размер
+          shapeType: 'circle',
+          fill: '#daedf3',
+          stroke: '#0071c2',
+          strokeWidth: 4,
+          position: { x: 420, y: 410 },
+          size: { width: 50, height: 50 },
         },
         {
           id: 'tt66',
@@ -927,12 +928,12 @@ export const demoPresentation: Presentation = {
         {
           id: '4rect6',
           type: 'shape',
-          shapeType: 'rectangle', // тип фигуры
-          fill: '#c00000', // цвет заливки (синий)
-          stroke: '#843e0d', // цвет контура (темно-синий)
-          strokeWidth: 10, // толщина контура в px
-          position: { x: 10, y: 10 }, // позиция
-          size: { width: 85, height: 80 }, // размер
+          shapeType: 'rectangle',
+          fill: '#c00000',
+          stroke: '#843e0d',
+          strokeWidth: 10,
+          position: { x: 10, y: 10 },
+          size: { width: 85, height: 80 },
           shadow: {
             color: 'rgba(0, 0, 0, 0.5)',
             blur: 8,
@@ -941,12 +942,12 @@ export const demoPresentation: Presentation = {
         {
           id: '5rect6',
           type: 'shape',
-          shapeType: 'circle', // тип фигуры
-          fill: '#ff0101', // цвет заливки (синий)
-          stroke: '#bf9100', // цвет контура (темно-синий)
-          strokeWidth: 8, // толщина контура в px
-          position: { x: 115, y: 10 }, // позиция
-          size: { width: 85, height: 80 }, // размер
+          shapeType: 'circle',
+          fill: '#ff0101',
+          stroke: '#bf9100',
+          strokeWidth: 8,
+          position: { x: 115, y: 10 },
+          size: { width: 85, height: 80 },
           shadow: {
             color: 'rgba(255, 0, 0, 0.5)',
             blur: 6,
@@ -955,12 +956,12 @@ export const demoPresentation: Presentation = {
         {
           id: '6rect6',
           type: 'shape',
-          shapeType: 'triangle', // тип фигуры
-          fill: '#febe00', // цвет заливки (синий)
-          stroke: '#7e6000', // цвет контура (темно-синий)
-          strokeWidth: 6, // толщина контура в px
-          position: { x: 220, y: 10 }, // позиция
-          size: { width: 85, height: 80 }, // размер
+          shapeType: 'triangle',
+          fill: '#febe00',
+          stroke: '#7e6000',
+          strokeWidth: 6,
+          position: { x: 220, y: 10 },
+          size: { width: 85, height: 80 },
           shadow: {
             color: 'rgba(0, 123, 255, 0.5)',
             blur: 6,
@@ -969,12 +970,12 @@ export const demoPresentation: Presentation = {
         {
           id: '7rect6',
           type: 'shape',
-          shapeType: 'star', // тип фигуры
-          fill: '#ffc000', // цвет заливки (синий)
-          stroke: '#2e75b5', // цвет контура (темно-синий)
-          strokeWidth: 5, // толщина контура в px
-          position: { x: 325, y: 10 }, // позиция
-          size: { width: 85, height: 80 }, // размер
+          shapeType: 'star',
+          fill: '#ffc000',
+          stroke: '#2e75b5',
+          strokeWidth: 5,
+          position: { x: 325, y: 10 },
+          size: { width: 85, height: 80 },
           shadow: {
             color: 'rgba(0, 128, 0, 0.5)',
             blur: 6,
@@ -983,12 +984,12 @@ export const demoPresentation: Presentation = {
         {
           id: '8rect6',
           type: 'shape',
-          shapeType: 'hexagon', // тип фигуры
-          fill: '#8fd04e', // цвет заливки (синий)
-          stroke: '#a7d08c', // цвет контура (темно-синий)
-          strokeWidth: 4, // толщина контура в px
-          position: { x: 10, y: 90 }, // позиция
-          size: { width: 85, height: 90 }, // размер
+          shapeType: 'hexagon',
+          fill: '#8fd04e',
+          stroke: '#a7d08c',
+          strokeWidth: 4,
+          position: { x: 10, y: 90 },
+          size: { width: 85, height: 90 },
           shadow: {
             color: 'rgba(255, 215, 0, 0.7)',
             blur: 10,
@@ -997,12 +998,12 @@ export const demoPresentation: Presentation = {
         {
           id: '9rect6',
           type: 'shape',
-          shapeType: 'cloud', // тип фигуры
-          fill: '#00af50', // цвет заливки (синий)
-          stroke: '#012060', // цвет контура (темно-синий)
-          strokeWidth: 3, // толщина контура в px
-          position: { x: 115, y: 100 }, // позиция
-          size: { width: 85, height: 80 }, // размер
+          shapeType: 'cloud',
+          fill: '#00af50',
+          stroke: '#012060',
+          strokeWidth: 3,
+          position: { x: 115, y: 100 },
+          size: { width: 85, height: 80 },
           shadow: {
             color: 'rgba(128, 0, 128, 0.6)',
             blur: 8,
@@ -1011,12 +1012,12 @@ export const demoPresentation: Presentation = {
         {
           id: '10rect6',
           type: 'shape',
-          shapeType: 'callout', // тип фигуры
-          fill: '#01b0f1', // цвет заливки (синий)
-          stroke: '#222834', // цвет контура (темно-синий)
-          strokeWidth: 2, // толщина контура в px
-          position: { x: 220, y: 100 }, // позиция
-          size: { width: 85, height: 80 }, // размер
+          shapeType: 'callout',
+          fill: '#01b0f1',
+          stroke: '#222834',
+          strokeWidth: 2,
+          position: { x: 220, y: 100 },
+          size: { width: 85, height: 80 },
           shadow: {
             color: 'rgba(255, 105, 180, 0.5)',
             blur: 6,
@@ -1025,12 +1026,12 @@ export const demoPresentation: Presentation = {
         {
           id: '11rect6',
           type: 'shape',
-          shapeType: 'heart', // тип фигуры
-          fill: '#7030a0', // цвет заливки (синий)
-          stroke: '#bdd7ee', // цвет контура (темно-синий)
-          strokeWidth: 1, // толщина контура в px
-          position: { x: 325, y: 100 }, // позиция
-          size: { width: 85, height: 80 }, // размер
+          shapeType: 'heart',
+          fill: '#7030a0',
+          stroke: '#bdd7ee',
+          strokeWidth: 1,
+          position: { x: 325, y: 100 },
+          size: { width: 85, height: 80 },
           shadow: {
             color: 'rgba(0, 0, 0, 0.15)',
             blur: 3,
@@ -1067,6 +1068,527 @@ export const demoPresentation: Presentation = {
           shadow: {
             color: 'rgba(0, 123, 255, 0.5)',
             blur: 6,
+          },
+        },
+      ],
+    },
+    {
+      id: 'slide7',
+      background: {
+        type: 'image',
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
+        size: 'cover',
+        position: 'center',
+      },
+      elements: [
+        {
+          id: 'tt71',
+          type: 'text',
+          content: 'Интерактивный интерфейс',
+          fontSize: 36,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: true,
+          position: { x: 50, y: 50 },
+          size: { width: 500, height: 100 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt74',
+          type: 'text',
+          content:
+            '• Интерактивное выделение элементов\n• Множественный выбор и групповое редактирование\n• Перетаскивание и изменение размера (8 ручек)\n• Точное позицинирование\n• Inline-редактирование текста',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          lineHeight: 2,
+          position: { x: 50, y: 200 },
+          size: { width: 450, height: 250 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          type: 'image',
+          id: '71',
+          src: treedImage,
+          position: { x: 600, y: 170 },
+          size: { width: 300, height: 300 },
+          smoothing: 50,
+          shadow: {
+            color: 'rgba(0, 123, 255, 0.5)',
+            blur: 6,
+          },
+        },
+      ],
+    },
+    {
+      id: 'slide8',
+      background: {
+        type: 'image',
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
+        size: 'cover',
+        position: 'center',
+      },
+      elements: [
+        {
+          id: 'tt81',
+          type: 'text',
+          content: 'Дизайн и Стилизация',
+          fontSize: 36,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'center',
+          verticalAlign: 'top',
+          bold: true,
+          position: { x: 0, y: 50 },
+          size: { width: 960, height: 50 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '1rect8',
+          type: 'shape',
+          shapeType: 'rectangle',
+          fill: '#bdd7ee',
+          stroke: '#0071c2',
+          strokeWidth: 2,
+          position: { x: 155, y: 150 },
+          size: { width: 300, height: 150 },
+        },
+        {
+          id: '4rect8',
+          type: 'shape',
+          shapeType: 'circle',
+          fill: '#0071c2',
+          stroke: '',
+          strokeWidth: 0,
+          position: { x: 175, y: 170 },
+          size: { width: 50, height: 50 },
+        },
+        {
+          id: 'tt82',
+          type: 'text',
+          content: '11 готовых тем',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'middle',
+          bold: true,
+          position: { x: 235, y: 170 },
+          size: { width: 200, height: 50 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt83',
+          type: 'text',
+          content: 'Быстрый старт с профессиональным дизайном.',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 175, y: 230 },
+          size: { width: 270, height: 60 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '2rect8',
+          type: 'shape',
+          shapeType: 'rectangle',
+          fill: '#bdd7ee',
+          stroke: '#c00000',
+          strokeWidth: 2,
+          position: { x: 505, y: 150 },
+          size: { width: 300, height: 150 },
+        },
+        {
+          id: '5rect8',
+          type: 'shape',
+          shapeType: 'circle',
+          fill: '#c00000',
+          stroke: '',
+          strokeWidth: 0,
+          position: { x: 525, y: 170 },
+          size: { width: 50, height: 50 },
+        },
+        {
+          id: 'tt84',
+          type: 'text',
+          content: '10 цветов палитры',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'middle',
+          bold: true,
+          position: { x: 585, y: 170 },
+          size: { width: 200, height: 50 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt85',
+          type: 'text',
+          content: 'Быстрый старт с профессиональным дизайном.',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 525, y: 230 },
+          size: { width: 270, height: 60 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '3rect8',
+          type: 'shape',
+          shapeType: 'rectangle',
+          fill: '#bdd7ee',
+          stroke: '#012060',
+          strokeWidth: 2,
+          position: { x: 155, y: 350 },
+          size: { width: 650, height: 150 },
+        },
+        {
+          id: 'rect8',
+          type: 'shape',
+          shapeType: 'circle',
+          fill: '#012060',
+          stroke: '',
+          strokeWidth: 0,
+          position: { x: 175, y: 370 },
+          size: { width: 50, height: 50 },
+        },
+        {
+          id: 'tt86',
+          type: 'text',
+          content: 'Единый стиль',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'middle',
+          bold: true,
+          position: { x: 235, y: 370 },
+          size: { width: 200, height: 50 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt87',
+          type: 'text',
+          content: 'Эффект теней, скругление углов для целостных презентаций.',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 175, y: 430 },
+          size: { width: 500, height: 60 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+      ],
+    },
+    {
+      id: 'slide9',
+      background: {
+        type: 'image',
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
+        size: 'cover',
+        position: 'center',
+      },
+      elements: [
+        {
+          id: 'tt91',
+          type: 'text',
+          content: 'Горячие Клавиши и Undo/Redo',
+          fontSize: 36,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: true,
+          position: { x: 70, y: 100 },
+          size: { width: 700, height: 50 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt92',
+          type: 'text',
+          content: 'Полный набор горячих клавиш для максимальной скорости работы:',
+          fontSize: 20,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'middle',
+          bold: false,
+          position: { x: 70, y: 200 },
+          size: { width: 700, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt93',
+          type: 'text',
+          content:
+            '• Ctrl/Cmd+C: Копировать\n • Ctrl/Cmd+V: Вставить\n • Ctrl/Cmd+D: Дублировать\n • Delete/BackSpace: Удалить\n • Ctrl/Cmd+Z: Отменить\n • Ctrl/Cmd+Y: Повторить\n',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: true,
+          lineHeight: 2,
+          position: { x: 70, y: 250 },
+          size: { width: 450, height: 230 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt94',
+          type: 'text',
+          content:
+            'Система Undo/Redo и централизованное управление состоянием обеспечивает безопасность данных',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          position: { x: 70, y: 480 },
+          size: { width: 840, height: 60 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          type: 'image',
+          id: '91',
+          src: notebookImage,
+          position: { x: 550, y: 250 },
+          size: { width: 334, height: 230 },
+          smoothing: 10,
+        },
+      ],
+    },
+    {
+      id: 'slide10',
+      background: {
+        type: 'image',
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
+        size: 'cover',
+        position: 'center',
+      },
+      elements: [
+        {
+          id: 'tt101',
+          type: 'text',
+          content: 'Режим Презентации',
+          fontSize: 36,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: true,
+          position: { x: 50, y: 50 },
+          size: { width: 700, height: 50 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: 'tt102',
+          type: 'text',
+          content: 'SlideCraft обеспечивает безупречное отображение ваших материалов:',
+          fontSize: 16,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'middle',
+          bold: false,
+          position: { x: 50, y: 110 },
+          size: { width: 700, height: 30 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '1rect10',
+          type: 'shape',
+          shapeType: 'rectangle',
+          fill: '#daedf3',
+          stroke: '#1f4e7a',
+          strokeWidth: 1,
+          position: { x: 50, y: 150 },
+          size: { width: 500, height: 100 },
+        },
+        {
+          id: 'tt103',
+          type: 'text',
+          content: 'Полноэкранный Режим \nМаксимальное погружение аудитории.',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          lineHeight: 2,
+          position: { x: 60, y: 160 },
+          size: { width: 480, height: 80 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '2rect10',
+          type: 'shape',
+          shapeType: 'rectangle',
+          fill: '#daedf3',
+          stroke: '#1f4e7a',
+          strokeWidth: 1,
+          position: { x: 50, y: 250 },
+          size: { width: 500, height: 100 },
+        },
+        {
+          id: 'tt104',
+          type: 'text',
+          content: 'Гибкое Управление \nЛегкое переключение слайдов.',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          lineHeight: 2,
+          position: { x: 60, y: 260 },
+          size: { width: 480, height: 80 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          id: '3rect10',
+          type: 'shape',
+          shapeType: 'rectangle',
+          fill: '#daedf3',
+          stroke: '#1f4e7a',
+          strokeWidth: 1,
+          position: { x: 50, y: 350 },
+          size: { width: 500, height: 100 },
+        },
+        {
+          id: 'tt105',
+          type: 'text',
+          content: 'Сохранение Пропорций \nДизайн всегда выглядит как задумано.',
+          fontSize: 18,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'left',
+          verticalAlign: 'top',
+          bold: false,
+          lineHeight: 2,
+          position: { x: 60, y: 360 },
+          size: { width: 480, height: 80 },
+          shadow: {
+            color: '0',
+            blur: 0,
+          },
+        },
+        {
+          type: 'image',
+          id: '101',
+          src: pictureImage,
+          position: { x: 560, y: 150 },
+          size: { width: 300, height: 300 },
+          smoothing: 10,
+        },
+      ],
+    },
+    {
+      id: 'slide11',
+      background: {
+        type: 'image',
+        value: DESIGN_THEMES.blue_white.backgroundImage!,
+        size: 'cover',
+        position: 'center',
+      },
+      elements: [
+        {
+          id: 'tt1111',
+          type: 'text',
+          content: 'Спасибо за внимание!',
+          fontSize: 96,
+          font: "'Trebuchet MS', sans-serif",
+          color: '#203864',
+          align: 'center',
+          verticalAlign: 'middle',
+          bold: true,
+          position: { x: 0, y: 0 },
+          size: { width: 960, height: 270 },
+          shadow: {
+            color: 'rgba(0, 0, 0, 0.5)',
+            blur: 8,
+          },
+        },
+        {
+          id: 'tt1112',
+          type: 'text',
+          content: 'Готов ответить на вопросы',
+          fontSize: 48,
+          font: 'Arial, sans-serif',
+          color: '#203864',
+          align: 'center',
+          verticalAlign: 'middle',
+          bold: false,
+          position: { x: 0, y: 280 },
+          size: { width: 960, height: 100 },
+          shadow: {
+            color: '0',
+            blur: 0,
           },
         },
       ],
