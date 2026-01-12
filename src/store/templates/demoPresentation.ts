@@ -1,5 +1,6 @@
 import { Presentation } from '../types/presentation';
 import { DESIGN_THEMES } from '../../common/components/Toolbar/constants/designThemes';
+import { applyListTypeToText } from '../functions/presentation';
 import logoImage from '../../common/components/Toolbar/assets/presentation/logo.png';
 import thinkImage from '../../common/components/Toolbar/assets/presentation/think.jpg';
 import workerImage from '../../common/components/Toolbar/assets/presentation/worker.jpg';
@@ -416,8 +417,10 @@ export const demoPresentation: Presentation = {
         {
           id: 'tt34',
           type: 'text',
-          content:
-            '• Создавайте, редактируйте, оформляйте\n• Показывайте презентации без установки ПО\n• Идеален для учебных и рабочих задач',
+          content: applyListTypeToText(
+            'Создавайте, редактируйте, оформляйте\nПоказывайте презентации без установки ПО\nИдеален для учебных и рабочих задач',
+            'bullet_star' // ← передаём тип списка
+          ),
           fontSize: 18,
           font: 'Arial, sans-serif',
           color: '#203864',
@@ -431,6 +434,7 @@ export const demoPresentation: Presentation = {
             color: '0',
             blur: 0,
           },
+          listType: 'bullet_star',
         },
       ],
     },
@@ -1107,8 +1111,10 @@ export const demoPresentation: Presentation = {
         {
           id: 'tt74',
           type: 'text',
-          content:
-            '• Интерактивное выделение элементов\n• Множественный выбор и групповое редактирование\n• Перетаскивание и изменение размера (8 ручек)\n• Точное позицинирование\n• Inline-редактирование текста',
+          content: applyListTypeToText(
+            'Интерактивное выделение элементов\nМножественный выбор и групповое редактирование\nПеретаскивание и изменение размера (8 ручек)\nТочное позиционирование\nInline-редактирование текста',
+            'bullet_circle' // или другой тип из LIST_OPTIONS
+          ),
           fontSize: 18,
           font: 'Arial, sans-serif',
           color: '#203864',
@@ -1122,6 +1128,7 @@ export const demoPresentation: Presentation = {
             color: '0',
             blur: 0,
           },
+          listType: 'bullet_circle', // добавляем это свойство
         },
         {
           type: 'image',
@@ -1373,8 +1380,10 @@ export const demoPresentation: Presentation = {
         {
           id: 'tt93',
           type: 'text',
-          content:
-            '• Ctrl/Cmd+C: Копировать\n • Ctrl/Cmd+V: Вставить\n • Ctrl/Cmd+D: Дублировать\n • Delete/BackSpace: Удалить\n • Ctrl/Cmd+Z: Отменить\n • Ctrl/Cmd+Y: Повторить\n',
+          content: applyListTypeToText(
+            'Ctrl/Cmd+C: Копировать\nCtrl/Cmd+V: Вставить\nCtrl/Cmd+D: Дублировать\nDelete/BackSpace: Удалить\nCtrl/Cmd+Z: Отменить\nCtrl/Cmd+Y: Повторить',
+            'bullet_disc'
+          ),
           fontSize: 18,
           font: 'Arial, sans-serif',
           color: '#203864',
@@ -1388,6 +1397,7 @@ export const demoPresentation: Presentation = {
             color: '0',
             blur: 0,
           },
+          listType: 'bullet_disc',
         },
         {
           id: 'tt94',

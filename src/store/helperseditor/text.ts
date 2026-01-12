@@ -10,7 +10,6 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
   const slideId = state.selectedSlideId;
   const slide = state.presentation.slides.find((s: Slide) => s.id === slideId);
   if (!slide || !elId) return false;
-
   if (action.startsWith('LIST_TYPE:')) {
     const listKey = action.split(':')[1].trim();
     const listOption = LIST_OPTIONS.find((opt) => opt.key === listKey);

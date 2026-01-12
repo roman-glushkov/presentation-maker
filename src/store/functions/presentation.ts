@@ -9,6 +9,7 @@ import {
   Size,
 } from '../types/presentation';
 import { createShapeElement } from '../templates/presentation';
+import { LIST_OPTIONS } from '../../common/components/Toolbar/constants/textOptions';
 
 export function changeTitle(presentation: Presentation, newTitle: string): Presentation {
   return { ...presentation, title: newTitle };
@@ -205,4 +206,24 @@ export function changeShapeStrokeWidth(
       el.type === 'shape' && el.id === elementId ? { ...el, strokeWidth } : el
     ),
   };
+}
+
+export function applyListTypeToText(text: string, listType?: string): string {
+  if (!listType) return text;
+
+  const listOption = LIST_OPTIONS.find((opt) => opt.key === listType);
+  if (!listOption || !listOption.prefix) return text;
+
+  const lines = text.split('\n');
+  const newLines = lines.map((line) => {
+    if (!line.trim()) return line;
+
+    // Проверяем, есть ли уже какой-то маркер из LIST_OPTIONS
+    const existing = LIST_OPTIONS.find((opt) => opt.prefix && line.startsWith(opt.prefix));
+    let clean = existing?.prefix ? line.slice(existing.prefix.length) : line;
+
+    return listOption.prefix + clean;
+  });
+
+  return newLines.join('\n');
 }
