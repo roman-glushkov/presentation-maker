@@ -21,6 +21,7 @@ import {
   TextAlignPopup,
   StrokeWidthPopup,
   TextOptionsPopup,
+  ListPopup,
 } from './PopupMenus';
 
 import { TEXT_SIZE_OPTIONS, LINE_HEIGHT_OPTIONS } from '../constants/textOptions';
@@ -42,6 +43,7 @@ const menuActions = [
   'ADD_SHAPE',
   'TEXT_SHADOW',
   'SHAPE_SMOOTHING',
+  'LIST_OPTIONS',
 ];
 
 export default function ToolbarGroup() {
@@ -220,6 +222,7 @@ export default function ToolbarGroup() {
           onSelect={(width: number) => handlePopupAction(`SHAPE_STROKE_WIDTH:${width}`)}
         />
       ),
+      LIST_OPTIONS: <ListPopup onSelect={(key: string) => handlePopupAction(`LIST_TYPE:${key}`)} />,
       TEXT_COLOR: <ColorSection type="text" />,
       SHAPE_FILL: <ColorSection type="fill" />,
       SHAPE_STROKE: <ColorSection type="stroke" />,

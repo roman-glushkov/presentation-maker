@@ -30,6 +30,7 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     { label: '𝐁 Жирный', action: 'TEXT_BOLD' },
     { label: '𝑰 Курсив', action: 'TEXT_ITALIC' },
     { label: 'U Подчеркнутый', action: 'TEXT_UNDERLINE' },
+    { label: '📋 Маркеры', action: 'LIST_OPTIONS' },
   ],
   insert: [
     { label: '📝 Текст', action: 'ADD_TEXT' },

@@ -58,6 +58,7 @@ export type TextElement = BaseElement & {
   placeholder?: string;
   underline?: boolean;
   smoothing?: number;
+  listType?: string;
 };
 
 export type ImageElement = BaseElement & {

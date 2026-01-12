@@ -6,6 +6,7 @@ import {
   TEXT_ALIGN_OPTIONS,
   TEXT_VERTICAL_ALIGN_OPTIONS,
   FONT_FAMILY_OPTIONS,
+  LIST_OPTIONS,
 } from '../constants/textOptions';
 
 interface PopupItem {
@@ -164,6 +165,34 @@ export function TextOptionsPopup({ options, onSelect }: TextOptionsPopupProps) {
       {options.map((opt) => (
         <button key={opt} className="text-option-button" onClick={() => onSelect(opt)}>
           {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
+// В PopupMenus.tsx добавляем:
+export interface ListPopupProps {
+  onSelect: (key: string) => void;
+}
+
+export function ListPopup({ onSelect }: ListPopupProps) {
+  const items = LIST_OPTIONS.map((option) => ({
+    key: option.key,
+    label: option.label,
+    prefix: option.prefix,
+  }));
+
+  return (
+    <div className="text-options-popup list-popup">
+      {items.map((item) => (
+        <button
+          key={item.key}
+          className="text-option-button list-option"
+          onClick={() => onSelect(item.key)}
+          title={item.label}
+        >
+          <span className="list-prefix">{item.prefix || ''}</span>
+          {item.label}
         </button>
       ))}
     </div>

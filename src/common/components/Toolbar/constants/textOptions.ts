@@ -96,3 +96,18 @@ export const SHAPE_SMOOTHING_OPTIONS: SmoothingOption[] = [
   { label: '50 px', key: 'strong', value: 50 },
   { label: '100 px', key: 'very-strong', value: 100 },
 ];
+
+export interface ListOption {
+  label: string;
+  key: string;
+  prefix?: string;
+}
+
+export const LIST_OPTIONS: ListOption[] = [
+  { label: 'Точка', key: 'bullet_disc', prefix: '• ' },
+  { label: 'Круг', key: 'bullet_circle', prefix: '○ ' },
+  { label: 'Квадрат', key: 'bullet_square', prefix: '▪ ' },
+  { label: 'Стрелка', key: 'bullet_arrow', prefix: '→ ' },
+  { label: 'Галочка', key: 'bullet_check', prefix: '✓ ' },
+  { label: 'Звезда', key: 'bullet_star', prefix: '⭐ ' },
+];
