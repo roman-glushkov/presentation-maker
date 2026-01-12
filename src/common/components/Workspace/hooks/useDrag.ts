@@ -19,7 +19,7 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
     origPositions: Map<string, { x: number; y: number }>;
   } | null>(null);
 
-  return (
+  const startDrag = (
     e: React.PointerEvent,
     el: SlideElement,
     selectedElementIds: string[] = [],
@@ -55,7 +55,16 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
         elements: s.elements.map((item) => {
           if (!dragStateRef.current!.draggingIds.includes(item.id)) return item;
           const origPos = dragStateRef.current!.origPositions.get(item.id);
-          return origPos ? { ...item, position: { x: origPos.x + dx, y: origPos.y + dy } } : item;
+
+          if (!origPos) return item;
+
+          return {
+            ...item,
+            position: {
+              x: origPos.x + dx,
+              y: origPos.y + dy,
+            },
+          };
         }),
       }));
     });
@@ -72,4 +81,6 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
       cleanupPointerHandlers();
     };
   };
+
+  return startDrag;
 }

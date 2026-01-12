@@ -1,0 +1,17 @@
+.workspace-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: #f0f0f0; /* Фон вокруг слайда */
+}
+
+.slide-container {
+  position: relative;
+  width: 960px;
+  height: 540px;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 15%);
+  background-color: white; /* Белый фон под сеткой */
+}

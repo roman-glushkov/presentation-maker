@@ -5,7 +5,7 @@ import {
   TextElement,
   ImageElement,
   ShapeElement,
-} from '../../store/types/presentation';
+} from '../types/presentation';
 import { renderShape } from './shapeRenderer';
 
 const EDITOR_SLIDE_WIDTH = 960;

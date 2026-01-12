@@ -6,6 +6,11 @@ interface Args {
   updateSlide: (updater: (s: Slide) => Slide) => void;
 }
 
+// Функция прилипания для ресайза
+function snapToGrid(value: number, gridSize: number = 10): number {
+  return Math.round(value / gridSize) * gridSize;
+}
+
 export default function useResize({ preview, updateSlide }: Args) {
   const startResize = (
     e: React.PointerEvent,
@@ -17,6 +22,7 @@ export default function useResize({ preview, updateSlide }: Args) {
 
     const MIN_WIDTH = 20;
     const MIN_HEIGHT = 20;
+    const GRID_SIZE = 10;
 
     const startX = e.clientX;
     const startY = e.clientY;
@@ -26,8 +32,12 @@ export default function useResize({ preview, updateSlide }: Args) {
     const origY = el.position.y;
 
     const onPointerMove = (ev: PointerEvent) => {
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
+      let dx = ev.clientX - startX;
+      let dy = ev.clientY - startY;
+
+      // Применяем снаппинг к сетке
+      dx = snapToGrid(dx, GRID_SIZE);
+      dy = snapToGrid(dy, GRID_SIZE);
 
       updateSlide((s: Slide) => ({
         ...s,
@@ -76,22 +86,18 @@ export default function useResize({ preview, updateSlide }: Args) {
               break;
           }
 
-          if (newWidth < MIN_WIDTH) {
-            newWidth = MIN_WIDTH;
-            if (['nw', 'w', 'sw'].includes(corner)) {
-              newX = origX + (origWidth - MIN_WIDTH);
-            } else {
-              newX = origX;
-            }
+          // Снаппинг размеров к сетке
+          newWidth = Math.max(MIN_WIDTH, snapToGrid(newWidth, GRID_SIZE));
+          newHeight = Math.max(MIN_HEIGHT, snapToGrid(newHeight, GRID_SIZE));
+          newX = snapToGrid(newX, GRID_SIZE);
+          newY = snapToGrid(newY, GRID_SIZE);
+
+          if (['nw', 'w', 'sw'].includes(corner) && newWidth < MIN_WIDTH) {
+            newX = origX + (origWidth - MIN_WIDTH);
           }
 
-          if (newHeight < MIN_HEIGHT) {
-            newHeight = MIN_HEIGHT;
-            if (['nw', 'n', 'ne'].includes(corner)) {
-              newY = origY + (origHeight - MIN_HEIGHT);
-            } else {
-              newY = origY;
-            }
+          if (['nw', 'n', 'ne'].includes(corner) && newHeight < MIN_HEIGHT) {
+            newY = origY + (origHeight - MIN_HEIGHT);
           }
 
           return {

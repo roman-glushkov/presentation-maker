@@ -10,6 +10,9 @@ import { Slide } from '../../../../store/types/presentation';
 import TextElementView from './TextElement';
 import ImageElementView from './ImageElement';
 import ShapeElementView from './ShapeElement';
+import GridOverlay from './GridOverlay';
+
+import '../styles/WorkspaceContent.css';
 
 interface WorkspaceContentProps {
   slide: Slide;
@@ -80,8 +83,15 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
   };
 
   return (
-    <div className="workspace-content" style={backgroundStyle} onClick={handleWorkspaceClick}>
-      {slide.elements.map(ElementComponent)}
+    <div className="workspace-content" onClick={handleWorkspaceClick}>
+      {/* Контейнер слайда */}
+      <div className="slide-container" style={backgroundStyle}>
+        {/* Сетка отображается только в режиме редактирования */}
+        {!preview && <GridOverlay />}
+
+        {/* Элементы слайда */}
+        {slide.elements.map(ElementComponent)}
+      </div>
     </div>
   );
 }
