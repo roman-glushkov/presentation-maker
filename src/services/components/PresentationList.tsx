@@ -15,6 +15,7 @@ import EditPresentationModal from './EditPresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications';
 import { slideTitle } from '../../store/templates/slide';
+import { usePdfExport } from '../../export/usePdfExport'; // Добавляем импорт
 import '../styles/PresentationList.css';
 
 export default function PresentationList() {
@@ -30,9 +31,11 @@ export default function PresentationList() {
   } | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [exportingId, setExportingId] = useState<string | null>(null); // Состояние для экспорта
 
   const dispatch = useDispatch();
   const { notifications, addNotification, removeNotification } = useNotifications();
+  const { exportToPdf } = usePdfExport(); // Используем хук экспорта
 
   useEffect(() => {
     account
@@ -254,6 +257,40 @@ export default function PresentationList() {
     }
   };
 
+  // Новая функция для экспорта в PDF
+  const handleExportPresentation = async (presentationId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const presentation = presentations.find((p) => (p.id || p.$id) === presentationId);
+    if (!presentation) return;
+
+    setExportingId(presentationId);
+    try {
+      addNotification('Начинаем экспорт презентации в PDF...', 'info', 2000);
+
+      // Загружаем полную презентацию
+      const fullPresentation = await PresentationService.getPresentation(presentationId);
+
+      // Экспортируем в PDF
+      await exportToPdf(fullPresentation);
+
+      addNotification(
+        `Презентация "${fullPresentation.title}" успешно экспортирована в PDF!`,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
+    } catch (error) {
+      console.error('Ошибка экспорта в PDF:', error);
+      addNotification(
+        'Не удалось экспортировать презентацию в PDF',
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
+    } finally {
+      setExportingId(null);
+    }
+  };
+
   if (!user)
     return (
       <div className="presentation-list-container--empty">
@@ -351,6 +388,15 @@ export default function PresentationList() {
                     <h3 className="presentation-list-card-title">{pres.title}</h3>
                     <div className="presentation-list-card-actions">
                       <button
+                        className="presentation-list-card-export"
+                        onClick={(e) => handleExportPresentation(pres.id || pres.$id, e)}
+                        disabled={exportingId === (pres.id || pres.$id)}
+                        title="Экспорт в PDF"
+                        aria-label="Экспорт в PDF"
+                      >
+                        {exportingId === (pres.id || pres.$id) ? '...' : '📄'}
+                      </button>
+                      <button
                         className="presentation-list-card-edit"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -375,6 +421,9 @@ export default function PresentationList() {
 
                   <div className="presentation-list-card-meta">
                     <span>{(pres.slides || []).length} слайдов</span>
+                    {exportingId === (pres.id || pres.$id) && (
+                      <span className="presentation-list-card-exporting">Экспорт в PDF...</span>
+                    )}
                   </div>
 
                   <div className="presentation-list-card-footer">

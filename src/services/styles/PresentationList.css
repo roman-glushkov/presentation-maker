@@ -368,7 +368,7 @@
 }
 
 .presentation-list-card-edit:hover {
-  background-color: rgba(66, 153, 225, 0.1);
+  background-color: rgb(66 153 225 / 10%);
   transform: scale(1.1);
 }
 
@@ -394,7 +394,7 @@
 
 .presentation-list-card-delete:hover {
   color: #e53e3e;
-  background-color: rgba(229, 62, 62, 0.1);
+  background-color: rgb(229 62 62 / 10%);
   transform: scale(1.1);
 }
 
@@ -432,11 +432,181 @@
 }
 
 /* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .presentation-list-card-actions {
     opacity: 1; /* Всегда показываем на мобильных */
   }
 
+  .presentation-list-card-edit,
+  .presentation-list-card-delete {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
+
+/* Добавьте в конец PresentationList.css */
+
+.presentation-list-card-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.presentation-list-card:hover .presentation-list-card-actions {
+  opacity: 1;
+}
+
+.presentation-list-card-export {
+  background: none;
+  border: none;
+  color: #38a169;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.presentation-list-card-export:hover {
+  background-color: rgb(56 161 105 / 10%);
+  transform: scale(1.1);
+}
+
+.presentation-list-card-export:active {
+  transform: scale(0.95);
+}
+
+.presentation-list-card-export:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.presentation-list-card-export:disabled:hover {
+  background-color: transparent;
+  color: #38a169;
+}
+
+.presentation-list-card-edit {
+  background: none;
+  border: none;
+  color: #4299e1;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.presentation-list-card-edit:hover {
+  background-color: rgb(66 153 225 / 10%);
+  transform: scale(1.1);
+}
+
+.presentation-list-card-edit:active {
+  transform: scale(0.95);
+}
+
+.presentation-list-card-delete {
+  background: none;
+  border: none;
+  color: #718096;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.presentation-list-card-delete:hover {
+  color: #e53e3e;
+  background-color: rgb(229 62 62 / 10%);
+  transform: scale(1.1);
+}
+
+.presentation-list-card-delete:active {
+  transform: scale(0.95);
+}
+
+.presentation-list-card-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.presentation-list-card-delete:disabled:hover {
+  background-color: transparent;
+  color: #718096;
+}
+
+.presentation-list-card-exporting {
+  color: #38a169;
+  font-size: 12px;
+  margin-left: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Обновите существующие стили для .presentation-list-card-header */
+.presentation-list-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.presentation-list-card-title {
+  flex: 1;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+.presentation-list-card-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #718096;
+  font-size: 14px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (width <= 768px) {
+  .presentation-list-card-actions {
+    opacity: 1; /* Всегда показываем на мобильных */
+  }
+
+  .presentation-list-card-export,
   .presentation-list-card-edit,
   .presentation-list-card-delete {
     width: 28px;
