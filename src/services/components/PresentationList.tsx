@@ -11,9 +11,10 @@ import {
 } from '../../store/editorSlice';
 import { Presentation } from '../../store/types/presentation';
 import NewPresentationModal from './NewPresentationModal';
+import EditPresentationModal from './EditPresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications';
-import { slideTitle } from '../../store/templates/slide'; // Импортируем шаблон
+import { slideTitle } from '../../store/templates/slide';
 import '../styles/PresentationList.css';
 
 export default function PresentationList() {
@@ -22,6 +23,11 @@ export default function PresentationList() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AccountUser | null>(null);
   const [showNewPresentationModal, setShowNewPresentationModal] = useState(false);
+  const [showEditPresentationModal, setShowEditPresentationModal] = useState(false);
+  const [editingPresentation, setEditingPresentation] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -79,7 +85,6 @@ export default function PresentationList() {
   const handleCreatePresentation = async (title: string) => {
     setCreatingNew(true);
     try {
-      // Создаем титульный слайд на основе шаблона
       const newSlideId = `slide-${Date.now()}`;
 
       const titleSlide = {
@@ -87,7 +92,6 @@ export default function PresentationList() {
         id: newSlideId,
       };
 
-      // Генерируем уникальные ID для элементов
       titleSlide.elements = titleSlide.elements.map((el) => ({
         ...el,
         id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -102,7 +106,7 @@ export default function PresentationList() {
 
       const currentUser = await account.get<AccountUser>();
       const saved = await PresentationService.savePresentation(
-        presentation, // Используем презентацию с титульным слайдом
+        presentation,
         currentUser.$id,
         currentUser.name || currentUser.email || ''
       );
@@ -115,7 +119,6 @@ export default function PresentationList() {
         selectedSlideIds: loaded.selectedSlideIds || [loaded.slides[0]?.id || ''],
       };
 
-      // ДИСПАТЧИМ ПОСЛЕ сохранения в БД
       dispatch(loadExistingPresentation(presForEditor));
       dispatch(setPresentationId(saved.$id));
 
@@ -136,6 +139,47 @@ export default function PresentationList() {
     } finally {
       setCreatingNew(false);
       setShowNewPresentationModal(false);
+    }
+  };
+
+  const handleUpdatePresentation = async (presentationId: string, newTitle: string) => {
+    try {
+      const currentUser = await account.get<AccountUser>();
+      const presentation = presentations.find((p) => (p.id || p.$id) === presentationId);
+
+      if (!presentation) {
+        throw new Error('Презентация не найдена');
+      }
+
+      await PresentationService.savePresentation(
+        { ...presentation, title: newTitle },
+        currentUser.$id,
+        currentUser.name || currentUser.email || '',
+        presentationId
+      );
+
+      setPresentations((prev) =>
+        prev.map((p) =>
+          (p.id || p.$id) === presentationId
+            ? { ...p, title: newTitle, updatedAt: new Date().toISOString() }
+            : p
+        )
+      );
+
+      addNotification(
+        'Название презентации успешно изменено',
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
+
+      loadPresentations();
+    } catch {
+      addNotification(
+        'Не удалось изменить название презентации',
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
+      throw new Error('Failed to update presentation');
     }
   };
 
@@ -175,6 +219,14 @@ export default function PresentationList() {
         NOTIFICATION_TIMEOUT.ERROR
       );
     }
+  };
+
+  const handleEditPresentation = (presentationId: string, currentTitle: string) => {
+    setEditingPresentation({
+      id: presentationId,
+      title: currentTitle,
+    });
+    setShowEditPresentationModal(true);
   };
 
   const handleDeletePresentation = async (presentationId: string, e: React.MouseEvent) => {
@@ -297,14 +349,28 @@ export default function PresentationList() {
                 >
                   <div className="presentation-list-card-header">
                     <h3 className="presentation-list-card-title">{pres.title}</h3>
-                    <button
-                      className="presentation-list-card-delete"
-                      onClick={(e) => handleDeletePresentation(pres.id || pres.$id, e)}
-                      disabled={deletingId === (pres.id || pres.$id)}
-                      aria-label="Удалить презентацию"
-                    >
-                      {deletingId === (pres.id || pres.$id) ? '...' : '🗑'}
-                    </button>
+                    <div className="presentation-list-card-actions">
+                      <button
+                        className="presentation-list-card-edit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPresentation(pres.id || pres.$id, pres.title);
+                        }}
+                        title="Изменить название"
+                        aria-label="Изменить название"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="presentation-list-card-delete"
+                        onClick={(e) => handleDeletePresentation(pres.id || pres.$id, e)}
+                        disabled={deletingId === (pres.id || pres.$id)}
+                        title="Удалить презентацию"
+                        aria-label="Удалить презентацию"
+                      >
+                        {deletingId === (pres.id || pres.$id) ? '...' : '🗑'}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="presentation-list-card-meta">
@@ -341,6 +407,19 @@ export default function PresentationList() {
             onClose={() => setShowNewPresentationModal(false)}
             onCreate={handleCreatePresentation}
             onCancel={() => setShowNewPresentationModal(false)}
+          />
+        )}
+
+        {showEditPresentationModal && editingPresentation && (
+          <EditPresentationModal
+            isOpen={showEditPresentationModal}
+            onClose={() => {
+              setShowEditPresentationModal(false);
+              setEditingPresentation(null);
+            }}
+            onUpdate={handleUpdatePresentation}
+            presentationId={editingPresentation.id}
+            currentTitle={editingPresentation.title}
           />
         )}
       </div>

@@ -1,0 +1,114 @@
+/* EditPresentationModal.css */
+.edit-presentation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.edit-presentation-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.edit-presentation-modal-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #1a1a1a;
+}
+
+.edit-presentation-modal-label-container {
+  margin-bottom: 8px;
+}
+
+.edit-presentation-modal-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.edit-presentation-modal-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.edit-presentation-modal-input:focus {
+  outline: none;
+  border-color: #4299e1;
+}
+
+.edit-presentation-modal-input.error {
+  border-color: #f56565;
+}
+
+.edit-presentation-modal-error {
+  margin-top: 8px;
+  color: #f56565;
+  font-size: 14px;
+}
+
+.edit-presentation-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.edit-presentation-modal-cancel {
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #4a5568;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-presentation-modal-cancel:hover:not(:disabled) {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.edit-presentation-modal-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.edit-presentation-modal-submit {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #4299e1;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-presentation-modal-submit:hover:not(:disabled) {
+  background: #3182ce;
+}
+
+.edit-presentation-modal-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
