@@ -5,7 +5,6 @@ import { undo, redo } from '../../../../store/editorSlice';
 const isTextInput = (el: Element | null) =>
   el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA' || el?.hasAttribute('contenteditable');
 
-// Функция проверки редактирования текста
 const isEditingTextElement = (): boolean => {
   const activeElement = document.activeElement;
   if (!activeElement) return false;
@@ -23,7 +22,6 @@ export default function useUndoRedoHotkeys() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Пропускаем, если редактируется текст
       if (isEditingTextElement()) {
         return;
       }

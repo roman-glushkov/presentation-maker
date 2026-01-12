@@ -20,8 +20,6 @@ export function createPointerHandlers(
     window.removeEventListener('pointerup', onPointerUp);
   };
 }
-
-// Функция для прилипания к сетке (10px)
 export function snapToGrid(value: number, gridSize: number = 10): number {
   return Math.round(value / gridSize) * gridSize;
 }
@@ -40,12 +38,8 @@ export function useDragResizeCore({ preview, updateSlide }: DragResizeCoreArgs) 
     const onPointerMove = (ev: PointerEvent) => {
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
-
-      // Снаппинг к сетке
       const snappedDx = snapToGrid(dx);
       const snappedDy = snapToGrid(dy);
-
-      // Передаем снапнутые значения
       callback(snappedDx, snappedDy);
     };
 

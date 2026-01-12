@@ -89,7 +89,6 @@
   font-style: italic;
 }
 
-/* Добавьте в BaseElement.css или создайте новый файл */
 .text-edit-area {
   resize: none;
   border: none;

@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background-color: #f0f0f0; /* Фон вокруг слайда */
+  background-color: #f0f0f0;
 }
 
 .slide-container {
@@ -13,5 +13,5 @@
   width: 960px;
   height: 540px;
   box-shadow: 0 2px 12px rgb(0 0 0 / 15%);
-  background-color: white; /* Белый фон под сеткой */
+  background-color: white;
 }

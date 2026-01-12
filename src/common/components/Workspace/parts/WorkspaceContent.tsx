@@ -84,12 +84,8 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
 
   return (
     <div className="workspace-content" onClick={handleWorkspaceClick}>
-      {/* Контейнер слайда */}
       <div className="slide-container" style={backgroundStyle}>
-        {/* Сетка отображается только в режиме редактирования */}
         {!preview && <GridOverlay />}
-
-        {/* Элементы слайда */}
         {slide.elements.map(ElementComponent)}
       </div>
     </div>

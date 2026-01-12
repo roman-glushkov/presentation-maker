@@ -6,7 +6,6 @@ interface Args {
   updateSlide: (updater: (s: Slide) => Slide) => void;
 }
 
-// Функция прилипания для ресайза
 function snapToGrid(value: number, gridSize: number = 10): number {
   return Math.round(value / gridSize) * gridSize;
 }
@@ -35,7 +34,6 @@ export default function useResize({ preview, updateSlide }: Args) {
       let dx = ev.clientX - startX;
       let dy = ev.clientY - startY;
 
-      // Применяем снаппинг к сетке
       dx = snapToGrid(dx, GRID_SIZE);
       dy = snapToGrid(dy, GRID_SIZE);
 
@@ -85,8 +83,6 @@ export default function useResize({ preview, updateSlide }: Args) {
               newWidth = origWidth + dx;
               break;
           }
-
-          // Снаппинг размеров к сетке
           newWidth = Math.max(MIN_WIDTH, snapToGrid(newWidth, GRID_SIZE));
           newHeight = Math.max(MIN_HEIGHT, snapToGrid(newHeight, GRID_SIZE));
           newX = snapToGrid(newX, GRID_SIZE);

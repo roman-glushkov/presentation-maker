@@ -338,8 +338,6 @@
   font-weight: 500;
 }
 
-/* Добавьте эти стили в конец файла PresentationList.css */
-
 .presentation-list-card-actions {
   display: flex;
   gap: 8px;
@@ -412,8 +410,6 @@
   background-color: transparent;
   color: #718096;
 }
-
-/* Обновите существующие стили для .presentation-list-card-header */
 .presentation-list-card-header {
   display: flex;
   justify-content: space-between;
@@ -430,22 +426,6 @@
   color: #1a1a1a;
   word-break: break-word;
 }
-
-/* Адаптивность для мобильных устройств */
-@media (width <= 768px) {
-  .presentation-list-card-actions {
-    opacity: 1; /* Всегда показываем на мобильных */
-  }
-
-  .presentation-list-card-edit,
-  .presentation-list-card-delete {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
-}
-
-/* Добавьте в конец PresentationList.css */
 
 .presentation-list-card-actions {
   display: flex;
@@ -574,7 +554,6 @@
   }
 }
 
-/* Обновите существующие стили для .presentation-list-card-header */
 .presentation-list-card-header {
   display: flex;
   justify-content: space-between;
@@ -598,19 +577,4 @@
   margin-bottom: 8px;
   color: #718096;
   font-size: 14px;
-}
-
-/* Адаптивность для мобильных устройств */
-@media (width <= 768px) {
-  .presentation-list-card-actions {
-    opacity: 1; /* Всегда показываем на мобильных */
-  }
-
-  .presentation-list-card-export,
-  .presentation-list-card-edit,
-  .presentation-list-card-delete {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
 }

@@ -15,7 +15,7 @@ import EditPresentationModal from './EditPresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications';
 import { slideTitle } from '../../store/templates/slide';
-import { usePdfExport } from '../../export/usePdfExport'; // Добавляем импорт
+import { usePdfExport } from '../../export/usePdfExport';
 import '../styles/PresentationList.css';
 
 export default function PresentationList() {
@@ -31,11 +31,11 @@ export default function PresentationList() {
   } | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [exportingId, setExportingId] = useState<string | null>(null); // Состояние для экспорта
+  const [exportingId, setExportingId] = useState<string | null>(null);
 
   const dispatch = useDispatch();
   const { notifications, addNotification, removeNotification } = useNotifications();
-  const { exportToPdf } = usePdfExport(); // Используем хук экспорта
+  const { exportToPdf } = usePdfExport();
 
   useEffect(() => {
     account
@@ -257,7 +257,6 @@ export default function PresentationList() {
     }
   };
 
-  // Новая функция для экспорта в PDF
   const handleExportPresentation = async (presentationId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -267,11 +266,7 @@ export default function PresentationList() {
     setExportingId(presentationId);
     try {
       addNotification('Начинаем экспорт презентации в PDF...', 'info', 2000);
-
-      // Загружаем полную презентацию
       const fullPresentation = await PresentationService.getPresentation(presentationId);
-
-      // Экспортируем в PDF
       await exportToPdf(fullPresentation);
 
       addNotification(

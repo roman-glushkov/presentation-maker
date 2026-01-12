@@ -6,13 +6,9 @@ import { AppDispatch } from '../../../../store';
 
 const isTextInput = (el: Element | null) =>
   el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA' || el?.hasAttribute('contenteditable');
-
-// Улучшенная функция проверки редактирования текста
 const isEditingTextElement = (): boolean => {
   const activeElement = document.activeElement;
   if (!activeElement) return false;
-
-  // Проверяем все возможные варианты текстовых редакторов
   if (activeElement.tagName === 'TEXTAREA') {
     return true;
   }
@@ -20,8 +16,6 @@ const isEditingTextElement = (): boolean => {
   if (activeElement.hasAttribute('contenteditable')) {
     return true;
   }
-
-  // Проверяем, находится ли в текстовом элементе
   const closestTextElement = activeElement.closest('.text-edit-area, [data-text-editing="true"]');
   if (closestTextElement) {
     return true;
@@ -42,7 +36,6 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Пропускаем ВСЕ события стрелок и клавиш редактирования текста
       const textEditingKeys = [
         'ArrowLeft',
         'ArrowRight',
@@ -57,9 +50,8 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
         'Enter',
       ];
 
-      // Если пользователь редактирует текст ИЛИ нажата стрелка/клавиша редактирования
       if (isEditingTextElement() && textEditingKeys.includes(e.key)) {
-        return; // Пропускаем событие полностью
+        return;
       }
 
       if (preview || isTextInput(document.activeElement)) return;
@@ -84,7 +76,7 @@ export default function useWorkspaceKeyboard(preview?: boolean) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown, { capture: false }); // Используем bubbling, не capture
+    window.addEventListener('keydown', handleKeyDown, { capture: false });
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: false });
   }, [dispatch, preview, selectedElementIds]);
 }

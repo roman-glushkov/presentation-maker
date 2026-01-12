@@ -55,7 +55,6 @@ export function BaseElement({
   if (!element || element.type !== elementType) return null;
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Простая проверка - если клик по textarea, не начинаем drag
     const target = e.target as HTMLElement;
     if (target.tagName === 'TEXTAREA' || target.closest('textarea')) {
       return;

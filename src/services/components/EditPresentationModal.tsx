@@ -1,4 +1,3 @@
-// EditPresentationModal.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { PresentationService } from '../services/PresentationService';
@@ -40,10 +39,7 @@ export default function EditPresentationModal({
 
   useEffect(() => {
     if (isOpen) {
-      // Устанавливаем текущее название
       setTitle(currentTitle);
-
-      // Загружаем существующие названия (исключая текущее)
       account
         .get<AppwriteUser>()
         .then((currentUser) => PresentationService.getUserPresentations(currentUser.$id))
@@ -64,8 +60,6 @@ export default function EditPresentationModal({
 
     const trimmedTitle = title.trim();
     removeValidationMessage('title');
-
-    // Пропускаем валидацию, если название не изменилось
     if (trimmedTitle.toLowerCase() === currentTitle.toLowerCase()) {
       return;
     }
@@ -89,8 +83,6 @@ export default function EditPresentationModal({
     if (!touched) setTouched(true);
 
     const trimmedTitle = title.trim();
-
-    // Если название не изменилось, просто закрываем
     if (trimmedTitle.toLowerCase() === currentTitle.toLowerCase()) {
       onClose();
       return;

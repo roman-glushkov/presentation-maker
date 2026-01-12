@@ -1,100 +1,87 @@
-// Основной тип, представляющий всю презентацию
 export type Presentation = {
-  title: string; // Название презентации
-  slides: Slide[]; // Массив слайдов
-  currentSlideId: string; // ID текущего активного слайда
-  selectedSlideIds: string[]; // ID выбранных слайдов (для групповых операций)
+  title: string;
+  slides: Slide[];
+  currentSlideId: string;
+  selectedSlideIds: string[];
 };
 
-// Тип, представляющий отдельный слайд
 export type Slide = {
-  id: string; // Уникальный идентификатор слайда
-  background: Background; // Фон слайда
-  elements: SlideElement[]; // Элементы на слайде (текст, изображения, фигуры)
+  id: string;
+  background: Background;
+  elements: SlideElement[];
 };
 
-// Тип для представления выбора (селекции) элементов
 export type Selection = {
-  slideId: string; // ID слайда, на котором происходит выбор
-  elementIds: string[]; // ID выбранных элементов на этом слайде
+  slideId: string;
+  elementIds: string[];
 };
 
-// Тип для определения фона слайда
 export type Background =
-  | { type: 'color'; value: string; isLocked?: boolean } // Цветной фон
-  | { type: 'image'; value: string; size?: string; position?: string; isLocked?: boolean } // Изображение в качестве фона
-  | { type: 'none' }; // Прозрачный фон
+  | { type: 'color'; value: string; isLocked?: boolean }
+  | { type: 'image'; value: string; size?: string; position?: string; isLocked?: boolean }
+  | { type: 'none' };
 
-// Объединенный тип для всех возможных элементов слайда
 export type SlideElement = TextElement | ImageElement | ShapeElement;
 
-// Тип для позиционирования элемента на слайде (координаты)
 export type Position = {
-  x: number; // Координата X (по горизонтали)
-  y: number; // Координата Y (по вертикали)
+  x: number;
+  y: number;
 };
 
-// Тип для размеров элемента
 export type Size = {
-  width: number; // Ширина элемента
-  height: number; // Высота элемента
+  width: number;
+  height: number;
 };
 
-// Базовый тип, содержащий общие свойства для всех элементов
 type BaseElement = {
-  id: string; // Уникальный идентификатор элемента
-  position: Position; // Позиция элемента на слайде
-  size: Size; // Размеры элемента
+  id: string;
+  position: Position;
+  size: Size;
   shadow?: {
-    // Тень элемента (опционально)
-    color: string; // Цвет тени
-    blur: number; // Размытие тени
+    color: string;
+    blur: number;
   };
 };
 
-// Тип для текстовых элементов
 export type TextElement = BaseElement & {
-  type: 'text'; // Тип элемента - текст
-  content: string; // Текстовое содержимое
-  font: string; // Название шрифта
-  fontSize: number; // Размер шрифта
-  color: string; // Цвет текста
-  backgroundColor?: string; // Фоновый цвет текстового блока
-  align?: 'left' | 'center' | 'right' | 'justify'; // Горизонтальное выравнивание
-  verticalAlign?: 'top' | 'middle' | 'bottom'; // Вертикальное выравнивание
-  lineHeight?: number; // Межстрочный интервал
-  bold?: boolean; // Жирное начертание
-  italic?: boolean; // Курсивное начертание
-  placeholder?: string; // Текст-заполнитель (placeholder)
-  underline?: boolean; // Подчеркивание текста
-  smoothing?: number; // Сглаживание текста (антиалиасинг)
+  type: 'text';
+  content: string;
+  font: string;
+  fontSize: number;
+  color: string;
+  backgroundColor?: string;
+  align?: 'left' | 'center' | 'right' | 'justify';
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+  lineHeight?: number;
+  bold?: boolean;
+  italic?: boolean;
+  placeholder?: string;
+  underline?: boolean;
+  smoothing?: number;
 };
 
-// Тип для элементов изображения
 export type ImageElement = BaseElement & {
-  type: 'image'; // Тип элемента - изображение
-  src: string; // Путь к файлу изображения (URL или base64)
-  smoothing?: number; // Сглаживание изображения
+  type: 'image';
+  src: string;
+  smoothing?: number;
 };
 
-// Тип для определения всех возможных фигур
 export type ShapeType =
-  | 'rectangle' // Прямоугольник
-  | 'circle' // Круг
-  | 'triangle' // Треугольник
-  | 'line' // Линия
-  | 'arrow' // Стрелка
-  | 'star' // Звезда
-  | 'hexagon' // Шестиугольник
-  | 'heart' // Сердце
-  | 'cloud' // Облако
-  | 'callout'; // Выноска (для комиксов, аннотаций)
+  | 'rectangle'
+  | 'circle'
+  | 'triangle'
+  | 'line'
+  | 'arrow'
+  | 'star'
+  | 'hexagon'
+  | 'heart'
+  | 'cloud'
+  | 'callout';
 
-// Тип для графических элементов (фигур)
 export type ShapeElement = BaseElement & {
-  type: 'shape'; // Тип элемента - фигура
-  shapeType: ShapeType; // Конкретный тип фигуры
-  fill: string; // Цвет заливки фигуры
-  stroke: string; // Цвет обводки (контура)
-  strokeWidth: number; // Толщина обводки
+  type: 'shape';
+  shapeType: ShapeType;
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
 };
