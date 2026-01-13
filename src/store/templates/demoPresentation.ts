@@ -341,7 +341,7 @@ export const demoPresentation: Presentation = {
           id: 'object1',
           src: thinkImage,
           position: { x: 20, y: 10 },
-          size: { width: 350, height: 390 },
+          size: { width: 347, height: 520 },
           smoothing: 10,
         },
       ],
@@ -419,7 +419,7 @@ export const demoPresentation: Presentation = {
           type: 'text',
           content: applyListTypeToText(
             'Создавайте, редактируйте, оформляйте\nПоказывайте презентации без установки ПО\nИдеален для учебных и рабочих задач',
-            'bullet_star' // ← передаём тип списка
+            'bullet_star'
           ),
           fontSize: 18,
           font: 'Arial, sans-serif',
@@ -1765,7 +1765,7 @@ export const demoPresentation: Presentation = {
           type: 'text',
           content: applyListTypeToText(
             'Интерактивное выделение элементов\nМножественный выбор и групповое редактирование\nПеретаскивание и изменение размера (8 ручек)\nТочное позиционирование\nInline-редактирование текста',
-            'bullet_circle' // или другой тип из LIST_OPTIONS
+            'bullet_circle'
           ),
           fontSize: 18,
           font: 'Arial, sans-serif',
@@ -1780,7 +1780,7 @@ export const demoPresentation: Presentation = {
             color: '0',
             blur: 0,
           },
-          listType: 'bullet_circle', // добавляем это свойство
+          listType: 'bullet_circle',
         },
         {
           type: 'image',

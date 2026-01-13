@@ -1,3 +1,39 @@
+export const AUTH_NOTIFICATIONS = {
+  INFO: {
+    ALREADY_LOGGED_IN: 'Вы уже вошли в систему. Перенаправляем...',
+  },
+} as const;
+
+export const PLAYER_NOTIFICATIONS = {
+  INFO: {
+    LOADING: 'Загружаем презентацию...',
+  },
+  ERROR: {
+    NOT_FOUND: 'Презентация не найдена',
+    LOAD_FAILED: 'Не удалось загрузить презентацию',
+  },
+} as const;
+
+export const PRESENTATION_LIST_NOTIFICATIONS = {
+  SUCCESS: {
+    RENAMED: 'Название презентации успешно изменено',
+    DELETED: 'Презентация успешно удалена',
+    EXPORTED: (title: string) => `Презентация "${title}" успешно экспортирована в PDF!`,
+    EXPORT_STARTED: 'Начинаем экспорт презентации в PDF...',
+  },
+
+  ERROR: {
+    RENAME_FAILED: 'Не удалось изменить название презентации',
+    DELETE_FAILED: '❌ Не удалось удалить презентацию',
+    EXPORT_FAILED: 'Не удалось экспортировать презентацию в PDF',
+    PRESENTATION_NOT_FOUND: 'Презентация не найдена',
+  },
+
+  INFO: {
+    EXPORTING: 'Экспорт в PDF...',
+  },
+} as const;
+
 export const REGISTER_NOTIFICATIONS = {
   SUCCESS: {
     CREATING_SESSION: 'Создаём сессию...',
@@ -99,11 +135,4 @@ export const APPWRITE_ERRORS = {
   409: 'Пользователь уже существует',
   401: 'Неавторизованный доступ',
   500: 'Внутренняя ошибка сервера',
-} as const;
-
-export const NOTIFICATION_TIMEOUT = {
-  SUCCESS: 3000,
-  ERROR: 5000,
-  INFO: 2000,
-  WARNING: 4000,
 } as const;

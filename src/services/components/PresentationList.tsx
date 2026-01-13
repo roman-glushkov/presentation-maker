@@ -13,7 +13,11 @@ import { Presentation } from '../../store/types/presentation';
 import NewPresentationModal from './NewPresentationModal';
 import EditPresentationModal from './EditPresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
-import { PRESENTATION_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../notifications';
+import {
+  PRESENTATION_NOTIFICATIONS,
+  PRESENTATION_LIST_NOTIFICATIONS,
+  NOTIFICATION_TIMEOUT,
+} from '../notifications';
 import { slideTitle } from '../../store/templates/slide';
 import { usePdfExport } from '../../export/usePdfExport';
 import '../styles/PresentationList.css';
@@ -151,6 +155,11 @@ export default function PresentationList() {
       const presentation = presentations.find((p) => (p.id || p.$id) === presentationId);
 
       if (!presentation) {
+        addNotification(
+          PRESENTATION_LIST_NOTIFICATIONS.ERROR.PRESENTATION_NOT_FOUND,
+          'error',
+          NOTIFICATION_TIMEOUT.ERROR
+        );
         throw new Error('Презентация не найдена');
       }
 
@@ -170,7 +179,7 @@ export default function PresentationList() {
       );
 
       addNotification(
-        'Название презентации успешно изменено',
+        PRESENTATION_LIST_NOTIFICATIONS.SUCCESS.RENAMED,
         'success',
         NOTIFICATION_TIMEOUT.SUCCESS
       );
@@ -178,7 +187,7 @@ export default function PresentationList() {
       loadPresentations();
     } catch {
       addNotification(
-        'Не удалось изменить название презентации',
+        PRESENTATION_LIST_NOTIFICATIONS.ERROR.RENAME_FAILED,
         'error',
         NOTIFICATION_TIMEOUT.ERROR
       );
@@ -192,7 +201,7 @@ export default function PresentationList() {
     addNotification(PRESENTATION_NOTIFICATIONS.INFO.DEMO_LOADED, 'info', NOTIFICATION_TIMEOUT.INFO);
     setTimeout(() => {
       navigate('/editor');
-    }, 2000);
+    }, NOTIFICATION_TIMEOUT.SHORT);
   };
 
   const handleLoadPresentation = async (presentation: StoredPresentation) => {
@@ -214,7 +223,7 @@ export default function PresentationList() {
       );
       setTimeout(() => {
         navigate(`/editor/${full.id || full.$id}`);
-      }, 2000);
+      }, NOTIFICATION_TIMEOUT.SHORT);
     } catch {
       addNotification(
         PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
@@ -245,10 +254,14 @@ export default function PresentationList() {
 
       setPresentations((prev) => prev.filter((p) => (p.id || p.$id) !== presentationId));
 
-      addNotification('Презентация успешно удалена', 'success', NOTIFICATION_TIMEOUT.SUCCESS);
+      addNotification(
+        PRESENTATION_LIST_NOTIFICATIONS.SUCCESS.DELETED,
+        'success',
+        NOTIFICATION_TIMEOUT.SUCCESS
+      );
     } catch {
       addNotification(
-        PRESENTATION_NOTIFICATIONS.ERROR.DELETE_FAILED,
+        PRESENTATION_LIST_NOTIFICATIONS.ERROR.DELETE_FAILED,
         'error',
         NOTIFICATION_TIMEOUT.ERROR
       );
@@ -265,19 +278,23 @@ export default function PresentationList() {
 
     setExportingId(presentationId);
     try {
-      addNotification('Начинаем экспорт презентации в PDF...', 'info', 2000);
+      addNotification(
+        PRESENTATION_LIST_NOTIFICATIONS.SUCCESS.EXPORT_STARTED,
+        'info',
+        NOTIFICATION_TIMEOUT.SHORT
+      );
       const fullPresentation = await PresentationService.getPresentation(presentationId);
       await exportToPdf(fullPresentation);
 
       addNotification(
-        `Презентация "${fullPresentation.title}" успешно экспортирована в PDF!`,
+        PRESENTATION_LIST_NOTIFICATIONS.SUCCESS.EXPORTED(fullPresentation.title),
         'success',
         NOTIFICATION_TIMEOUT.SUCCESS
       );
     } catch (error) {
       console.error('Ошибка экспорта в PDF:', error);
       addNotification(
-        'Не удалось экспортировать презентацию в PDF',
+        PRESENTATION_LIST_NOTIFICATIONS.ERROR.EXPORT_FAILED,
         'error',
         NOTIFICATION_TIMEOUT.ERROR
       );
@@ -417,7 +434,9 @@ export default function PresentationList() {
                   <div className="presentation-list-card-meta">
                     <span>{(pres.slides || []).length} слайдов</span>
                     {exportingId === (pres.id || pres.$id) && (
-                      <span className="presentation-list-card-exporting">Экспорт в PDF...</span>
+                      <span className="presentation-list-card-exporting">
+                        {PRESENTATION_LIST_NOTIFICATIONS.INFO.EXPORTING}
+                      </span>
                     )}
                   </div>
 

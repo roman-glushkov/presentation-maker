@@ -6,7 +6,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import {
   LOGIN_NOTIFICATIONS,
   NOTIFICATION_TIMEOUT,
-  TRANSITION_DELAY,
+  AUTH_NOTIFICATIONS,
   getFieldValidationMessage,
 } from '../notifications';
 
@@ -105,15 +105,19 @@ export default function Login() {
         NOTIFICATION_TIMEOUT.SUCCESS
       );
 
-      setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
+      setTimeout(() => navigate('/presentations'), NOTIFICATION_TIMEOUT.INFO);
     } catch (error: unknown) {
       let errorMessage = LOGIN_NOTIFICATIONS.ERROR.INVALID_CREDENTIALS;
 
       const appwriteError = error as AppwriteError;
 
       if (appwriteError.code === 401 && appwriteError.message?.includes('session is active')) {
-        addNotification('Вы уже вошли в систему. Перенаправляем...', 'info', 2000);
-        setTimeout(() => navigate('/presentations'), 2000);
+        addNotification(
+          AUTH_NOTIFICATIONS.INFO.ALREADY_LOGGED_IN, // ← используем константу
+          'info',
+          NOTIFICATION_TIMEOUT.SHORT
+        );
+        setTimeout(() => navigate('/presentations'), NOTIFICATION_TIMEOUT.SHORT);
       } else {
         addNotification(errorMessage, 'error', NOTIFICATION_TIMEOUT.ERROR);
       }

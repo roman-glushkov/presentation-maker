@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { undo, redo } from '../../store/editorSlice';
 import type { RootState } from '../../store';
 import { useNotifications } from '../hooks/useNotifications';
-import { NOTIFICATION_TIMEOUT, GENERAL_NOTIFICATIONS } from '../notifications/messages';
+import { NOTIFICATION_TIMEOUT, GENERAL_NOTIFICATIONS } from '../notifications';
 import type { Notification } from '../notifications/types';
 import '../styles/AuthWrapper.css';
 

@@ -170,7 +170,6 @@ export function TextOptionsPopup({ options, onSelect }: TextOptionsPopupProps) {
     </div>
   );
 }
-// В PopupMenus.tsx добавляем:
 export interface ListPopupProps {
   onSelect: (key: string) => void;
 }

@@ -2,10 +2,6 @@ export const NOTIFICATION_TIMEOUT = {
   SUCCESS: 5000,
   ERROR: 7000,
   INFO: 4000,
-  LOADING: -1,
-} as const;
-
-export const TRANSITION_DELAY = {
-  AFTER_SUCCESS: 4000,
+  SHORT: 2000,
   BEFORE_NAVIGATION: 1000,
 } as const;

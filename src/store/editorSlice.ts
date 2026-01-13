@@ -250,7 +250,6 @@ export const editorSlice = createSlice({
         'isLocked' in slide.background &&
         slide.background.isLocked
       ) {
-        console.warn('Фон заблокирован и не может быть изменен');
         return;
       }
 

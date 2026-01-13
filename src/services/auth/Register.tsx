@@ -7,7 +7,6 @@ import { useNotifications } from '../hooks/useNotifications';
 import {
   REGISTER_NOTIFICATIONS,
   NOTIFICATION_TIMEOUT,
-  TRANSITION_DELAY,
   getFieldValidationMessage,
 } from '../notifications';
 
@@ -128,7 +127,7 @@ export default function Register() {
         NOTIFICATION_TIMEOUT.SUCCESS
       );
 
-      setTimeout(() => navigate('/presentations'), TRANSITION_DELAY.AFTER_SUCCESS);
+      setTimeout(() => navigate('/presentations'), NOTIFICATION_TIMEOUT.INFO);
     } catch (error: unknown) {
       let errorMessage: string = REGISTER_NOTIFICATIONS.ERROR.GENERIC;
 

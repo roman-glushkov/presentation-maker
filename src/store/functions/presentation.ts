@@ -217,8 +217,6 @@ export function applyListTypeToText(text: string, listType?: string): string {
   const lines = text.split('\n');
   const newLines = lines.map((line) => {
     if (!line.trim()) return line;
-
-    // Проверяем, есть ли уже какой-то маркер из LIST_OPTIONS
     const existing = LIST_OPTIONS.find((opt) => opt.prefix && line.startsWith(opt.prefix));
     let clean = existing?.prefix ? line.slice(existing.prefix.length) : line;
 

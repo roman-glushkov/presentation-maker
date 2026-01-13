@@ -118,8 +118,6 @@ const TextElementRenderer = ({
     const prevLine = linesBefore[linesBefore.length - 1];
 
     let marker = parseListMarker(prevLine);
-
-    // если текущая строка пустая, но предыдущая имела маркер → продолжить её
     if (!marker && linesBefore.length > 1) {
       const prevPrevLine = linesBefore[linesBefore.length - 2];
       const prevMarker = parseListMarker(prevPrevLine);

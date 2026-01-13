@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PresentationService } from '../services/PresentationService';
 import { Presentation } from '../../store/types/presentation';
 import { SlideRenderer } from '../../store/utils/SlideRenderer';
-import { GENERAL_NOTIFICATIONS } from '../notifications/messages';
+import { PLAYER_NOTIFICATIONS } from '../notifications';
 import '../styles/Player.css';
 
 const SLIDE_WIDTH = 960;
@@ -34,7 +34,7 @@ export default function Player() {
         const loaded = await PresentationService.getPresentation(presentationId);
         setPresentation(loaded);
       } catch {
-        setError(GENERAL_NOTIFICATIONS.ERROR.SAVE_FAILED);
+        setError(PLAYER_NOTIFICATIONS.ERROR.LOAD_FAILED);
       } finally {
         setLoading(false);
       }
@@ -98,7 +98,7 @@ export default function Player() {
     return (
       <div className="player-loading">
         <div className="player-spinner" />
-        <p>Загружаем презентацию...</p>
+        <p>{PLAYER_NOTIFICATIONS.INFO.LOADING}</p>
       </div>
     );
   }
@@ -106,7 +106,7 @@ export default function Player() {
   if (error || !presentation) {
     return (
       <div className="player-error">
-        <p>{error || 'Презентация не найдена'}</p>
+        <p>{error || PLAYER_NOTIFICATIONS.ERROR.NOT_FOUND}</p>
         <button onClick={() => navigate('/presentations')}>Назад</button>
       </div>
     );
