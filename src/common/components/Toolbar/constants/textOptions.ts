@@ -104,6 +104,7 @@ export interface ListOption {
 }
 
 export const LIST_OPTIONS: ListOption[] = [
+  { label: 'Без маркера', key: 'bullet_none', prefix: '' },
   { label: 'Точка', key: 'bullet_disc', prefix: '• ' },
   { label: 'Круг', key: 'bullet_circle', prefix: '○ ' },
   { label: 'Квадрат', key: 'bullet_square', prefix: '▪ ' },
