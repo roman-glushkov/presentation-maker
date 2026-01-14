@@ -113,7 +113,7 @@ export default function Login() {
 
       if (appwriteError.code === 401 && appwriteError.message?.includes('session is active')) {
         addNotification(
-          AUTH_NOTIFICATIONS.INFO.ALREADY_LOGGED_IN, // ← используем константу
+          AUTH_NOTIFICATIONS.INFO.ALREADY_LOGGED_IN,
           'info',
           NOTIFICATION_TIMEOUT.SHORT
         );

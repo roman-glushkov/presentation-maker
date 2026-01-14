@@ -364,20 +364,6 @@ export default function Register() {
                 Войти
               </a>
             </div>
-
-            <div className="presentation-agreement">
-              <p className="presentation-agreement-text">
-                Нажимая «Начать создавать презентации», вы соглашаетесь с{' '}
-                <a href="#" className="presentation-link">
-                  Условиями использования
-                </a>{' '}
-                и{' '}
-                <a href="#" className="presentation-link">
-                  Политикой конфиденциальности
-                </a>
-                .
-              </p>
-            </div>
           </div>
         </div>
       </div>

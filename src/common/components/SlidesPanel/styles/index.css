@@ -4,9 +4,8 @@
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  padding: 12px;
   overflow: hidden;
   gap: 16px;
-  height: 100vh;
+  height: 80vh;
   box-sizing: border-box;
 }
