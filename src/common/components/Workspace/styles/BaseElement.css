@@ -27,35 +27,36 @@
   white-space: pre-wrap;
 }
 
-.element[type='image'] {
-  border: none;
+.element[data-type='image'] {
+  border: none !important;
+  padding: 0 !important;
 }
 
-.element[type='shape'] {
+.element[data-type='shape'] {
   border: 1px solid #d1d5db;
   background-color: #fff;
 }
 
-.element[type='shape']:hover {
+.element[data-type='shape']:hover {
   border-color: #3b82f6;
 }
 
-.element[type='shape'][data-shape-type='line'] {
+.element[data-type='shape'][data-shape-type='line'] {
   border: none;
   background-color: #000;
 }
 
-.element[type='shape'][data-shape-type='circle'] {
+.element[data-type='shape'][data-shape-type='circle'] {
   border-radius: 50%;
 }
 
-.element[type='shape'][data-shape-type='arrow'] {
+.element[data-type='shape'][data-shape-type='arrow'] {
   border: none;
   background: transparent;
   position: relative;
 }
 
-.element[type='shape'][data-shape-type='arrow']::before {
+.element[data-type='shape'][data-shape-type='arrow']::before {
   content: '';
   position: absolute;
   width: 0;

@@ -8,8 +8,9 @@ export const getImageStyles = (element: ImageElementType) => {
   };
 
   const imageStyle: React.CSSProperties = {
-    width: element.size.width === 0 ? 'auto' : '100%',
-    height: element.size.height === 0 ? 'auto' : '100%',
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
     objectFit: 'fill',
     borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
   };
