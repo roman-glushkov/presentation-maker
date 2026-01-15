@@ -10,12 +10,14 @@ import PlanePreview from '../assets/wallpaper/plane.jpg';
 import SchoolPreview from '../assets/wallpaper/School.jpg';
 import FutureBackground from '../assets/wallpaper/blue_white.jpg';
 
-export type GroupKey = 'main' | 'insert' | 'colors' | 'effects' | 'design';
+export type GroupKey = 'main' | 'insert' | 'colors' | 'effects' | 'design' | 'view';
 
 export interface GroupButton {
   label?: string;
   action: string;
   previewImage?: string;
+  toggleable?: boolean; // Добавляем опцию для кнопок-переключателей
+  active?: boolean;
 }
 
 export const GROUPS: Record<GroupKey, GroupButton[]> = {
@@ -99,6 +101,14 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
       previewImage: FutureBackground,
     },
   ],
+  view: [
+    // Новый раздел "Вид"
+    {
+      label: '📐 Сетка',
+      action: 'TOGGLE_GRID',
+      toggleable: true, // Это переключатель
+    },
+  ],
 };
 
 export const TAB_TITLES: { key: GroupKey; name: string }[] = [
@@ -107,4 +117,5 @@ export const TAB_TITLES: { key: GroupKey; name: string }[] = [
   { key: 'colors', name: 'Цвета' },
   { key: 'effects', name: 'Эффекты' },
   { key: 'design', name: 'Дизайн' },
+  { key: 'view', name: 'Вид' },
 ];

@@ -7,6 +7,7 @@ export interface ToolbarState {
   showTextColorPicker: boolean;
   showFillColorPicker: boolean;
   showBackgroundColorPicker: boolean;
+  gridVisible: boolean; // Добавляем состояние сетки
 }
 
 const initialState: ToolbarState = {
@@ -16,6 +17,7 @@ const initialState: ToolbarState = {
   showTextColorPicker: false,
   showFillColorPicker: false,
   showBackgroundColorPicker: false,
+  gridVisible: false, // По умолчанию сетка скрыта
 };
 
 export const toolbarSlice = createSlice({
@@ -37,9 +39,19 @@ export const toolbarSlice = createSlice({
       state.showFillColorPicker = false;
       state.showBackgroundColorPicker = false;
     },
+    // Добавляем action для переключения сетки
+    toggleGrid(state) {
+      state.gridVisible = !state.gridVisible;
+    },
+    // Можно также добавить action для явной установки состояния
+    setGridVisible(state, action: PayloadAction<boolean>) {
+      state.gridVisible = action.payload;
+    },
   },
 });
 
-export const { setActiveGroup, setActiveTextOption } = toolbarSlice.actions;
+// Экспортируем новые actions
+export const { setActiveGroup, setActiveTextOption, toggleGrid, setGridVisible } =
+  toolbarSlice.actions;
 
 export default toolbarSlice.reducer;

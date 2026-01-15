@@ -8,6 +8,7 @@ import type { RootState } from '../../store';
 import { useNotifications } from '../hooks/useNotifications';
 import { NOTIFICATION_TIMEOUT, GENERAL_NOTIFICATIONS } from '../notifications';
 import type { Notification } from '../notifications/types';
+import HelpModal from './HelpModal';
 import '../styles/AuthWrapper.css';
 
 interface AuthWrapperProps {
@@ -17,6 +18,7 @@ interface AuthWrapperProps {
 export default function AuthWrapper({ children }: AuthWrapperProps) {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -63,6 +65,10 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
     const targetPath = presentationId ? `/player/${presentationId}` : '/player';
     navigate(targetPath, { state: { presentation } });
+  };
+
+  const handleHelpClick = () => {
+    setIsHelpOpen(true);
   };
 
   const renderNotification = ({ id, message, type }: Notification) => (
@@ -195,8 +201,14 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
               canRedo ? 'toolbar-button--active' : 'toolbar-button--disabled'
             )}
           </div>
+
+          <div className="toolbar-right">
+            {renderToolbarButton(handleHelpClick, '❓', 'Справка по горячим клавишам')}
+          </div>
         </div>
       )}
+
+      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 
       <div className={showToolbar ? 'presentation-content-with-toolbar' : ''}>{children}</div>
     </>

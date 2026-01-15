@@ -1,7 +1,7 @@
 import React, { useRef, useState, ReactElement } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
-import { setActiveTextOption } from '../../../../store/toolbarSlice';
+import { setActiveTextOption, toggleGrid } from '../../../../store/toolbarSlice';
 import { GROUPS, GroupButton, GroupKey } from '../constants/config';
 import { useNotifications } from '../../../../services/hooks/useNotifications';
 import { IMAGE_NOTIFICATIONS, NOTIFICATION_TIMEOUT } from '../../../../services/notifications';
@@ -47,6 +47,7 @@ export default function ToolbarGroup() {
   const dispatch = useAppDispatch();
   const activeGroup = useAppSelector((state) => state.toolbar.activeGroup) as GroupKey;
   const activeTextOption = useAppSelector((state) => state.toolbar.activeTextOption);
+  const gridVisible = useAppSelector((state) => state.toolbar.gridVisible);
   const currentSlideId = useAppSelector((state: RootState) => state.editor.selectedSlideId);
   const { addNotification } = useNotifications();
 
@@ -62,6 +63,11 @@ export default function ToolbarGroup() {
   }
 
   const handleButtonClick = (action: string) => {
+    if (action === 'TOGGLE_GRID') {
+      dispatch(toggleGrid());
+      return;
+    }
+
     if (action.startsWith('DESIGN_')) {
       dispatch(handleAction(action));
       return;
@@ -269,6 +275,21 @@ export default function ToolbarGroup() {
           );
         }
 
+        if (activeGroup === 'view') {
+          const isActive = btn.action === 'TOGGLE_GRID' && gridVisible;
+          return (
+            <div key={btn.action} className="toolbar-button-wrapper">
+              <button
+                onClick={() => handleButtonClick(btn.action)}
+                className={isActive ? 'active-toggle' : ''}
+                title={btn.label || ''}
+              >
+                {btn.label || ''}
+                {isActive && <span className="toggle-indicator">✓</span>}
+              </button>
+            </div>
+          );
+        }
         if (activeGroup === 'design') {
           return renderDesignButton(btn);
         }

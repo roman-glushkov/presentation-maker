@@ -77,3 +77,16 @@
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
+/* Стили для активной кнопки-переключателя */
+.active-toggle {
+  background-color: #e6f7ff !important;
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+}
+
+.toggle-indicator {
+  margin-left: 5px;
+  font-weight: bold;
+  color: #1890ff;
+}

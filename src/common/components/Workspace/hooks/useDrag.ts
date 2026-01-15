@@ -10,8 +10,12 @@ interface DragArgs {
   updateSlide: Parameters<typeof useDragResizeCore>[0]['updateSlide'];
 }
 
+function snapToGrid(value: number, gridSize: number = 10): number {
+  return Math.round(value / gridSize) * gridSize;
+}
+
 export default function useDrag({ preview, setSelElId, bringToFront, updateSlide }: DragArgs) {
-  const { handlePointerEvent } = useDragResizeCore({ preview, updateSlide });
+  const { handlePointerEvent, gridVisible } = useDragResizeCore({ preview, updateSlide });
   const dragStateRef = useRef<{
     draggingIds: string[];
     startX: number;
@@ -47,7 +51,7 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
       origPositions,
     };
 
-    const cleanup = handlePointerEvent(e, (dx, dy) => {
+    const cleanup = handlePointerEvent(e, (rawDx, rawDy) => {
       if (!dragStateRef.current) return;
 
       updateSlide((s) => ({
@@ -58,11 +62,21 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
 
           if (!origPos) return item;
 
+          // Вычисляем новые координаты
+          let newX = origPos.x + rawDx;
+          let newY = origPos.y + rawDy;
+
+          // Применяем снаппинг ТОЛЬКО КОГДА сетка включена и ТОЛЬКО К ИТОГОВЫМ КООРДИНАТАМ
+          if (gridVisible) {
+            newX = snapToGrid(newX);
+            newY = snapToGrid(newY);
+          }
+
           return {
             ...item,
             position: {
-              x: origPos.x + dx,
-              y: origPos.y + dy,
+              x: newX,
+              y: newY,
             },
           };
         }),
