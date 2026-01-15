@@ -45,9 +45,6 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <p className="help-note">
               <strong>Примечание:</strong> Для Mac используйте Cmd вместо Ctrl
             </p>
-            <p className="help-note">
-              <strong>Сетка:</strong> Все элементы автоматически привязываются к сетке 10px
-            </p>
           </div>
         </div>
       </div>

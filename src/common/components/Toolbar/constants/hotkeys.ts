@@ -1,22 +1,10 @@
 export interface HotkeyItem {
   keys: string[];
   description: string;
-  category: 'general' | 'slides' | 'workspace' | 'elements' | 'navigation';
+  category: 'general' | 'slides' | 'workspace' | 'workspace' | 'slides';
 }
 
 export const hotkeysConfig: HotkeyItem[] = [
-  // Навигация по слайдам
-  {
-    keys: ['← Стрелка влево', '↑ Стрелка вверх'],
-    description: 'Перейти к предыдущему слайду',
-    category: 'navigation',
-  },
-  {
-    keys: ['→ Стрелка вправо', '↓ Стрелка вниз'],
-    description: 'Перейти к следующему слайду',
-    category: 'navigation',
-  },
-
   // Панель слайдов
   {
     keys: ['Ctrl/Cmd', 'C'],
@@ -39,13 +27,24 @@ export const hotkeysConfig: HotkeyItem[] = [
     category: 'slides',
   },
   {
-    keys: ['Shift', 'Клик'],
+    keys: ['Ctrl', 'Клик'],
     description: 'Множественное выделение слайдов',
     category: 'slides',
   },
   {
     keys: ['Перетаскивание'],
     description: 'Изменение порядка слайдов',
+    category: 'slides',
+  },
+  // Навигация по слайдам
+  {
+    keys: ['← или ↑'],
+    description: 'Перейти к предыдущему слайду',
+    category: 'slides',
+  },
+  {
+    keys: ['→ или ↓'],
+    description: 'Перейти к следующему слайду',
     category: 'slides',
   },
 
@@ -66,12 +65,12 @@ export const hotkeysConfig: HotkeyItem[] = [
     category: 'workspace',
   },
   {
-    keys: ['Delete', 'Backspace'],
+    keys: ['Delete или Backspace'],
     description: 'Удалить элементы',
     category: 'workspace',
   },
   {
-    keys: ['Shift', 'Клик'],
+    keys: ['Ctrl', 'Клик'],
     description: 'Множественное выделение элементов',
     category: 'workspace',
   },
@@ -80,43 +79,36 @@ export const hotkeysConfig: HotkeyItem[] = [
   {
     keys: ['Перетаскивание'],
     description: 'Перемещение элементов',
-    category: 'elements',
-  },
-  {
-    keys: ['Alt', 'Перетаскивание'],
-    description: 'Принудительное перемещение (без привязки к сетке)',
-    category: 'elements',
+    category: 'workspace',
   },
   {
     keys: ['Ручки ресайза'],
     description: 'Изменение размера элемента',
-    category: 'elements',
+    category: 'workspace',
   },
   {
     keys: ['Shift', 'Ресайз'],
     description: 'Сохранять пропорции при изменении размера',
-    category: 'elements',
+    category: 'workspace',
   },
   {
     keys: ['Двойной клик'],
     description: 'Редактирование текста',
-    category: 'elements',
+    category: 'workspace',
   },
   {
     keys: ['Esc'],
     description: 'Выйти из режима редактирования текста',
-    category: 'elements',
+    category: 'workspace',
   },
   {
     keys: ['Enter'],
     description: 'Создать новый элемент списка',
-    category: 'elements',
+    category: 'workspace',
   },
 ];
 
 export const hotkeyCategories = {
   slides: 'Панель слайдов',
   workspace: 'Рабочая область',
-  elements: 'Рабочая панель',
-  navigation: 'Навигация',
 };
