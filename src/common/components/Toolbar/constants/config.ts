@@ -16,7 +16,7 @@ export interface GroupButton {
   label?: string;
   action: string;
   previewImage?: string;
-  toggleable?: boolean; // Добавляем опцию для кнопок-переключателей
+  toggleable?: boolean;
   active?: boolean;
 }
 

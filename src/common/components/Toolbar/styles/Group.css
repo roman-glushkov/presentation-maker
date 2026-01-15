@@ -90,3 +90,76 @@
   font-weight: bold;
   color: #1890ff;
 }
+
+/* Стили для заблокированных кнопок */
+.toolbar-group button:disabled,
+.toolbar-group .disabled-button {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%) !important;
+  color: #999 !important;
+  border-color: #ddd !important;
+}
+
+.toolbar-group button:disabled:hover,
+.toolbar-group .disabled-button:hover {
+  background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%) !important;
+  transform: none !important;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%) !important;
+  border-color: #ddd !important;
+}
+
+/* Убираем значок "🚫" полностью - просто удаляем этот блок */
+
+/* Стиль для активных переключателей */
+.toolbar-group .active-toggle {
+  background-color: #e6f7ff !important;
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+}
+
+.toggle-indicator {
+  margin-left: 5px;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+/* Стили для тултипов заблокированных кнопок - используем data-атрибут */
+.toolbar-group button:disabled:hover::after,
+.toolbar-group .disabled-button:hover::after {
+  content: attr(data-disabled-reason);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 5px;
+  pointer-events: none;
+  max-width: 200px;
+  text-align: center;
+}
+
+.toolbar-group button:disabled:hover::before,
+.toolbar-group .disabled-button:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #333;
+  margin-bottom: -5px;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+/* Убираем стандартные тултипы браузера для всех кнопок */
+.toolbar-group button {
+  position: relative; /* Нужно для позиционирования кастомных тултипов */
+}
