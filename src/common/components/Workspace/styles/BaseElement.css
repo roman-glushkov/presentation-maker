@@ -4,7 +4,7 @@
   font-size: 14px;
   transition: border 0.2s ease;
   border: 1px solid #c4c6c8;
-  padding: 4px;
+  /* УБРАНО: padding: 4px; - чтобы избежать несоответствия размеров для текста */
   box-sizing: border-box;
 }
 
@@ -20,11 +20,16 @@
 .element[data-type='text'] {
   border: 1px solid #d1d5db;
   display: block;
-  padding: 4px;
+  padding: 0; /* Для текста убрал padding */
   box-sizing: border-box;
   text-align: left;
   line-height: 1.2;
   white-space: pre-wrap;
+}
+
+/* Только при редактировании текста добавляем небольшой padding */
+.element[data-type='text'][data-editing='true'] {
+  padding: 2px;
 }
 
 .element[data-type='image'] {
@@ -35,6 +40,8 @@
 .element[data-type='shape'] {
   border: 1px solid #d1d5db;
   background-color: #fff;
+  /* ВЕРНУЛ КАК БЫЛО: для фигур оставляем padding */
+  padding: 4px;
 }
 
 .element[data-type='shape']:hover {
