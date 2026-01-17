@@ -1,4 +1,3 @@
-// src/common/shared/hooks/domUtils.ts
 export const isTextInputFocused = (): boolean => {
   const activeElement = document.activeElement;
   return !!(

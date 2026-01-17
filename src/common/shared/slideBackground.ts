@@ -27,7 +27,6 @@ export const getScaledSlideBackgroundStyle = (
 
   if (scale === 1) return baseStyle;
 
-  // Масштабируем свойства, если нужно
   const scaledStyle = { ...baseStyle };
 
   if (scaledStyle.backgroundSize && typeof scaledStyle.backgroundSize === 'string') {

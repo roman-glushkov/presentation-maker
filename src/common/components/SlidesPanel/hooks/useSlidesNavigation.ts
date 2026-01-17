@@ -23,7 +23,6 @@ export default function useSlidesNavigation() {
     [dispatch, slides, selectedSlideId]
   );
 
-  // Используем общий хук для горячих клавиш с кастомными действиями
   useKeyboardShortcuts({
     preview: false,
     selectedElementIds,
@@ -35,6 +34,5 @@ export default function useSlidesNavigation() {
     enableNavigation: true,
   });
 
-  // Возвращаем функцию навигации если нужна где-то еще
   return { navigateToSlide };
 }

@@ -45,12 +45,10 @@ export default function useSlidesActions() {
     }
   }, [dispatch, selectedSlideIds]);
 
-  // Используем общий хук для горячих клавиш
   useKeyboardShortcuts({
     preview: false,
     selectedSlideIds,
     context: 'slides',
-    // customActions не нужны, так как логика уже встроена в useKeyboardShortcuts
   });
 
   return {

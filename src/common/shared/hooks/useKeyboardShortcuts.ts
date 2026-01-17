@@ -1,4 +1,3 @@
-// src/common/shared/hooks/useKeyboardShortcuts.ts
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { isTextInputFocused, isEditingTextElement } from './domUtils';
@@ -29,13 +28,11 @@ export function useKeyboardShortcuts({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Общие проверки
       if (preview || isTextInputFocused()) return;
 
       const isCtrl = e.ctrlKey || e.metaKey;
       const isShift = e.shiftKey;
 
-      // Навигация стрелками (если включена и не редактируется текст)
       if (enableNavigation && !isEditingTextElement()) {
         switch (e.key) {
           case 'ArrowUp':
@@ -51,7 +48,6 @@ export function useKeyboardShortcuts({
         }
       }
 
-      // Undo/Redo (общие для всех контекстов)
       if (isCtrl && !isShift && e.code === 'KeyZ' && !isEditingTextElement()) {
         e.preventDefault();
         dispatch(undo());
@@ -64,7 +60,6 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      // Контекстные действия
       switch (context) {
         case 'workspace':
           handleWorkspaceKeys(e, isCtrl);
@@ -72,7 +67,6 @@ export function useKeyboardShortcuts({
         case 'slides':
           handleSlidesKeys(e, isCtrl);
           break;
-        // Для 'global' ничего не делаем, только undo/redo и навигация
       }
     };
 

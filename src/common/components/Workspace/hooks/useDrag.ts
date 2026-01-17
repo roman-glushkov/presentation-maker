@@ -6,7 +6,7 @@ interface DragArgs {
   setSelElId?: (id: string) => void;
   bringToFront?: (id: string) => void;
   updateSlide: (updater: (s: Slide) => Slide) => void;
-  gridVisible?: boolean; // Передаем извне
+  gridVisible?: boolean;
 }
 
 function snapToGrid(value: number, gridSize: number = 10): number {
@@ -131,7 +131,6 @@ export default function useDrag({
 
       const cleanup = createPointerHandlers(onPointerMove, onPointerUp);
 
-      // Возвращаем функцию для принудительной отмены
       return () => {
         cleanup();
       };
