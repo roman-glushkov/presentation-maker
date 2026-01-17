@@ -1,9 +1,8 @@
 import { EditorState } from '../editorSlice';
-import { ShapeType } from '../types/presentation';
+import { ShapeType, Slide } from '../types/presentation';
 import { SHAPE_SMOOTHING_OPTIONS } from '../../common/components/Toolbar/constants/textOptions';
 import * as func from '../functions/presentation';
 import * as temp from '../templates/presentation';
-import { Slide } from '../types/presentation';
 
 export function handleShapeAction(state: EditorState, action: string, elId: string) {
   const slideId = state.selectedSlideId;
@@ -12,9 +11,7 @@ export function handleShapeAction(state: EditorState, action: string, elId: stri
 
   if (action.startsWith('SHAPE_SMOOTHING:')) {
     const smoothingKey = action.split(':')[1].trim();
-    const smoothingPreset = SHAPE_SMOOTHING_OPTIONS.find(
-      (option: { key: string }) => option.key === smoothingKey
-    );
+    const smoothingPreset = SHAPE_SMOOTHING_OPTIONS.find((option) => option.key === smoothingKey);
 
     if (smoothingPreset) {
       state.presentation.slides = state.presentation.slides.map((s: Slide) =>
@@ -25,7 +22,10 @@ export function handleShapeAction(state: EditorState, action: string, elId: stri
                 el.id === elId
                   ? {
                       ...el,
-                      smoothing: smoothingPreset.value,
+                      smoothing:
+                        typeof smoothingPreset.value === 'string'
+                          ? parseInt(smoothingPreset.value, 10)
+                          : smoothingPreset.value,
                     }
                   : el
               ),

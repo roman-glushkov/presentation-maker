@@ -4,12 +4,13 @@ import {
   LIST_OPTIONS,
 } from '../../common/components/Toolbar/constants/textOptions';
 import * as func from '../functions/presentation';
-import { Slide } from '../types/presentation';
+import { Slide, TextElement } from '../types/presentation';
 
 export function handleTextAction(state: EditorState, action: string, elId: string) {
   const slideId = state.selectedSlideId;
   const slide = state.presentation.slides.find((s: Slide) => s.id === slideId);
   if (!slide || !elId) return false;
+
   if (action.startsWith('LIST_TYPE:')) {
     const listKey = action.split(':')[1].trim();
 
@@ -17,7 +18,8 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
       const element = slide.elements.find((el) => el.id === elId);
       if (!element || element.type !== 'text') return true;
 
-      const lines = element.content.split('\n');
+      const textElement = element as TextElement;
+      const lines = textElement.content.split('\n');
       const newLines = lines.map((line) => {
         if (!line.trim()) return line;
 
@@ -36,7 +38,11 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
               ...s,
               elements: s.elements.map((el) =>
                 el.id === elId && el.type === 'text'
-                  ? { ...el, content: newLines.join('\n'), listType: listKey }
+                  ? {
+                      ...el,
+                      content: newLines.join('\n'),
+                      listType: listKey,
+                    }
                   : el
               ),
             }
@@ -51,7 +57,8 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
     const element = slide.elements.find((el) => el.id === elId);
     if (!element || element.type !== 'text') return true;
 
-    const lines = element.content.split('\n');
+    const textElement = element as TextElement;
+    const lines = textElement.content.split('\n');
     const newLines = lines.map((line) => {
       if (!line.trim()) return line;
 
@@ -67,7 +74,11 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
             ...s,
             elements: s.elements.map((el) =>
               el.id === elId && el.type === 'text'
-                ? { ...el, content: newLines.join('\n'), listType: listKey }
+                ? {
+                    ...el,
+                    content: newLines.join('\n'),
+                    listType: listKey,
+                  }
                 : el
             ),
           }
@@ -79,9 +90,7 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
 
   if (action.startsWith('TEXT_SHADOW:')) {
     const shadowKey = action.split(':')[1].trim();
-    const shadowPreset = TEXT_SHADOW_OPTIONS.find(
-      (option: { key: string }) => option.key === shadowKey
-    );
+    const shadowPreset = TEXT_SHADOW_OPTIONS.find((option) => option.key === shadowKey);
 
     if (shadowPreset) {
       state.presentation.slides = state.presentation.slides.map((s: Slide) =>
@@ -96,8 +105,8 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
                         shadowKey === 'none'
                           ? undefined
                           : {
-                              color: shadowPreset.color,
-                              blur: shadowPreset.blur,
+                              color: shadowPreset.color || '#000000',
+                              blur: shadowPreset.blur || 0,
                             },
                     }
                   : el
@@ -163,7 +172,7 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
         ? {
             ...s,
             elements: s.elements.map((el) =>
-              el.id === elId && el.type === 'text' ? { ...el, bold: !el.bold } : el
+              el.id === elId && el.type === 'text' ? { ...el, bold: !(el as TextElement).bold } : el
             ),
           }
         : s
@@ -177,7 +186,9 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
         ? {
             ...s,
             elements: s.elements.map((el) =>
-              el.id === elId && el.type === 'text' ? { ...el, italic: !el.italic } : el
+              el.id === elId && el.type === 'text'
+                ? { ...el, italic: !(el as TextElement).italic }
+                : el
             ),
           }
         : s
@@ -191,7 +202,9 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
         ? {
             ...s,
             elements: s.elements.map((el) =>
-              el.id === elId && el.type === 'text' ? { ...el, underline: !el.underline } : el
+              el.id === elId && el.type === 'text'
+                ? { ...el, underline: !(el as TextElement).underline }
+                : el
             ),
           }
         : s
@@ -205,7 +218,7 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
         ? {
             ...s,
             elements: s.elements.map((el) =>
-              el.id === elId && el.type === 'text' ? { ...el, fontFamily: 'Arial' } : el
+              el.id === elId && el.type === 'text' ? { ...el, font: 'Arial, sans-serif' } : el
             ),
           }
         : s

@@ -19,8 +19,6 @@ export default function TemplateSlidePreview({ slide, scale }: Props) {
           backgroundPosition: bg.position || 'center',
           backgroundRepeat: 'no-repeat',
         };
-      case 'color':
-        return { backgroundColor: bg.value };
       default:
         return { backgroundColor: '#ffffff' };
     }
@@ -44,8 +42,6 @@ export default function TemplateSlidePreview({ slide, scale }: Props) {
 
   return (
     <div className="template-preview-container" style={getBackgroundStyle()}>
-      {slide.background.type === 'none' && <div className="no-design-overlay">Без дизайна</div>}
-
       {slide.elements.map((el) => {
         if (el.type !== 'text') return null;
         const textEl = el as TextElement;

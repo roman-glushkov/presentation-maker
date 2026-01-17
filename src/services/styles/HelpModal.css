@@ -172,7 +172,6 @@
   color: #4b5563;
 }
 
-/* Responsive */
 @media (width <= 640px) {
   .help-modal {
     width: 95%;
@@ -195,7 +194,6 @@
   }
 }
 
-/* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .help-modal {
     background: #1f2937;

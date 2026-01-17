@@ -5,9 +5,8 @@ export function renderShape(element: ShapeElementType): React.ReactElement {
   const { width: w, height: h } = element.size;
   const { strokeWidth: sw, fill, stroke, shapeType } = element;
   const radius = Math.min(w, h) / 2;
-
   const commonProps = {
-    fill,
+    fill: fill === 'transparent' ? 'none' : fill || 'none',
     stroke,
     strokeWidth: sw,
     strokeLinejoin: 'round' as const,

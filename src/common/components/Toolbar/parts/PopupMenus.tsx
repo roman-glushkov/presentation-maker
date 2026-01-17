@@ -7,33 +7,28 @@ import {
   TEXT_VERTICAL_ALIGN_OPTIONS,
   FONT_FAMILY_OPTIONS,
   LIST_OPTIONS,
+  STROKE_WIDTH_OPTIONS,
+  PopupOption,
 } from '../constants/textOptions';
 
-interface PopupItem {
-  key: string;
-  label: string;
-  icon?: string;
-  value?: number | string;
-}
-
 interface BasePopupProps {
-  items: PopupItem[];
-  onSelect: (key: string, value?: number | string) => void;
-  showIcons?: boolean;
+  options: PopupOption[];
+  onSelect: (key: string, value?: string | number) => void;
+  showPrefix?: boolean;
 }
 
-function BasePopup({ items, onSelect, showIcons = false }: BasePopupProps) {
+function BasePopup({ options, onSelect, showPrefix = false }: BasePopupProps) {
   return (
     <div className="text-options-popup">
-      {items.map((item) => (
+      {options.map((option) => (
         <button
-          key={item.key}
+          key={option.key}
           className="text-option-button"
-          onClick={() => onSelect(item.key, item.value)}
-          title={item.label}
+          onClick={() => onSelect(option.key, option.value)}
+          title={option.label}
         >
-          {showIcons && item.icon && <span className="popup-icon">{item.icon}</span>}
-          {item.label}
+          {showPrefix && option.prefix && <span className="option-prefix">{option.prefix}</span>}
+          {option.label}
         </button>
       ))}
     </div>
@@ -45,13 +40,7 @@ export interface ShapePopupProps {
 }
 
 export function ShapePopup({ onSelect }: ShapePopupProps) {
-  const items = SHAPE_OPTIONS.map((shape) => ({
-    key: shape.type,
-    label: shape.label,
-    icon: shape.icon,
-  }));
-
-  return <BasePopup items={items} onSelect={onSelect} showIcons />;
+  return <BasePopup options={SHAPE_OPTIONS} onSelect={onSelect} showPrefix />;
 }
 
 export interface ShapeSmoothingMenuProps {
@@ -59,13 +48,7 @@ export interface ShapeSmoothingMenuProps {
 }
 
 export function ShapeSmoothingMenu({ onSelect }: ShapeSmoothingMenuProps) {
-  const items = SHAPE_SMOOTHING_OPTIONS.map((option) => ({
-    key: option.key,
-    label: option.label,
-    value: option.value,
-  }));
-
-  return <BasePopup items={items} onSelect={(key) => onSelect(key)} />;
+  return <BasePopup options={SHAPE_SMOOTHING_OPTIONS} onSelect={onSelect} />;
 }
 
 export interface TextShadowMenuProps {
@@ -73,12 +56,15 @@ export interface TextShadowMenuProps {
 }
 
 export function TextShadowMenu({ onSelect }: TextShadowMenuProps) {
-  const items = TEXT_SHADOW_OPTIONS.map((option) => ({
-    key: option.key,
-    label: option.label,
-  }));
+  return <BasePopup options={TEXT_SHADOW_OPTIONS} onSelect={onSelect} />;
+}
 
-  return <BasePopup items={items} onSelect={onSelect} />;
+export interface ListPopupProps {
+  onSelect: (key: string) => void;
+}
+
+export function ListPopup({ onSelect }: ListPopupProps) {
+  return <BasePopup options={LIST_OPTIONS} onSelect={onSelect} showPrefix />;
 }
 
 export interface FontPopupProps {
@@ -117,7 +103,6 @@ export function TextAlignPopup({ onSelect }: TextAlignPopupProps) {
           </button>
         ))}
       </div>
-
       <div className="align-section">
         <div className="align-title">Вертикально</div>
         {TEXT_VERTICAL_ALIGN_OPTIONS.map((opt) => (
@@ -135,21 +120,24 @@ export interface StrokeWidthPopupProps {
   currentWidth?: number;
 }
 
-export function StrokeWidthPopup({ onSelect }: StrokeWidthPopupProps) {
-  const strokeWidthOptions = [1, 2, 3, 4, 5, 6, 8, 10];
-
+export function StrokeWidthPopup({ onSelect, currentWidth }: StrokeWidthPopupProps) {
   return (
     <div className="text-options-popup">
-      {strokeWidthOptions.map((width) => (
-        <button
-          key={width}
-          className="text-option-button stroke-width-option"
-          onClick={() => onSelect(width)}
-        >
-          <div className="stroke-preview" style={{ height: `${width}px` }} />
-          {width}px
-        </button>
-      ))}
+      {STROKE_WIDTH_OPTIONS.map((option) => {
+        const width = option.value as number;
+        const isSelected = currentWidth === width;
+        return (
+          <button
+            key={option.key}
+            className={`text-option-button stroke-width-option ${isSelected ? 'selected' : ''}`}
+            onClick={() => onSelect(width)}
+            title={option.label}
+          >
+            <div className="stroke-preview" style={{ height: `${width}px` }} />
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -160,40 +148,9 @@ export interface TextOptionsPopupProps {
 }
 
 export function TextOptionsPopup({ options, onSelect }: TextOptionsPopupProps) {
-  return (
-    <div className="text-options-popup">
-      {options.map((opt) => (
-        <button key={opt} className="text-option-button" onClick={() => onSelect(opt)}>
-          {opt}
-        </button>
-      ))}
-    </div>
-  );
-}
-export interface ListPopupProps {
-  onSelect: (key: string) => void;
-}
-
-export function ListPopup({ onSelect }: ListPopupProps) {
-  const items = LIST_OPTIONS.map((option) => ({
-    key: option.key,
-    label: option.label,
-    prefix: option.prefix,
+  const popupOptions: PopupOption[] = options.map((opt) => ({
+    key: opt,
+    label: opt,
   }));
-
-  return (
-    <div className="text-options-popup list-popup">
-      {items.map((item) => (
-        <button
-          key={item.key}
-          className="text-option-button list-option"
-          onClick={() => onSelect(item.key)}
-          title={item.label}
-        >
-          <span className="list-prefix">{item.prefix || ''}</span>
-          {item.label}
-        </button>
-      ))}
-    </div>
-  );
+  return <BasePopup options={popupOptions} onSelect={onSelect} />;
 }

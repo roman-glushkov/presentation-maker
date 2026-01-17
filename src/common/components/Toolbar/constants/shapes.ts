@@ -2,19 +2,19 @@ import { ShapeType } from '../../../../store/types/presentation';
 
 export interface ShapeOption {
   label: string;
-  type: ShapeType;
-  icon: string;
+  key: ShapeType;
+  prefix: string;
 }
 
 export const SHAPE_OPTIONS: ShapeOption[] = [
-  { label: 'Прямоугольник', type: 'rectangle', icon: '▭' },
-  { label: 'Круг', type: 'circle', icon: '○' },
-  { label: 'Треугольник', type: 'triangle', icon: '△' },
-  { label: 'Звезда', type: 'star', icon: '★' },
-  { label: 'Шестиугольник', type: 'hexagon', icon: '⬢' },
-  { label: 'Сердце', type: 'heart', icon: '♥' },
-  { label: 'Облако', type: 'cloud', icon: '☁' },
-  { label: 'Выноска', type: 'callout', icon: '💬' },
+  { label: 'Прямоугольник', key: 'rectangle', prefix: '▭' },
+  { label: 'Круг', key: 'circle', prefix: '○' },
+  { label: 'Треугольник', key: 'triangle', prefix: '△' },
+  { label: 'Звезда', key: 'star', prefix: '★' },
+  { label: 'Шестиугольник', key: 'hexagon', prefix: '⬢' },
+  { label: 'Сердце', key: 'heart', prefix: '♥' },
+  { label: 'Облако', key: 'cloud', prefix: '☁' },
+  { label: 'Выноска', key: 'callout', prefix: '💬' },
 ];
 
 export const DEFAULT_SHAPE_SIZE = {
@@ -23,6 +23,6 @@ export const DEFAULT_SHAPE_SIZE = {
 };
 
 export const DEFAULT_SHAPE_STYLES = {
-  fill: '#ffffff',
+  fill: 'transparent',
   stroke: '#000000',
 };

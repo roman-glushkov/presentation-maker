@@ -28,7 +28,7 @@ export const shapeElementTemplate: ShapeElement = {
   shapeType: 'rectangle',
   position: { x: 100, y: 100 },
   size: { width: 150, height: 100 },
-  fill: '#ffffff',
+  fill: 'transparent',
   stroke: '#000000',
   strokeWidth: 2,
 };

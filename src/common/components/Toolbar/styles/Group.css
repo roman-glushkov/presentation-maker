@@ -78,7 +78,6 @@
   animation: spin 1s linear infinite;
 }
 
-/* Стили для активной кнопки-переключателя */
 .active-toggle {
   background-color: #e6f7ff !important;
   border-color: #1890ff !important;
@@ -91,7 +90,6 @@
   color: #1890ff;
 }
 
-/* Стили для заблокированных кнопок */
 .toolbar-group button:disabled,
 .toolbar-group .disabled-button {
   opacity: 0.5 !important;
@@ -109,9 +107,6 @@
   border-color: #ddd !important;
 }
 
-/* Убираем значок "🚫" полностью - просто удаляем этот блок */
-
-/* Стиль для активных переключателей */
 .toolbar-group .active-toggle {
   background-color: #e6f7ff !important;
   border-color: #1890ff !important;
@@ -124,7 +119,6 @@
   color: #1890ff;
 }
 
-/* Стили для тултипов заблокированных кнопок - используем data-атрибут */
 .toolbar-group button:disabled:hover::after,
 .toolbar-group .disabled-button:hover::after {
   content: attr(data-disabled-reason);
@@ -159,7 +153,6 @@
   pointer-events: none;
 }
 
-/* Убираем стандартные тултипы браузера для всех кнопок */
 .toolbar-group button {
-  position: relative; /* Нужно для позиционирования кастомных тултипов */
+  position: relative;
 }
