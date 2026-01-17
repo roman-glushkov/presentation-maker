@@ -1,6 +1,6 @@
 import React from 'react';
 import { Slide } from '../../../../store/types/presentation';
-import { SlideRenderer } from '../../../../store/utils/SlideRenderer';
+import { SlideRenderer } from '../../../shared/SlideRenderer';
 
 interface Props {
   slide: Slide;

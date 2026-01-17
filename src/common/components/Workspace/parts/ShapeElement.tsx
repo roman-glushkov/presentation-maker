@@ -4,7 +4,7 @@ import {
   SlideElement,
 } from '../../../../store/types/presentation';
 import { createElementComponent } from './BaseElement';
-import { renderShape } from '../../../../store/utils/shapeRenderer';
+import { renderShape } from '../../../shared/shapeRenderer';
 
 const getShadowStyle = (shadow: ShapeElementType['shadow'], scale: number = 1): string => {
   if (!shadow) return 'none';

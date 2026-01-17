@@ -1,8 +1,6 @@
+// src/common/components/Workspace/parts/ColorPickerContext.tsx
 import React from 'react';
-import { THEME_COLUMNS, STANDARD_COLORS } from '../../Toolbar/constants/colors';
-import ColorSwatchButton from './ColorSwatchButton';
-
-import '../styles/ColorPickerContext.css';
+import ColorPicker from '../../../shared/ColorPicker';
 
 interface ColorPickerContextProps {
   type: 'text' | 'fill' | 'stroke' | 'background';
@@ -10,13 +8,6 @@ interface ColorPickerContextProps {
   onSelectColor: (color: string) => void;
   onClose: () => void;
 }
-
-const TITLES = {
-  text: 'Цвет текста',
-  fill: 'Заливка',
-  stroke: 'Цвет границы',
-  background: 'Фон слайда',
-} as const;
 
 export default function ColorPickerContext({
   type,
@@ -44,48 +35,12 @@ export default function ColorPickerContext({
       style={{ top: `${finalPosition.y}px`, left: `${finalPosition.x}px` }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="color-picker-header">
-        <h4>{TITLES[type] || 'Выберите цвет'}</h4>
-      </div>
-
-      <div className="color-section">
-        <div className="color-section-title">Цвета темы</div>
-        <div className="theme-colors">
-          {THEME_COLUMNS.map((column, ci) => (
-            <div key={ci} className="theme-column">
-              {column.map((color) => (
-                <ColorSwatchButton
-                  key={color}
-                  color={color}
-                  onClick={onSelectColor}
-                  title={color}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="color-section">
-        <div className="color-section-title">Стандартные цвета</div>
-        <div className="standard-colors">
-          {STANDARD_COLORS.map((color) => (
-            <ColorSwatchButton key={color} color={color} onClick={onSelectColor} title={color} />
-          ))}
-        </div>
-      </div>
-
-      <div className="color-picker-actions">
-        <button
-          className="color-picker-button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-        >
-          Отмена
-        </button>
-      </div>
+      <ColorPicker
+        type={type}
+        onSelectColor={onSelectColor}
+        showCancelButton={true}
+        onClose={onClose}
+      />
     </div>
   );
 }

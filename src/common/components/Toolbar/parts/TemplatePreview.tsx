@@ -1,6 +1,6 @@
 import React from 'react';
 import { Slide, TextElement } from '../../../../store/types/presentation';
-import { getTextStyles } from '../../../../store/utils/textStyles';
+import { getTextStyles } from '../../../shared/textStyles';
 import '../styles/TemplatePreview.css';
 
 interface Props {

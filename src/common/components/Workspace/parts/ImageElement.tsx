@@ -4,7 +4,7 @@ import {
   SlideElement,
 } from '../../../../store/types/presentation';
 import { createElementComponent } from './BaseElement';
-import { getImageStyles } from '../../../../store/utils/imageStyles';
+import { getImageStyles } from '../../../shared/imageStyles';
 
 interface ImageElementProps {
   elementId: string;

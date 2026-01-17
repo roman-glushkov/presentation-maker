@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PresentationService } from '../services/PresentationService';
 import { Presentation } from '../../store/types/presentation';
-import { SlideRenderer } from '../../store/utils/SlideRenderer';
+import { SlideRenderer } from '../../common/shared/SlideRenderer';
 import { PLAYER_NOTIFICATIONS } from '../notifications';
 import '../styles/Player.css';
 

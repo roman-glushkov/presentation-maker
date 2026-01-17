@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShapeElement as ShapeElementType } from '../types/presentation';
+import { ShapeElement as ShapeElementType } from '../../store/types/presentation';
 
 export function renderShape(element: ShapeElementType): React.ReactElement {
   const { width: w, height: h } = element.size;
