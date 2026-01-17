@@ -111,7 +111,6 @@ export default function ToolbarGroup() {
   const handleButtonClick = (action: string) => {
     if (!isButtonAvailable(selectionType, action)) {
       const reason = getButtonDisabledReason(selectionType, action);
-      console.log(`Кнопка ${action} недоступна: ${reason}`);
 
       addNotification(
         reason || 'Это действие недоступно для выбранного элемента',
