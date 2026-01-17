@@ -1,6 +1,7 @@
 import React from 'react';
 import { Slide, TextElement } from '../../../../store/types/presentation';
 import { getTextStyles } from '../../../shared/textStyles';
+import { getSlideBackgroundStyle } from '../../../shared/slideBackground';
 import '../styles/TemplatePreview.css';
 
 interface Props {
@@ -9,21 +10,6 @@ interface Props {
 }
 
 export default function TemplateSlidePreview({ slide, scale }: Props) {
-  const getBackgroundStyle = (): React.CSSProperties => {
-    const bg = slide.background;
-    switch (bg.type) {
-      case 'image':
-        return {
-          backgroundImage: `url(${bg.value})`,
-          backgroundSize: bg.size || 'cover',
-          backgroundPosition: bg.position || 'center',
-          backgroundRepeat: 'no-repeat',
-        };
-      default:
-        return { backgroundColor: '#ffffff' };
-    }
-  };
-
   const applyScale = (styles: React.CSSProperties): React.CSSProperties => {
     const scaledStyles = { ...styles };
 
@@ -41,7 +27,7 @@ export default function TemplateSlidePreview({ slide, scale }: Props) {
   };
 
   return (
-    <div className="template-preview-container" style={getBackgroundStyle()}>
+    <div className="template-preview-container" style={getSlideBackgroundStyle(slide)}>
       {slide.elements.map((el) => {
         if (el.type !== 'text') return null;
         const textEl = el as TextElement;

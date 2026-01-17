@@ -4,6 +4,7 @@ import { updateTextContent } from '../../../../store/editorSlice';
 import { TextElement as TextElementType, SlideElement } from '../../../../store/types/presentation';
 import { createElementComponent } from './BaseElement';
 import { getTextStyles } from '../../../shared/textStyles';
+import { LIST_OPTIONS } from '../../Toolbar/constants/textOptions';
 
 interface TextElementProps {
   elementId: string;
@@ -15,7 +16,9 @@ interface TextElementProps {
 
 type ListMarker = { type: 'static'; value: string };
 
-const STATIC_MARKERS = ['• ', '○ ', '▪ ', '→ ', '✓ ', '⭐ '];
+const STATIC_MARKERS = LIST_OPTIONS.filter((option) => option.prefix)
+  .map((option) => option.prefix!)
+  .filter((prefix) => prefix && prefix.trim().length > 0);
 
 const parseListMarker = (line: string): ListMarker | null => {
   const staticMarker = STATIC_MARKERS.find((m) => line.startsWith(m));

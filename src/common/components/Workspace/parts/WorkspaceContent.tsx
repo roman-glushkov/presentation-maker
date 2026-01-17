@@ -11,7 +11,7 @@ import TextElementView from './TextElement';
 import ImageElementView from './ImageElement';
 import ShapeElementView from './ShapeElement';
 import GridOverlay from './GridOverlay';
-
+import { getSlideBackgroundStyle } from '../../../shared/slideBackground';
 import '../styles/WorkspaceContent.css';
 
 interface WorkspaceContentProps {
@@ -48,25 +48,9 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
     }
   };
 
-  const backgroundStyle: React.CSSProperties = (() => {
-    const bg = slide.background;
+  const backgroundStyle = getSlideBackgroundStyle(slide);
 
-    switch (bg.type) {
-      case 'image':
-        return {
-          backgroundImage: `url(${bg.value})`,
-          backgroundSize: bg.size || 'cover',
-          backgroundPosition: bg.position || 'center',
-          backgroundRepeat: 'no-repeat',
-        };
-      case 'color':
-        return { backgroundColor: bg.value };
-      default:
-        return { backgroundColor: '#fff' };
-    }
-  })();
-
-  const ElementComponent = (el: Slide['elements'][0]) => {
+  const renderElement = (el: Slide['elements'][0]) => {
     const Component = elementComponents[el.type];
     if (!Component) return null;
 
@@ -86,7 +70,7 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
     <div className="workspace-content" onClick={handleWorkspaceClick}>
       <div className="slide-container" style={backgroundStyle}>
         {!preview && <GridOverlay />}
-        {slide.elements.map(ElementComponent)}
+        {slide.elements.map(renderElement)}
       </div>
     </div>
   );
