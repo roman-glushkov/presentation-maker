@@ -2,23 +2,28 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { isTextInputFocused, isEditingTextElement } from './domUtils';
-
-// Импорты для действий с элементами (замените на реальные пути)
-import { ElementActions } from '../../components/Workspace/utils/elementActions'; // Пример пути
-import { undo, redo, duplicateSlide, removeSlide } from '../../../store/editorSlice'; // Пример пути
+import { ElementActions } from '../../components/Workspace/utils/elementActions';
+import { undo, redo, duplicateSlide, removeSlide } from '../../../store/editorSlice';
 
 interface UseKeyboardShortcutsArgs {
   preview?: boolean;
   selectedElementIds?: string[];
   selectedSlideIds?: string[];
-  context?: 'workspace' | 'slides';
+  context?: 'workspace' | 'slides' | 'global';
+  customActions?: {
+    onSelectPrev?: () => void;
+    onSelectNext?: () => void;
+  };
+  enableNavigation?: boolean;
 }
 
 export function useKeyboardShortcuts({
   preview,
   selectedElementIds = [],
   selectedSlideIds = [],
-  context = 'workspace',
+  context = 'global',
+  customActions,
+  enableNavigation = false,
 }: UseKeyboardShortcutsArgs) {
   const dispatch = useDispatch();
 
@@ -29,6 +34,22 @@ export function useKeyboardShortcuts({
 
       const isCtrl = e.ctrlKey || e.metaKey;
       const isShift = e.shiftKey;
+
+      // Навигация стрелками (если включена и не редактируется текст)
+      if (enableNavigation && !isEditingTextElement()) {
+        switch (e.key) {
+          case 'ArrowUp':
+          case 'ArrowLeft':
+            e.preventDefault();
+            customActions?.onSelectPrev?.();
+            return;
+          case 'ArrowDown':
+          case 'ArrowRight':
+            e.preventDefault();
+            customActions?.onSelectNext?.();
+            return;
+        }
+      }
 
       // Undo/Redo (общие для всех контекстов)
       if (isCtrl && !isShift && e.code === 'KeyZ' && !isEditingTextElement()) {
@@ -51,6 +72,7 @@ export function useKeyboardShortcuts({
         case 'slides':
           handleSlidesKeys(e, isCtrl);
           break;
+        // Для 'global' ничего не делаем, только undo/redo и навигация
       }
     };
 
@@ -84,13 +106,11 @@ export function useKeyboardShortcuts({
         switch (e.code) {
           case 'KeyC':
             e.preventDefault();
-            // Логика copySlides из useSlidesActions.ts
             if (selectedSlideIds.length === 0) return;
             sessionStorage.setItem('slidesClipboard', JSON.stringify(selectedSlideIds));
             break;
           case 'KeyV': {
             e.preventDefault();
-            // Логика pasteSlides из useSlidesActions.ts
             const clipboardData = sessionStorage.getItem('slidesClipboard');
             let slideIdToDuplicate;
 
@@ -108,7 +128,6 @@ export function useKeyboardShortcuts({
           }
           case 'KeyD': {
             e.preventDefault();
-            // Логика duplicateSlides из useSlidesActions.ts
             const lastSelectedId = selectedSlideIds[selectedSlideIds.length - 1];
             if (lastSelectedId) {
               dispatch(duplicateSlide(lastSelectedId));
@@ -118,7 +137,6 @@ export function useKeyboardShortcuts({
         }
       } else if (e.key === 'Delete' && selectedSlideIds.length > 0) {
         e.preventDefault();
-        // Логика deleteSlides из useSlidesActions.ts
         selectedSlideIds.forEach((slideId: string) => {
           dispatch(removeSlide(slideId));
         });
@@ -127,5 +145,13 @@ export function useKeyboardShortcuts({
 
     window.addEventListener('keydown', handleKeyDown, { capture: true });
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
-  }, [preview, selectedElementIds, selectedSlideIds, context, dispatch]);
+  }, [
+    preview,
+    selectedElementIds,
+    selectedSlideIds,
+    context,
+    dispatch,
+    customActions,
+    enableNavigation,
+  ]);
 }

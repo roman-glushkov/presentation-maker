@@ -1,21 +1,13 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { duplicateSlide, removeSlide } from '../../../../store/editorSlice';
+import { useKeyboardShortcuts } from '../../../shared/hooks/useKeyboardShortcuts';
 
 export default function useSlidesActions() {
   const dispatch = useDispatch();
   const selectedSlideIds = useSelector((state: RootState) => state.editor.selectedSlideIds);
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
-
-  const isTextInputFocused = useCallback(() => {
-    const activeElement = document.activeElement;
-    return (
-      activeElement?.tagName === 'INPUT' ||
-      activeElement?.tagName === 'TEXTAREA' ||
-      activeElement?.hasAttribute('contenteditable')
-    );
-  }, []);
 
   const copySlides = useCallback(() => {
     if (selectedSlideIds.length === 0) return;
@@ -53,36 +45,13 @@ export default function useSlidesActions() {
     }
   }, [dispatch, selectedSlideIds]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isTextInputFocused()) return;
-
-      const isCtrl = e.ctrlKey || e.metaKey;
-
-      if (isCtrl) {
-        switch (e.code) {
-          case 'KeyC':
-            e.preventDefault();
-            copySlides();
-            break;
-          case 'KeyV':
-            e.preventDefault();
-            pasteSlides();
-            break;
-          case 'KeyD':
-            e.preventDefault();
-            duplicateSlides();
-            break;
-        }
-      } else if (e.key === 'Delete') {
-        e.preventDefault();
-        deleteSlides();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown, { capture: true });
-    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
-  }, [isTextInputFocused, copySlides, pasteSlides, deleteSlides, duplicateSlides]);
+  // Используем общий хук для горячих клавиш
+  useKeyboardShortcuts({
+    preview: false,
+    selectedSlideIds,
+    context: 'slides',
+    // customActions не нужны, так как логика уже встроена в useKeyboardShortcuts
+  });
 
   return {
     copySlides,

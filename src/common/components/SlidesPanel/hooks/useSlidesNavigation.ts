@@ -1,22 +1,17 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { selectSlide } from '../../../../store/editorSlice';
+import { useKeyboardShortcuts } from '../../../shared/hooks/useKeyboardShortcuts';
 
 export default function useSlidesNavigation() {
   const dispatch = useDispatch();
   const slides = useSelector((state: RootState) => state.editor.presentation.slides);
   const selectedSlideId = useSelector((state: RootState) => state.editor.selectedSlideId);
-
-  const isEditingText = useCallback(() => {
-    const activeElement = document.activeElement;
-    return activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA';
-  }, []);
+  const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
 
   const navigateToSlide = useCallback(
     (direction: 'prev' | 'next') => {
-      if (isEditingText()) return;
-
       const currentIndex = slides.findIndex((slide) => slide.id === selectedSlideId);
 
       if (direction === 'prev' && currentIndex > 0) {
@@ -25,19 +20,21 @@ export default function useSlidesNavigation() {
         dispatch(selectSlide(slides[currentIndex + 1].id));
       }
     },
-    [dispatch, slides, selectedSlideId, isEditingText]
+    [dispatch, slides, selectedSlideId]
   );
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        navigateToSlide('prev');
-      } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        navigateToSlide('next');
-      }
-    };
+  // Используем общий хук для горячих клавиш с кастомными действиями
+  useKeyboardShortcuts({
+    preview: false,
+    selectedElementIds,
+    context: 'global',
+    customActions: {
+      onSelectPrev: () => navigateToSlide('prev'),
+      onSelectNext: () => navigateToSlide('next'),
+    },
+    enableNavigation: true,
+  });
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigateToSlide]);
+  // Возвращаем функцию навигации если нужна где-то еще
+  return { navigateToSlide };
 }
