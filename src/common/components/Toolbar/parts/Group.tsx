@@ -1,4 +1,4 @@
-import React, { useRef, useState, ReactElement, useEffect } from 'react'; // Добавили useEffect
+import React, { useRef, useState, ReactElement, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction, addImageWithUrl } from '../../../../store/editorSlice';
 import { setActiveTextOption, toggleGrid } from '../../../../store/toolbarSlice';
@@ -56,10 +56,8 @@ export default function ToolbarGroup() {
   const currentSlideId = useAppSelector((state: RootState) => state.editor.selectedSlideId);
   const { addNotification } = useNotifications();
 
-  // Реф для отслеживания кликов вне попапов
   const popupRef = useRef<HTMLDivElement>(null);
 
-  // Получаем выбранные элементы
   const selectedElements = useAppSelector((state: RootState) => {
     const currentSlide = state.editor.presentation.slides.find(
       (slide) => slide.id === state.editor.selectedSlideId
@@ -67,13 +65,11 @@ export default function ToolbarGroup() {
 
     if (!currentSlide) return [];
 
-    // Используем selectedElementIds вместо selectedElements
     return currentSlide.elements.filter((element) =>
       state.editor.selectedElementIds.includes(element.id)
     );
   });
 
-  // Определяем тип выбранных элементов
   const selectionType = getSelectionType(selectedElements);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,10 +79,8 @@ export default function ToolbarGroup() {
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
 
-  // Эффект для закрытия попапов при клике вне их области
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      // Если есть открытый попап и клик был вне его области
       if (
         activeTextOption &&
         popupRef.current &&
@@ -94,7 +88,6 @@ export default function ToolbarGroup() {
       ) {
         dispatch(setActiveTextOption(null));
       }
-      // Закрываем URL инпут если клик был вне его
       if (
         showUrlInput &&
         urlInputRef.current &&
@@ -104,10 +97,8 @@ export default function ToolbarGroup() {
       }
     }
 
-    // Добавляем обработчик событий
     document.addEventListener('mousedown', handleClickOutside);
 
-    // Убираем обработчик при размонтировании
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -118,13 +109,10 @@ export default function ToolbarGroup() {
   }
 
   const handleButtonClick = (action: string) => {
-    // Проверяем доступность кнопки
     if (!isButtonAvailable(selectionType, action)) {
       const reason = getButtonDisabledReason(selectionType, action);
-      // Можно показать уведомление или просто не выполнять действие
       console.log(`Кнопка ${action} недоступна: ${reason}`);
 
-      // Показываем уведомление пользователю
       addNotification(
         reason || 'Это действие недоступно для выбранного элемента',
         'info',
@@ -144,7 +132,6 @@ export default function ToolbarGroup() {
     }
 
     if (menuActions.includes(action)) {
-      // Если уже открыт этот попап - закрываем его, иначе открываем
       dispatch(setActiveTextOption(activeTextOption === action ? null : action));
     } else if (action === 'ADD_IMAGE') {
       handleImageButtonClick();
@@ -259,7 +246,6 @@ export default function ToolbarGroup() {
         <button
           onClick={() => handleButtonClick(btn.action)}
           className="design-button"
-          // Оставляем title для дизайн кнопок, так как они всегда доступны
           title={themeName}
         >
           {btn.previewImage && (
@@ -328,25 +314,19 @@ export default function ToolbarGroup() {
     return popupMap[btn.action];
   };
 
-  // Функция для рендеринга обычной кнопки
   const renderRegularButton = (btn: GroupButton) => {
     const isImageButton = btn.action === 'ADD_IMAGE';
     const showPopup = activeTextOption === btn.action && getPopupContent(btn);
     const showUrlPopup = btn.action === 'ADD_IMAGE_FROM_URL' && showUrlInput;
 
-    // Проверяем доступность кнопки
     const isAvailable = isButtonAvailable(selectionType, btn.action);
     const disabledReason = getButtonDisabledReason(selectionType, btn.action);
-
-    // УБИРАЕМ title полностью для всех кнопок
-    // Вместо этого будем показывать кастомный тултип только для заблокированных
 
     return (
       <div key={btn.action} className="toolbar-button-wrapper">
         <button
           onClick={() => handleButtonClick(btn.action)}
           disabled={(isImageButton && uploading) || !isAvailable}
-          // Убираем title атрибут! Это важно
           data-disabled-reason={!isAvailable ? disabledReason : undefined}
           className={!isAvailable ? 'disabled-button' : ''}
         >
@@ -422,7 +402,6 @@ export default function ToolbarGroup() {
               <button
                 onClick={() => handleButtonClick(btn.action)}
                 className={isActive ? 'active-toggle' : ''}
-                // Убираем title здесь тоже!
                 data-disabled-reason={!isAvailable ? disabledReason : undefined}
                 disabled={!isAvailable}
               >

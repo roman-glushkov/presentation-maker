@@ -11,7 +11,6 @@ function snapToGrid(value: number, gridSize: number = 10): number {
   return Math.round(value / gridSize) * gridSize;
 }
 
-// Функция для получения масштаба контейнера
 function getSlideContainerScale(): number {
   const slideContainer = document.querySelector('.slide-container');
   if (slideContainer) {
@@ -43,7 +42,7 @@ export default function useResize({ preview, updateSlide }: Args) {
     const origHeight = el.size.height;
     const origX = el.position.x;
     const origY = el.position.y;
-    const aspectRatio = origWidth / origHeight; // Для сохранения пропорций с Shift
+    const aspectRatio = origWidth / origHeight;
 
     let shiftPressed = false;
 
@@ -59,7 +58,6 @@ export default function useResize({ preview, updateSlide }: Args) {
     window.addEventListener('keyup', onKeyUp);
 
     const onPointerMove = (ev: PointerEvent) => {
-      // Получаем масштаб и масштабируем дельты
       const scale = getSlideContainerScale();
       const dx = (ev.clientX - startX) / scale;
       const dy = (ev.clientY - startY) / scale;
@@ -77,7 +75,6 @@ export default function useResize({ preview, updateSlide }: Args) {
           const isCornerResize = ['nw', 'ne', 'sw', 'se'].includes(corner);
 
           if (shiftPressed && isCornerResize) {
-            // Ресайз с сохранением пропорций (Shift)
             let scaleFactor;
             switch (corner) {
               case 'se':
@@ -106,7 +103,6 @@ export default function useResize({ preview, updateSlide }: Args) {
                 break;
             }
           } else {
-            // Обычный ресайз (ваш старый код)
             switch (corner) {
               case 'se':
                 newWidth = origWidth + dx;
@@ -145,7 +141,6 @@ export default function useResize({ preview, updateSlide }: Args) {
             }
           }
 
-          // Применяем минимальные размеры (ваш старый код)
           if (newWidth < MIN_WIDTH) {
             newWidth = MIN_WIDTH;
             if (['nw', 'w', 'sw'].includes(corner)) {
@@ -164,7 +159,6 @@ export default function useResize({ preview, updateSlide }: Args) {
             }
           }
 
-          // Применяем снаппинг только если сетка включена
           if (gridVisible) {
             newWidth = snapToGrid(newWidth, GRID_SIZE);
             newHeight = snapToGrid(newHeight, GRID_SIZE);

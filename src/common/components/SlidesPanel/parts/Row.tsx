@@ -1,7 +1,6 @@
 import React from 'react';
 import { Slide } from '../../../../store/types/presentation';
 import { PreviewWorkspace } from './PreviewWorkspace';
-import { SlideNumber } from './Number';
 
 interface RowProps {
   slide: Slide;
@@ -12,6 +11,10 @@ interface RowProps {
   onDragStart: () => void;
   onDragEnter: () => void;
   onDragEnd: () => void;
+}
+
+function SlideNumber({ number }: { number: number }) {
+  return <div className="slide-number">{number}</div>;
 }
 
 export function SlideRow({
@@ -36,7 +39,7 @@ export function SlideRow({
       onDragEnd={onDragEnd}
     >
       <SlideNumber number={index + 1} />
-      <PreviewWorkspace slide={slide} scale={0.25} />
+      <PreviewWorkspace slide={slide} />
     </div>
   );
 }

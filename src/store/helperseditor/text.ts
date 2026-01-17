@@ -13,17 +13,14 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
   if (action.startsWith('LIST_TYPE:')) {
     const listKey = action.split(':')[1].trim();
 
-    // Специальная обработка для "Без маркера"
     if (listKey === 'bullet_none') {
       const element = slide.elements.find((el) => el.id === elId);
       if (!element || element.type !== 'text') return true;
 
-      // Удаляем все маркеры из всех строк
       const lines = element.content.split('\n');
       const newLines = lines.map((line) => {
         if (!line.trim()) return line;
 
-        // Ищем любой существующий маркер и удаляем его
         for (const opt of LIST_OPTIONS) {
           if (opt.prefix && opt.key !== 'bullet_none' && line.startsWith(opt.prefix)) {
             return line.slice(opt.prefix.length);
@@ -48,7 +45,6 @@ export function handleTextAction(state: EditorState, action: string, elId: strin
       return true;
     }
 
-    // Оригинальный код для остальных маркеров
     const listOption = LIST_OPTIONS.find((opt) => opt.key === listKey);
     if (!listOption || !listOption.prefix) return true;
 

@@ -4,22 +4,13 @@ import { SlideRenderer } from '../../../../store/utils/SlideRenderer';
 
 interface Props {
   slide: Slide;
-  scale: number;
 }
 
-export function PreviewWorkspace({ slide, scale }: Props) {
+export function PreviewWorkspace({ slide }: Props) {
   return (
     <div className="slide-preview-wrapper">
-      <div
-        className="slide-preview"
-        style={{
-          width: 960 * scale,
-          height: 540 * scale,
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <SlideRenderer slide={slide} scale={scale} />
+      <div className="slide-preview">
+        <SlideRenderer slide={slide} scale={0.25} />
       </div>
     </div>
   );

@@ -15,7 +15,6 @@ interface TextElementProps {
 
 type ListMarker = { type: 'static'; value: string };
 
-// Только указанные маркеры
 const STATIC_MARKERS = ['• ', '○ ', '▪ ', '→ ', '✓ ', '⭐ '];
 
 const parseListMarker = (line: string): ListMarker | null => {

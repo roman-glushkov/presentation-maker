@@ -62,11 +62,9 @@ export default function useDrag({ preview, setSelElId, bringToFront, updateSlide
 
           if (!origPos) return item;
 
-          // Вычисляем новые координаты
           let newX = origPos.x + rawDx;
           let newY = origPos.y + rawDy;
 
-          // Применяем снаппинг ТОЛЬКО КОГДА сетка включена и ТОЛЬКО К ИТОГОВЫМ КООРДИНАТАМ
           if (gridVisible) {
             newX = snapToGrid(newX);
             newY = snapToGrid(newY);

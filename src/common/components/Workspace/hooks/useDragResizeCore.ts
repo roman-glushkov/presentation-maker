@@ -26,13 +26,11 @@ export function snapToGrid(value: number, gridSize: number = 10): number {
   return Math.round(value / gridSize) * gridSize;
 }
 
-// Функция для получения текущего масштаба контейнера
 function getSlideContainerScale(): number {
   const slideContainer = document.querySelector('.slide-container');
   if (slideContainer) {
     const computedStyle = window.getComputedStyle(slideContainer);
     const matrix = new DOMMatrix(computedStyle.transform);
-    // matrix.a - масштаб по X (scale factor)
     return matrix.a || 1;
   }
   return 1;
@@ -53,9 +51,8 @@ export function useDragResizeCore({ preview, updateSlide }: DragResizeCoreArgs) 
 
     const onPointerMove = (ev: PointerEvent) => {
       const currentScale = getSlideContainerScale();
-      const scale = currentScale; // Используем текущий масштаб
+      const scale = currentScale;
 
-      // Масштабируем дельты координат мыши
       const dx = (ev.clientX - startX) / scale;
       const dy = (ev.clientY - startY) / scale;
 

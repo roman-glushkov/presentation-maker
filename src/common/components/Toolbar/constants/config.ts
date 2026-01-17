@@ -102,11 +102,10 @@ export const GROUPS: Record<GroupKey, GroupButton[]> = {
     },
   ],
   view: [
-    // Новый раздел "Вид"
     {
       label: '📐 Сетка',
       action: 'TOGGLE_GRID',
-      toggleable: true, // Это переключатель
+      toggleable: true,
     },
   ],
 };

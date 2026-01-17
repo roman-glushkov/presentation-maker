@@ -5,7 +5,6 @@ export interface HotkeyItem {
 }
 
 export const hotkeysConfig: HotkeyItem[] = [
-  // Панель слайдов
   {
     keys: ['Ctrl/Cmd', 'C'],
     description: 'Копировать слайд',
@@ -36,7 +35,6 @@ export const hotkeysConfig: HotkeyItem[] = [
     description: 'Изменение порядка слайдов',
     category: 'slides',
   },
-  // Навигация по слайдам
   {
     keys: ['← или ↑'],
     description: 'Перейти к предыдущему слайду',
@@ -48,7 +46,6 @@ export const hotkeysConfig: HotkeyItem[] = [
     category: 'slides',
   },
 
-  // Рабочая область
   {
     keys: ['Ctrl/Cmd', 'C'],
     description: 'Копировать элементы',
@@ -75,7 +72,6 @@ export const hotkeysConfig: HotkeyItem[] = [
     category: 'workspace',
   },
 
-  // Элементы
   {
     keys: ['Перетаскивание'],
     description: 'Перемещение элементов',

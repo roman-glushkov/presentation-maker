@@ -1,12 +1,10 @@
 import React from 'react';
-import { useAppSelector } from '../../../../store/hooks'; // Добавляем импорт
+import { useAppSelector } from '../../../../store/hooks';
 import '../styles/GridOverlay.css';
 
 export default function GridOverlay() {
-  // Получаем состояние видимости сетки из Redux
   const gridVisible = useAppSelector((state) => state.toolbar.gridVisible);
 
-  // Если сетка не видна, не рендерим ничего
   if (!gridVisible) {
     return null;
   }
