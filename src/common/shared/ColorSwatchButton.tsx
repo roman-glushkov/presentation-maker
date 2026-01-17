@@ -1,5 +1,5 @@
-// src/common/components/shared/ColorSwatchButton.tsx
 import React from 'react';
+import './styles/ColorSwatchButton.css';
 
 interface Props {
   color: string;

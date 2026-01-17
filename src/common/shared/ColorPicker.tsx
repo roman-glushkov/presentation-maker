@@ -1,7 +1,8 @@
-// src/store/utils/ColorPicker.tsx
 import React from 'react';
 import { THEME_COLUMNS, STANDARD_COLORS } from '../components/Toolbar/constants/colors';
 import ColorSwatchButton from './ColorSwatchButton';
+import './styles/ColorPickerContext.css';
+import './styles/ColorSection.css';
 
 interface ColorPickerProps {
   type?: 'text' | 'fill' | 'stroke' | 'background';

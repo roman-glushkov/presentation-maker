@@ -1,9 +1,7 @@
-// src/common/components/Toolbar/parts/ColorSection.tsx
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction } from '../../../../store/editorSlice';
 import ColorPicker from '../../../shared/ColorPicker';
-import '../styles/ColorSection.css';
 
 interface Props {
   type: 'text' | 'fill' | 'stroke' | 'background';

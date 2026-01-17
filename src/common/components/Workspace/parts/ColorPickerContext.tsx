@@ -1,4 +1,3 @@
-// src/common/components/Workspace/parts/ColorPickerContext.tsx
 import React from 'react';
 import ColorPicker from '../../../shared/ColorPicker';
 
