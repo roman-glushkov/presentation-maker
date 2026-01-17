@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextElement as TextElementType } from '../../../../../store/types/presentation';
+import { TextElement as TextElementType } from '../types/presentation';
 
 export const getTextStyles = (element: TextElementType, showPlaceholder: boolean) => {
   const dynamicTextStyle: React.CSSProperties = {

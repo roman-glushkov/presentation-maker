@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { updateTextContent } from '../../../../store/editorSlice';
 import { TextElement as TextElementType, SlideElement } from '../../../../store/types/presentation';
 import { createElementComponent } from './BaseElement';
-import { getTextStyles } from './constStyles/textStyles';
+import { getTextStyles } from '../../../../store/utils/textStyles';
 
 interface TextElementProps {
   elementId: string;

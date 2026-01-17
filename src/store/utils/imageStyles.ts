@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageElement as ImageElementType } from '../../../../../store/types/presentation';
+import { ImageElement as ImageElementType } from '../types/presentation';
 
 export const getImageStyles = (element: ImageElementType) => {
   const dynamicContainerStyle: React.CSSProperties = {

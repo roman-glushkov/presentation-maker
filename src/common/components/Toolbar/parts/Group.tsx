@@ -26,7 +26,7 @@ import {
   isButtonAvailable,
   getButtonDisabledReason,
   getSelectionType,
-} from '../constants/availability';
+} from '../utils/availabilityUtils';
 
 import '../styles/Group.css';
 import '../styles/Popups.css';

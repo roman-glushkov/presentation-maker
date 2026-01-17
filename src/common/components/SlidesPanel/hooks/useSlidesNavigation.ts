@@ -31,10 +31,8 @@ export default function useSlidesNavigation() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        e.preventDefault();
         navigateToSlide('prev');
       } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        e.preventDefault();
         navigateToSlide('next');
       }
     };

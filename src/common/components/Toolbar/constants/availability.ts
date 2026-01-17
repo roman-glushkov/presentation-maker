@@ -1,4 +1,3 @@
-import { SlideElement } from '../../../../store/types/presentation';
 export type SelectionType = 'shape' | 'text' | 'image' | 'slide' | 'multiple' | 'other' | 'none';
 export interface ButtonAvailability {
   action: string;
@@ -182,48 +181,3 @@ export const availabilityConfig: Record<SelectionType, ButtonAvailability[]> = {
     { action: 'TOGGLE_GRID', available: true },
   ],
 };
-
-export function isButtonAvailable(selectionType: SelectionType, action: string): boolean {
-  const config = availabilityConfig[selectionType];
-  const buttonConfig = config.find((item) => item.action === action);
-  if (buttonConfig) {
-    return buttonConfig.available;
-  }
-  return true;
-}
-
-export function getButtonDisabledReason(
-  selectionType: SelectionType,
-  action: string
-): string | undefined {
-  const config = availabilityConfig[selectionType];
-  const buttonConfig = config.find((item) => item.action === action);
-  return buttonConfig?.reason;
-}
-
-export function getSelectionType(selectedElements: SlideElement[]): SelectionType {
-  if (selectedElements.length === 0) {
-    return 'none';
-  }
-  if (selectedElements.length === 1) {
-    const element = selectedElements[0];
-    if (element.type === 'text') return 'text';
-    if (element.type === 'image') return 'image';
-    if (element.type === 'shape') return 'shape';
-    return 'other';
-  }
-
-  const types = new Set(
-    selectedElements.map((el) => {
-      if (el.type === 'text') return 'text';
-      if (el.type === 'image') return 'image';
-      if (el.type === 'shape') return 'shape';
-      return 'other';
-    })
-  );
-
-  if (types.size === 1) {
-    return Array.from(types)[0] as SelectionType;
-  }
-  return 'multiple';
-}
