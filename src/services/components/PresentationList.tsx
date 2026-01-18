@@ -191,7 +191,6 @@ export default function PresentationList() {
         'error',
         NOTIFICATION_TIMEOUT.ERROR
       );
-      throw new Error('Failed to update presentation');
     }
   };
 

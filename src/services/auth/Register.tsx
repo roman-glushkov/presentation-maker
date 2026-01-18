@@ -1,9 +1,9 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ID } from 'appwrite';
 import { account } from '../client';
 import { useNotifications } from '../hooks/useNotifications';
+import { useFieldValidation } from '../hooks/useFieldValidation';
 import {
   REGISTER_NOTIFICATIONS,
   NOTIFICATION_TIMEOUT,
@@ -36,34 +36,23 @@ export default function Register() {
     hasValidationErrors,
   } = useNotifications();
 
-  useEffect(() => {
-    if (touchedFields.has('name') && name) {
-      const error = getFieldValidationMessage('name', name);
-      if (error) {
-        addValidationMessage('name', error, 'error');
-      } else {
-        removeValidationMessage('name');
-      }
-    }
+  const fields = useMemo(
+    () => [
+      { name: 'name', value: name },
+      { name: 'email', value: email },
+      { name: 'password', value: password },
+    ],
+    [name, email, password]
+  );
 
-    if (touchedFields.has('email') && email) {
-      const error = getFieldValidationMessage('email', email);
-      if (error) {
-        addValidationMessage('email', error, 'error');
-      } else {
-        removeValidationMessage('email');
-      }
-    }
-
-    if (touchedFields.has('password') && password) {
-      const error = getFieldValidationMessage('password', password);
-      if (error) {
-        addValidationMessage('password', error, 'error');
-      } else {
-        removeValidationMessage('password');
-      }
-    }
-  }, [name, email, password, touchedFields, addValidationMessage, removeValidationMessage]);
+  useFieldValidation({
+    fields,
+    touchedFields,
+    notifications: {
+      addValidationMessage,
+      removeValidationMessage,
+    },
+  });
 
   const handleBlur = (field: string) => {
     setTouchedFields((prev) => new Set(prev).add(field));
