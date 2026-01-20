@@ -13,12 +13,6 @@ class ClipboardService {
 
   copy(elementIds: string[]): void {
     this.clipboard = [...elementIds];
-    sessionStorage.setItem('elementsClipboard', JSON.stringify(elementIds));
-  }
-
-  cut(elementIds: string[]): void {
-    this.clipboard = [...elementIds];
-    sessionStorage.setItem('elementsClipboard', JSON.stringify(elementIds));
   }
 
   paste(): string[] {
@@ -31,7 +25,6 @@ class ClipboardService {
 
   clear(): void {
     this.clipboard = [];
-    sessionStorage.removeItem('elementsClipboard');
   }
 }
 

@@ -8,6 +8,12 @@
   gap: 10px;
   max-width: 400px;
   pointer-events: none;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }
 
 .notification {

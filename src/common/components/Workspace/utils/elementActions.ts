@@ -3,13 +3,6 @@ import { AppDispatch } from '../../../../store';
 import { duplicateElements, handleAction, removeSlide } from '../../../../store/editorSlice';
 
 export class ElementActions {
-  static cut(selectedElementIds: string[], dispatch: AppDispatch) {
-    if (selectedElementIds.length === 0) return;
-
-    clipboardService.cut(selectedElementIds);
-    dispatch(handleAction('DELETE_SELECTED'));
-  }
-
   static copy(selectedElementIds: string[]) {
     if (selectedElementIds.length === 0) return;
 

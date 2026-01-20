@@ -6,7 +6,6 @@ import WorkspaceContent from './WorkspaceContent';
 import WorkspaceContextMenu from './WorkspaceContextMenu';
 import useWorkspaceKeyboard from '../hooks/useWorkspaceKeyboard';
 import useWorkspaceContextMenu from '../hooks/useWorkspaceContextMenu';
-
 import '../styles/WorkspaceCore.css';
 
 export default function WorkspaceCore({ preview }: { preview?: boolean }) {
@@ -23,7 +22,6 @@ export default function WorkspaceCore({ preview }: { preview?: boolean }) {
     );
     return currentSlide?.elements.find((el) => el.id === selectedElementIds[0]);
   });
-
   const {
     menu,
     handleContextMenu,
@@ -43,7 +41,6 @@ export default function WorkspaceCore({ preview }: { preview?: boolean }) {
   } = useWorkspaceContextMenu();
 
   useWorkspaceKeyboard(preview);
-
   const handleWorkspaceContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     let targetType: 'text' | 'image' | 'shape' | 'slide' | 'none' = 'none';
@@ -58,7 +55,6 @@ export default function WorkspaceCore({ preview }: { preview?: boolean }) {
 
     handleContextMenu(e, targetElement, targetType === 'slide');
   };
-
   return (
     <div className="workspace-panel">
       <div className="workspace" onContextMenu={handleWorkspaceContextMenu}>
@@ -70,7 +66,6 @@ export default function WorkspaceCore({ preview }: { preview?: boolean }) {
           </div>
         )}
       </div>
-
       <WorkspaceContextMenu
         visible={menu.visible}
         x={menu.x}

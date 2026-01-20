@@ -116,15 +116,12 @@ export function useImageActions({ currentSlideId, dispatch, addNotification }: P
   return {
     fileInputRef,
     urlInputRef,
-
     uploading,
     progress,
     showUrlInput,
     imageUrl,
-
     setShowUrlInput,
     setImageUrl,
-
     handleImageButtonClick,
     handleImageFromUrlButtonClick,
     handleFileSelect,

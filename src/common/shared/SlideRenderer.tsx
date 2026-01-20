@@ -7,7 +7,6 @@ import {
   ShapeElement,
 } from '../../store/types/presentation';
 import { renderShape } from './shapeRenderer';
-
 const EDITOR_SLIDE_WIDTH = 960;
 const EDITOR_SLIDE_HEIGHT = 540;
 
@@ -24,7 +23,6 @@ export function SlideRenderer({ slide, scale }: Props) {
     },
     [scale]
   );
-
   const renderTextElement = (el: TextElement) => {
     const x = el.position.x * scale;
     const y = el.position.y * scale;
@@ -79,7 +77,6 @@ export function SlideRenderer({ slide, scale }: Props) {
       </div>
     );
   };
-
   const renderImageElement = (el: ImageElement) => {
     const x = el.position.x * scale;
     const y = el.position.y * scale;
@@ -111,7 +108,6 @@ export function SlideRenderer({ slide, scale }: Props) {
       </div>
     );
   };
-
   const renderShapeElement = (el: ShapeElement) => {
     const x = el.position.x * scale;
     const y = el.position.y * scale;
@@ -140,14 +136,12 @@ export function SlideRenderer({ slide, scale }: Props) {
       </div>
     );
   };
-
   const renderSlideElement = (el: SlideElement) => {
     if (el.type === 'text') return renderTextElement(el);
     if (el.type === 'image') return renderImageElement(el);
     if (el.type === 'shape') return renderShapeElement(el);
     return null;
   };
-
   return (
     <div
       className="player-slide"

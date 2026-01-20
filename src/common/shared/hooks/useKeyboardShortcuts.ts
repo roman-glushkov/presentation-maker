@@ -32,7 +32,6 @@ export function useKeyboardShortcuts({
 
       const isCtrl = e.ctrlKey || e.metaKey;
       const isShift = e.shiftKey;
-
       if (enableNavigation && !isEditingTextElement()) {
         switch (e.key) {
           case 'ArrowUp':
@@ -47,19 +46,16 @@ export function useKeyboardShortcuts({
             return;
         }
       }
-
       if (isCtrl && !isShift && e.code === 'KeyZ' && !isEditingTextElement()) {
         e.preventDefault();
         dispatch(undo());
         return;
       }
-
       if ((isCtrl && e.code === 'KeyY') || (isCtrl && isShift && e.code === 'KeyZ')) {
         e.preventDefault();
         dispatch(redo());
         return;
       }
-
       switch (context) {
         case 'workspace':
           handleWorkspaceKeys(e, isCtrl);
@@ -84,7 +80,6 @@ export function useKeyboardShortcuts({
           action();
         }
       }
-
       if (
         (e.key === 'Delete' || e.key === 'Backspace') &&
         !isCtrl &&
@@ -114,7 +109,6 @@ export function useKeyboardShortcuts({
             } else {
               slideIdToDuplicate = selectedSlideIds[selectedSlideIds.length - 1];
             }
-
             if (slideIdToDuplicate) {
               dispatch(duplicateSlide(slideIdToDuplicate));
             }

@@ -18,7 +18,6 @@ interface WorkspaceContentProps {
   slide: Slide;
   preview?: boolean;
 }
-
 const elementComponents = {
   text: TextElementView,
   image: ImageElementView,
@@ -28,13 +27,11 @@ const elementComponents = {
 export default function WorkspaceContent({ slide, preview }: WorkspaceContentProps) {
   const dispatch = useDispatch();
   const selectedElementIds = useSelector((state: RootState) => state.editor.selectedElementIds);
-
   const handleWorkspaceClick = (e: React.MouseEvent) => {
     if (!preview && !e.ctrlKey && !e.metaKey) {
       dispatch(clearSelection());
     }
   };
-
   const handleElementClick = (e: React.MouseEvent, elementId: string) => {
     e.stopPropagation();
 
@@ -47,7 +44,6 @@ export default function WorkspaceContent({ slide, preview }: WorkspaceContentPro
       dispatch(selectElement(elementId));
     }
   };
-
   const backgroundStyle = getSlideBackgroundStyle(slide);
 
   const renderElement = (el: Slide['elements'][0]) => {
