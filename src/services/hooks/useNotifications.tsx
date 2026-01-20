@@ -1,3 +1,4 @@
+//хук для показа и работы уведомлений
 import React, { useState, useCallback, createContext, useContext } from 'react';
 import type {
   Notification,
@@ -23,7 +24,7 @@ const NotificationsContext = createContext<NotificationsContextType | undefined>
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [validationMessages, setValidationMessages] = useState<ValidationNotification[]>([]);
-
+  //по какомму принципу добавляется увеломление
   const addNotification = useCallback(
     (message: string, type: NotificationType = 'success', timeout?: number) => {
       const id = Date.now();
@@ -36,7 +37,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       };
 
       setNotifications((prev) => [notification, ...prev]);
-
+      //автозакрытие уведомления по таймеру
       if (notification.autoClose && timeout && timeout > 0) {
         setTimeout(() => {
           setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -47,7 +48,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     },
     []
   );
-
+  //валидные сообщения
   const addValidationMessage = useCallback(
     (field: string, message: string, type: NotificationType = 'error') => {
       const id = Date.now();
@@ -67,19 +68,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     },
     []
   );
-
+  //уведа
   const removeNotification = useCallback((id: number) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
   }, []);
-
+  //валидность
   const removeValidationMessage = useCallback((field: string) => {
     setValidationMessages((prev) => prev.filter((msg) => msg.field !== field));
   }, []);
-
+  //очиста от уведомления
   const clearNotifications = useCallback(() => {
     setNotifications([]);
   }, []);
-
+  //чистим валидности
   const clearValidationMessages = useCallback(() => {
     setValidationMessages([]);
   }, []);
@@ -97,6 +98,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [validationMessages]);
 
   return (
+    //выводим уведомления, так как это глобальные компоненты
     <NotificationsContext.Provider
       value={{
         notifications,
@@ -117,8 +119,5 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 };
 export const useNotifications = () => {
   const context = useContext(NotificationsContext);
-  if (context === undefined) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  return context;
+  return context as NotificationsContextType;
 };

@@ -1,13 +1,9 @@
+// src/services/components/NewPresentationModal.tsx
 'use client';
-import React, { useState, useEffect } from 'react';
-import { PresentationService } from '../services/PresentationService';
-import { account, AppwriteUser } from '../client';
-import '../styles/NewPresentationModal.css';
+import React from 'react';
+import { usePresentationModal } from '../hooks/usePresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
-import {
-  validatePresentationTitle,
-  getPresentationValidationMessage,
-} from '../notifications/validation';
+import '../styles/NewPresentationModal.css';
 
 interface NewPresentationModalProps {
   isOpen: boolean;
@@ -22,101 +18,49 @@ export default function NewPresentationModal({
   onCreate,
   onCancel,
 }: NewPresentationModalProps) {
-  const [title, setTitle] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [existingTitles, setExistingTitles] = useState<string[]>([]);
-  const [touched, setTouched] = useState(false);
-  const [, setNextPresentationNumber] = useState(1);
+  const { hasValidationErrors } = useNotifications();
 
   const {
-    addValidationMessage,
-    removeValidationMessage,
-    clearValidationMessages,
-    getValidationMessage,
-    hasValidationErrors,
-  } = useNotifications();
-
-  useEffect(() => {
-    if (isOpen) {
-      account
-        .get<AppwriteUser>()
-        .then((currentUser) => PresentationService.getUserPresentations(currentUser.$id))
-        .then((presentations) => {
-          const titles = presentations.map((p) => p.title?.toLowerCase().trim() || '');
-          setExistingTitles(titles.filter((t) => t));
-
-          const baseName = 'моя презентация';
-          let maxNumber = 0;
-
-          titles.forEach((title) => {
-            const lowerTitle = title.toLowerCase();
-            if (lowerTitle.startsWith(baseName)) {
-              const match = lowerTitle.match(new RegExp(`^${baseName}\\s*(\\d+)$`));
-              if (match && match[1]) {
-                const num = parseInt(match[1], 10);
-                if (num > maxNumber) {
-                  maxNumber = num;
-                }
-              }
-            }
-          });
-
-          setNextPresentationNumber(maxNumber + 1);
-          setTitle(`Моя презентация ${maxNumber + 1}`);
-        });
-
-      clearValidationMessages();
-      setTouched(false);
-    }
-  }, [isOpen, clearValidationMessages]);
-
-  useEffect(() => {
-    if (!touched) return;
-
-    const trimmedTitle = title.trim();
-    removeValidationMessage('title');
-
-    const validation = validatePresentationTitle(title, existingTitles);
-    if (!validation.isValid && validation.error) {
-      const message =
-        validation.message || getPresentationValidationMessage(validation.error, trimmedTitle);
-      addValidationMessage('title', message, 'error');
-    }
-  }, [title, touched, existingTitles, addValidationMessage, removeValidationMessage]);
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
-    if (!touched) setTouched(true);
-  };
+    title,
+    loading,
+    existingTitles,
+    titleError,
+    validation,
+    handleTitleChange,
+    handleBlur,
+    clearState,
+    setLoading,
+  } = usePresentationModal({
+    mode: 'create',
+    isOpen,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!touched) setTouched(true);
-
-    const trimmedTitle = title.trim();
-    const validation = validatePresentationTitle(title, existingTitles);
 
     if (!validation.isValid) return;
 
     setLoading(true);
-    await onCreate(trimmedTitle);
-    onClose();
-    clearValidationMessages();
-    setTouched(false);
-    setLoading(false);
+    try {
+      await onCreate(title.trim());
+      onClose();
+      clearState(); // Очищаем состояние после успешного создания
+    } catch (error) {
+      // Обработка ошибки, если нужно
+      console.error('Failed to create presentation:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    clearValidationMessages();
-    setTouched(false);
+    clearState();
     onCancel();
   };
 
   if (!isOpen) return null;
 
   const trimmedTitle = title.trim();
-  const titleError = getValidationMessage('title');
 
   return (
     <div className="new-presentation-modal-overlay">
@@ -133,6 +77,7 @@ export default function NewPresentationModal({
               type="text"
               value={title}
               onChange={handleTitleChange}
+              onBlur={handleBlur}
               className={`new-presentation-modal-input ${titleError ? 'error' : ''}`}
               autoFocus
               disabled={loading}

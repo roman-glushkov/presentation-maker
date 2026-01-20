@@ -1,13 +1,9 @@
+// src/services/components/EditPresentationModal.tsx
 'use client';
-import React, { useState, useEffect } from 'react';
-import { PresentationService } from '../services/PresentationService';
-import { account, AppwriteUser } from '../client';
-import '../styles/EditPresentationModal.css';
+import React from 'react';
+import { usePresentationModal } from '../hooks/usePresentationModal';
 import { useNotifications } from '../hooks/useNotifications';
-import {
-  validatePresentationTitle,
-  getPresentationValidationMessage,
-} from '../notifications/validation';
+import '../styles/EditPresentationModal.css';
 
 interface EditPresentationModalProps {
   isOpen: boolean;
@@ -24,93 +20,58 @@ export default function EditPresentationModal({
   presentationId,
   currentTitle,
 }: EditPresentationModalProps) {
-  const [title, setTitle] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [existingTitles, setExistingTitles] = useState<string[]>([]);
-  const [touched, setTouched] = useState(false);
+  const { hasValidationErrors } = useNotifications();
 
   const {
-    addValidationMessage,
-    removeValidationMessage,
-    clearValidationMessages,
-    getValidationMessage,
-    hasValidationErrors,
-  } = useNotifications();
-
-  useEffect(() => {
-    if (isOpen) {
-      setTitle(currentTitle);
-      account
-        .get<AppwriteUser>()
-        .then((currentUser) => PresentationService.getUserPresentations(currentUser.$id))
-        .then((presentations) => {
-          const titles = presentations
-            .filter((p) => (p.id || p.$id) !== presentationId)
-            .map((p) => p.title?.toLowerCase().trim() || '');
-          setExistingTitles(titles.filter((t) => t));
-        });
-
-      clearValidationMessages();
-      setTouched(false);
-    }
-  }, [isOpen, currentTitle, presentationId, clearValidationMessages]);
-
-  useEffect(() => {
-    if (!touched) return;
-
-    const trimmedTitle = title.trim();
-    removeValidationMessage('title');
-    if (trimmedTitle.toLowerCase() === currentTitle.toLowerCase()) {
-      return;
-    }
-
-    const validation = validatePresentationTitle(title, existingTitles);
-    if (!validation.isValid && validation.error) {
-      const message =
-        validation.message || getPresentationValidationMessage(validation.error, trimmedTitle);
-      addValidationMessage('title', message, 'error');
-    }
-  }, [title, touched, existingTitles, currentTitle, addValidationMessage, removeValidationMessage]);
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
-    if (!touched) setTouched(true);
-  };
+    title,
+    loading,
+    titleError,
+    isChanged,
+    validation,
+    handleTitleChange,
+    handleBlur,
+    clearState,
+    setLoading,
+  } = usePresentationModal({
+    mode: 'edit',
+    initialTitle: currentTitle,
+    presentationId,
+    isOpen,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!touched) setTouched(true);
 
-    const trimmedTitle = title.trim();
-    if (trimmedTitle.toLowerCase() === currentTitle.toLowerCase()) {
+    // Если название не изменилось - просто закрываем
+    if (!isChanged) {
       onClose();
       return;
     }
 
-    const validation = validatePresentationTitle(title, existingTitles);
+    // Проверяем валидность
     if (!validation.isValid) return;
 
     setLoading(true);
     try {
-      await onUpdate(presentationId, trimmedTitle);
+      await onUpdate(presentationId, title.trim());
       onClose();
+      clearState(); // Очищаем состояние после успешного обновления
+    } catch (error) {
+      // Обработка ошибки, если нужно
+      console.error('Failed to update presentation:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    clearValidationMessages();
-    setTouched(false);
+    clearState();
     onClose();
   };
 
   if (!isOpen) return null;
 
   const trimmedTitle = title.trim();
-  const titleError = getValidationMessage('title');
-  const isChanged = trimmedTitle.toLowerCase() !== currentTitle.toLowerCase();
 
   return (
     <div className="edit-presentation-modal-overlay">
@@ -127,6 +88,7 @@ export default function EditPresentationModal({
               type="text"
               value={title}
               onChange={handleTitleChange}
+              onBlur={handleBlur}
               className={`edit-presentation-modal-input ${titleError ? 'error' : ''}`}
               autoFocus
               disabled={loading}

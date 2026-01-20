@@ -1,3 +1,4 @@
+//компонент слайд шоу
 import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PresentationService } from '../services/PresentationService';
@@ -5,11 +6,12 @@ import { Presentation } from '../../store/types/presentation';
 import { SlideRenderer } from '../../common/shared/SlideRenderer';
 import { PLAYER_NOTIFICATIONS } from '../notifications';
 import '../styles/Player.css';
-
+//константы моего салйда
 const SLIDE_WIDTH = 960;
 const SLIDE_HEIGHT = 540;
 
 export default function Player() {
+  //псоздаем консанты и берем значнию из редукса
   const navigate = useNavigate();
   const location = useLocation();
   const { presentationId } = useParams();
@@ -48,14 +50,14 @@ export default function Player() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-
+  //функция - кнопка плеер работает только из эдитора
   const navigateToEditor = useCallback(() => {
     navigate(presentationId ? `/editor/${presentationId}` : '/editor');
   }, [navigate, presentationId]);
 
   useEffect(() => {
     if (!presentation) return;
-
+    //кнопки переключения слайдов
     const onKey = (e: KeyboardEvent) => {
       if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) {
         e.preventDefault();
@@ -70,7 +72,7 @@ export default function Player() {
         e.preventDefault();
         setCurrentSlideIndex((i) => Math.max(0, i - 1));
       }
-
+      //эскейп - выход из плеера
       if (e.key === 'Escape') {
         navigateToEditor();
       }
@@ -79,7 +81,7 @@ export default function Player() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [presentation, currentSlideIndex, navigateToEditor]);
-
+  //клик - переход к следующему слайду, если слайды закончились то возвращаемся в эдитор
   const handleClick = useCallback(() => {
     if (!presentation) return;
     if (currentSlideIndex < presentation.slides.length - 1) {
@@ -95,6 +97,7 @@ export default function Player() {
   }, []);
 
   if (loading) {
+    //сам рисовщик плеера
     return (
       <div className="player-loading">
         <div className="player-spinner" />
@@ -112,7 +115,7 @@ export default function Player() {
     );
   }
 
-  const scale = Math.min(windowSize.width / SLIDE_WIDTH, windowSize.height / SLIDE_HEIGHT);
+  const scale = Math.min(windowSize.width / SLIDE_WIDTH, windowSize.height / SLIDE_HEIGHT); //находим значение scale, чтобы слайд был на полный экран
 
   const slide = presentation.slides[currentSlideIndex];
 
@@ -123,6 +126,7 @@ export default function Player() {
       </div>
 
       <div className="player-slide-container">
+        //главная штука с помощью котроой и происходит весь рендеринг
         <SlideRenderer slide={slide} scale={scale} />
       </div>
     </div>

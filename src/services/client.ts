@@ -1,5 +1,6 @@
+//главный файл всего аппрайта
 import { Client, Account, Databases, Storage, ID } from 'appwrite';
-
+//берутся ве значения для аппрайта из env
 const client = new Client()
   .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
   .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
@@ -27,7 +28,7 @@ if (import.meta.env.DEV) {
     console.error('❌ Missing .env variables:', missing);
   }
 }
-
+//прописываются типы для презентации
 export interface AppwriteUser {
   $id: string;
   name: string;

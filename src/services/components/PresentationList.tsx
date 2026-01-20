@@ -1,3 +1,4 @@
+//компонент - главное меню моего проекта
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { usePdfExport } from '../../export/usePdfExport';
 import '../styles/PresentationList.css';
 
 export default function PresentationList() {
+  //прописаны константы из редукса
   const navigate = useNavigate();
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,7 @@ export default function PresentationList() {
   const { exportToPdf } = usePdfExport();
 
   useEffect(() => {
+    //получаем юзера
     account
       .get<AccountUser>()
       .then(setUser)
@@ -55,7 +58,7 @@ export default function PresentationList() {
     try {
       const userPresentations = await PresentationService.getUserPresentations(user.$id);
       setPresentations(userPresentations);
-
+      //проверка есть ли презентация
       if (userPresentations.length === 0) {
         addNotification(
           PRESENTATION_NOTIFICATIONS.INFO.NO_PRESENTATIONS,
@@ -70,6 +73,7 @@ export default function PresentationList() {
         );
       }
     } catch {
+      //иначе присылаем что неудалось згрузить презентацию
       addNotification(
         PRESENTATION_NOTIFICATIONS.ERROR.LOAD_FAILED,
         'error',
@@ -90,10 +94,11 @@ export default function PresentationList() {
   }, [user, loadPresentations]);
 
   const handleCreatePresentation = async (title: string) => {
+    //создание презентации
     setCreatingNew(true);
     try {
       const newSlideId = `slide-${Date.now()}`;
-
+      //навзание
       const titleSlide = {
         ...slideTitle,
         id: newSlideId,
@@ -101,7 +106,7 @@ export default function PresentationList() {
 
       titleSlide.elements = titleSlide.elements.map((el) => ({
         ...el,
-        id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, //id создаем из в тот момент даты и рандома
       }));
 
       const presentation: Presentation = {
@@ -128,7 +133,7 @@ export default function PresentationList() {
 
       dispatch(loadExistingPresentation(presForEditor));
       dispatch(setPresentationId(saved.$id));
-
+      //уведомление преза сохранена
       addNotification(
         PRESENTATION_NOTIFICATIONS.SUCCESS.CREATED,
         'success',
@@ -136,9 +141,11 @@ export default function PresentationList() {
       );
 
       loadPresentations();
+      //переходим в редактрор
       navigate(`/editor/${saved.$id}`);
     } catch {
       addNotification(
+        //иначе не удалось создат ьпрезентацию
         PRESENTATION_NOTIFICATIONS.ERROR.CREATE_FAILED,
         'error',
         NOTIFICATION_TIMEOUT.ERROR
@@ -148,13 +155,14 @@ export default function PresentationList() {
       setShowNewPresentationModal(false);
     }
   };
-
+  //обновление презентации
   const handleUpdatePresentation = async (presentationId: string, newTitle: string) => {
     try {
       const currentUser = await account.get<AccountUser>();
       const presentation = presentations.find((p) => (p.id || p.$id) === presentationId);
 
       if (!presentation) {
+        //ошибка есть ли презентация
         addNotification(
           PRESENTATION_LIST_NOTIFICATIONS.ERROR.PRESENTATION_NOT_FOUND,
           'error',
@@ -179,6 +187,7 @@ export default function PresentationList() {
       );
 
       addNotification(
+        //изменение презентации
         PRESENTATION_LIST_NOTIFICATIONS.SUCCESS.RENAMED,
         'success',
         NOTIFICATION_TIMEOUT.SUCCESS
@@ -187,6 +196,7 @@ export default function PresentationList() {
       loadPresentations();
     } catch {
       addNotification(
+        //иначе не удалось
         PRESENTATION_LIST_NOTIFICATIONS.ERROR.RENAME_FAILED,
         'error',
         NOTIFICATION_TIMEOUT.ERROR
@@ -195,6 +205,7 @@ export default function PresentationList() {
   };
 
   const handleLoadDemo = () => {
+    // загрузка и показ демо презентации
     dispatch(setPresentationId('demo'));
     dispatch(loadDemoPresentation());
     addNotification(PRESENTATION_NOTIFICATIONS.INFO.DEMO_LOADED, 'info', NOTIFICATION_TIMEOUT.INFO);
@@ -202,7 +213,7 @@ export default function PresentationList() {
       navigate('/editor');
     }, NOTIFICATION_TIMEOUT.SHORT);
   };
-
+  //загрзука презентации
   const handleLoadPresentation = async (presentation: StoredPresentation) => {
     try {
       const full = await PresentationService.getPresentation(presentation.id || presentation.$id);
@@ -231,7 +242,7 @@ export default function PresentationList() {
       );
     }
   };
-
+  //изменение презентации
   const handleEditPresentation = (presentationId: string, currentTitle: string) => {
     setEditingPresentation({
       id: presentationId,
@@ -239,7 +250,7 @@ export default function PresentationList() {
     });
     setShowEditPresentationModal(true);
   };
-
+  //подверждение при удалении презентации
   const handleDeletePresentation = async (presentationId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -268,7 +279,7 @@ export default function PresentationList() {
       setDeletingId(null);
     }
   };
-
+  //экспорт презы
   const handleExportPresentation = async (presentationId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -301,7 +312,7 @@ export default function PresentationList() {
       setExportingId(null);
     }
   };
-
+  //если не зарегистрированный пользователь, то пишем
   if (!user)
     return (
       <div className="presentation-list-container--empty">
@@ -310,6 +321,7 @@ export default function PresentationList() {
     );
 
   return (
+    //рисуем все кнопки и тексат
     <>
       <div className="presentation-list-container">
         <div className="presentation-list-header">

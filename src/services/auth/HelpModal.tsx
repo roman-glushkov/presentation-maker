@@ -1,3 +1,4 @@
+//Рисовщик справки
 import React from 'react';
 import { hotkeysConfig, hotkeyCategories } from '../../common/components/Toolbar/constants/hotkeys';
 import HelpSection from './HelpSection';
@@ -10,7 +11,7 @@ interface HelpModalProps {
 
 const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
-
+  //используем данный из хуткейса
   const groupedHotkeys = Object.entries(hotkeyCategories)
     .map(([categoryKey, categoryTitle]) => ({
       title: categoryTitle,
@@ -21,6 +22,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     .filter((group) => group.hotkeys.length > 0);
 
   return (
+    //выводим
     <div className="help-modal-overlay" onClick={onClose}>
       <div className="help-modal" onClick={(e) => e.stopPropagation()}>
         <div className="help-modal-header">

@@ -1,7 +1,9 @@
+//сервис для загрузки, обработки и удаления изображений в облачное хранилище Appwrite.
 import { storage, STORAGE_BUCKET_ID, ID } from '../client';
 
 export class ImageService {
   static async uploadImage(file: File): Promise<{
+    //загрузка изоображения
     url: string;
     width: number;
     height: number;
@@ -24,6 +26,7 @@ export class ImageService {
   }
 
   private static getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+    //определние размеров фотки
     return new Promise((resolve) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
@@ -46,6 +49,7 @@ export class ImageService {
   }
 
   static async deleteImage(fileId: string) {
+    //удаление ифокти
     await storage.deleteFile(STORAGE_BUCKET_ID, fileId);
   }
 }
