@@ -38,7 +38,7 @@ export default function PresentationList() {
   const [exportingId, setExportingId] = useState<string | null>(null);
 
   const dispatch = useDispatch();
-  const { notifications, addNotification, removeNotification } = useNotifications();
+  const { addNotification } = useNotifications();
   const { exportToPdf } = usePdfExport();
 
   useEffect(() => {
@@ -311,23 +311,6 @@ export default function PresentationList() {
 
   return (
     <>
-      <div className="presentation-notifications-container">
-        {notifications.map(({ id, message, type }) => (
-          <div key={id} className={`presentation-notification presentation-notification--${type}`}>
-            <div className="presentation-notification-content">
-              <span className="presentation-notification-message">{message}</span>
-            </div>
-            <button
-              className="presentation-notification-close"
-              onClick={() => removeNotification(id)}
-              aria-label="Закрыть уведомление"
-            >
-              ✖
-            </button>
-          </div>
-        ))}
-      </div>
-
       <div className="presentation-list-container">
         <div className="presentation-list-header">
           <h2 className="presentation-list-title">Мои презентации</h2>

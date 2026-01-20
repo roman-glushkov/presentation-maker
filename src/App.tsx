@@ -30,7 +30,6 @@ export default function App() {
   return (
     <NotificationProvider>
       <BrowserRouter>
-        {/* Глобальный контейнер для всех уведомлений */}
         <NotificationContainer />
 
         <Routes>

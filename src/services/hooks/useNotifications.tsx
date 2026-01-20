@@ -1,11 +1,28 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback, createContext, useContext } from 'react';
 import type {
   Notification,
   NotificationType,
   ValidationNotification,
 } from '../notifications/types';
 
-export const useNotifications = () => {
+// Создаем контекст для уведомлений
+interface NotificationsContextType {
+  notifications: Notification[];
+  validationMessages: ValidationNotification[];
+  addNotification: (message: string, type?: NotificationType, timeout?: number) => number;
+  addValidationMessage: (field: string, message: string, type?: NotificationType) => number;
+  removeNotification: (id: number) => void;
+  removeValidationMessage: (field: string) => void;
+  clearNotifications: () => void;
+  clearValidationMessages: () => void;
+  getValidationMessage: (field: string) => string | undefined;
+  hasValidationErrors: () => boolean;
+}
+
+const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
+
+// Провайдер уведомлений
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [validationMessages, setValidationMessages] = useState<ValidationNotification[]>([]);
 
@@ -81,16 +98,31 @@ export const useNotifications = () => {
     return validationMessages.length > 0;
   }, [validationMessages]);
 
-  return {
-    notifications,
-    validationMessages,
-    addNotification,
-    addValidationMessage,
-    removeNotification,
-    removeValidationMessage,
-    clearNotifications,
-    clearValidationMessages,
-    getValidationMessage,
-    hasValidationErrors,
-  };
+  return (
+    <NotificationsContext.Provider
+      value={{
+        notifications,
+        validationMessages,
+        addNotification,
+        addValidationMessage,
+        removeNotification,
+        removeValidationMessage,
+        clearNotifications,
+        clearValidationMessages,
+        getValidationMessage,
+        hasValidationErrors,
+      }}
+    >
+      {children}
+    </NotificationsContext.Provider>
+  );
+}; // ← Закрывающая фигурная скобка была пропущена
+
+// Хук для использования уведомлений
+export const useNotifications = () => {
+  const context = useContext(NotificationsContext);
+  if (context === undefined) {
+    throw new Error('useNotifications must be used within a NotificationProvider');
+  }
+  return context;
 };

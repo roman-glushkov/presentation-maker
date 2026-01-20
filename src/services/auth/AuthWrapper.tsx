@@ -7,7 +7,6 @@ import { undo, redo } from '../../store/editorSlice';
 import type { RootState } from '../../store';
 import { useNotifications } from '../hooks/useNotifications';
 import { NOTIFICATION_TIMEOUT, GENERAL_NOTIFICATIONS } from '../notifications';
-import type { Notification } from '../notifications/types';
 import HelpModal from './HelpModal';
 import '../styles/AuthWrapper.css';
 
@@ -32,7 +31,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   const presentation = useSelector((state: RootState) => state.editor.presentation);
   const presentationId = useSelector((state: RootState) => state.editor.presentationId);
 
-  const { notifications, addNotification, removeNotification } = useNotifications();
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -71,46 +70,6 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     setIsHelpOpen(true);
   };
 
-  const renderNotification = ({ id, message, type }: Notification) => (
-    <div key={id} className={`presentation-notification presentation-notification--${type}`}>
-      <div className="presentation-notification-content">
-        <svg
-          className="presentation-notification-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          {type === 'success' ? (
-            <path
-              d="M20 6L9 17l-5-5"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          ) : (
-            <path
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          )}
-        </svg>
-        <span className="presentation-notification-message">{message}</span>
-      </div>
-      <button className="presentation-notification-close" onClick={() => removeNotification(id)}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path
-            d="M18 6L6 18M6 6l12 12"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-    </div>
-  );
-
   const renderLoadingScreen = () => (
     <div className="presentation-loading-container">
       <div className="presentation-loading-content">
@@ -144,17 +103,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     </button>
   );
 
-  const renderWithNotifications = (content: ReactNode) => (
-    <div className="presentation-body">
-      <div className="presentation-notifications-container">
-        {notifications.map((n: Notification) => renderNotification(n))}
-      </div>
-      {content}
-    </div>
-  );
-
   if (!authChecked) {
-    return renderWithNotifications(renderLoadingScreen());
+    return renderLoadingScreen();
   }
 
   if (!isAuthenticated) {
@@ -163,7 +113,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
   const showToolbar = location.pathname.startsWith('/editor');
 
-  return renderWithNotifications(
+  return (
     <>
       {showToolbar && (
         <div className="presentation-toolbar">

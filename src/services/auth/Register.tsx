@@ -25,9 +25,7 @@ export default function Register() {
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
   const {
-    notifications,
     addNotification,
-    removeNotification,
     clearNotifications,
     addValidationMessage,
     removeValidationMessage,
@@ -149,44 +147,6 @@ export default function Register() {
 
   return (
     <div className="presentation-body">
-      <div className="presentation-notifications-container">
-        {notifications.map(({ id, message, type }) => (
-          <div key={id} className={`presentation-notification presentation-notification--${type}`}>
-            <div className="presentation-notification-content">
-              <svg
-                className="presentation-notification-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  d="M20 6L9 17l-5-5"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-
-              <span className="presentation-notification-message">{message}</span>
-            </div>
-
-            <button
-              className="presentation-notification-close"
-              onClick={() => removeNotification(id)}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path
-                  d="M18 6L6 18M6 6l12 12"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
-        ))}
-      </div>
-
       <div className="presentation-container">
         <nav className="presentation-navbar">
           <div>
