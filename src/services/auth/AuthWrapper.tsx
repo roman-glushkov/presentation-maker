@@ -120,7 +120,9 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
           <div className="presentation-loading-dot"></div>
           <div className="presentation-loading-dot"></div>
         </div>
-        <p className="presentation-loading-text">Загружаем вашу презентацию...</p>
+        <p className="presentation-loading-text">
+          Загружаем вашу презентацию<span className="loading-dots"></span>
+        </p>
       </div>
     </div>
   );

@@ -53,6 +53,34 @@
   margin: 0;
 }
 
+.loading-dots::after {
+  content: '';
+  animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+  0%,
+  20% {
+    content: '';
+  }
+  21%,
+  40% {
+    content: '.';
+  }
+  41%,
+  60% {
+    content: '..';
+  }
+  61%,
+  80% {
+    content: '...';
+  }
+  81%,
+  100% {
+    content: '';
+  }
+}
+
 .presentation-toolbar {
   position: fixed;
   top: 0;
