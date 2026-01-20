@@ -66,7 +66,6 @@
   opacity: 1;
 }
 
-/* Типы уведомлений с градиентами из старого стиля */
 .notification-info {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border-left-color: #1d4ed8;
@@ -87,7 +86,6 @@
   border-left-color: #92400e;
 }
 
-/* Анимации */
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -112,22 +110,4 @@
 
 .notification-exiting {
   animation: slideOut 0.3s ease-out forwards;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .notification-container {
-    top: 10px;
-    right: 10px;
-    left: 10px;
-    max-width: none;
-  }
-
-  .notification {
-    padding: 14px;
-  }
-
-  .notification-message {
-    font-size: 13px;
-  }
 }

@@ -5,7 +5,6 @@ import type {
   ValidationNotification,
 } from '../notifications/types';
 
-// Создаем контекст для уведомлений
 interface NotificationsContextType {
   notifications: Notification[];
   validationMessages: ValidationNotification[];
@@ -21,7 +20,6 @@ interface NotificationsContextType {
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
 
-// Провайдер уведомлений
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [validationMessages, setValidationMessages] = useState<ValidationNotification[]>([]);
@@ -116,9 +114,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       {children}
     </NotificationsContext.Provider>
   );
-}; // ← Закрывающая фигурная скобка была пропущена
-
-// Хук для использования уведомлений
+};
 export const useNotifications = () => {
   const context = useContext(NotificationsContext);
   if (context === undefined) {

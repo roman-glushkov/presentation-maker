@@ -5,7 +5,6 @@ import './styles/NotificationContainer.css';
 export function NotificationContainer() {
   const { notifications, removeNotification } = useNotifications();
 
-  // Автоматическое удаление уведомлений
   useEffect(() => {
     const timers: number[] = [];
 
