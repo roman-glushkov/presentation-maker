@@ -1,4 +1,3 @@
-//хук - авто сохранения
 import { useEffect, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -6,8 +5,6 @@ import { PresentationService } from '../services/PresentationService';
 import { account, AppwriteUser, AccountUser } from '../client';
 
 export function useAutoSave(intervalMs = 15000) {
-  //интервал 15 сек
-  //берем нужные состояния из редукса
   const presentation = useSelector((state: RootState) => state.editor.presentation);
   const presentationId = useSelector((state: RootState) => state.editor.presentationId);
   const [isSaving, setIsSaving] = useState(false);
@@ -26,7 +23,7 @@ export function useAutoSave(intervalMs = 15000) {
         setIsReady(false);
       });
   }, []);
-  //сохранение презентации
+
   const savePresentation = useCallback(async () => {
     if (!user || isSaving || !presentationId) {
       return;
@@ -44,13 +41,11 @@ export function useAutoSave(intervalMs = 15000) {
   }, [presentation, user, isSaving, presentationId]);
 
   useEffect(() => {
-    //если не известно один из этих трех пунктов не можем проивести сохранение
     if (!user || !presentationId || !isReady) {
       return;
     }
 
     const interval = setInterval(() => {
-      //интервал - 15 секунд
       savePresentation();
     }, intervalMs);
 

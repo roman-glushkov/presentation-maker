@@ -1,4 +1,3 @@
-//компонент, который создает поле логинации в моем проекте на отделньой страничке
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +18,6 @@ interface AppwriteError {
 }
 
 export default function Login() {
-  //созадем консанты
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +25,6 @@ export default function Login() {
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
   const {
-    //какие используем функции
     addNotification,
     clearNotifications,
     addValidationMessage,
@@ -37,7 +34,6 @@ export default function Login() {
   } = useNotifications();
 
   useEffect(() => {
-    //проверка, если нашлась сессия то переходим в нее
     const checkExistingSession = async () => {
       const session = await account.get().catch(() => null);
       if (session) {
@@ -46,7 +42,7 @@ export default function Login() {
     };
     checkExistingSession();
   }, [navigate]);
-  //объявляем каке есть типы инпутов
+
   const fields = useMemo(
     () => [
       { name: 'email', value: email },
@@ -54,7 +50,7 @@ export default function Login() {
     ],
     [email, password]
   );
-  //с пмощью хука useFieldValidation вынесенная проверка валидации
+
   useFieldValidation({
     fields,
     touchedFields,
@@ -71,7 +67,7 @@ export default function Login() {
   const validateForm = (): boolean => {
     clearValidationMessages();
     let isValid = true;
-    //обрабатываем ошибки валидации, которые прописаны в нотификейшене
+
     const emailError = getFieldValidationMessage('email', email);
     if (emailError) {
       addValidationMessage('email', emailError, 'error');
@@ -99,19 +95,19 @@ export default function Login() {
 
     try {
       await account.createEmailPasswordSession(email.trim(), password);
-      //вход выполнен успешно
+
       addNotification(
         LOGIN_NOTIFICATIONS.SUCCESS.LOGIN_SUCCESS,
         'success',
         NOTIFICATION_TIMEOUT.SUCCESS
       );
 
-      setTimeout(() => navigate('/presentations'), NOTIFICATION_TIMEOUT.INFO); //через 4 секунды переход к меню презентаций
+      setTimeout(() => navigate('/presentations'), NOTIFICATION_TIMEOUT.INFO);
     } catch (error: unknown) {
       let errorMessage = LOGIN_NOTIFICATIONS.ERROR.INVALID_CREDENTIALS;
 
       const appwriteError = error as AppwriteError;
-      //обработка остальных ошибок
+
       if (appwriteError.code === 401 && appwriteError.message?.includes('session is active')) {
         addNotification(
           AUTH_NOTIFICATIONS.INFO.ALREADY_LOGGED_IN,
@@ -126,17 +122,16 @@ export default function Login() {
       setLoading(false);
     }
   };
-  //переход по кнопке на роутер регистрации
+
   const handleSwitchToRegister = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate('/register');
   };
-  //прописание что получилось
+
   const emailError = getValidationMessage('email');
   const passwordError = getValidationMessage('password');
 
   return (
-    //сам рендеринг
     <div className="presentation-body">
       <div className="presentation-container">
         <nav className="presentation-navbar">

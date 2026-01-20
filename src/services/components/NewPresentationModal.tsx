@@ -1,4 +1,3 @@
-// src/services/components/NewPresentationModal.tsx
 'use client';
 import React from 'react';
 import { usePresentationModal } from '../hooks/usePresentationModal';
@@ -18,7 +17,7 @@ export default function NewPresentationModal({
   onCreate,
   onCancel,
 }: NewPresentationModalProps) {
-  const { hasValidationErrors } = useNotifications();
+  const { hasValidationErrors, addNotification } = useNotifications();
 
   const {
     title,
@@ -44,10 +43,9 @@ export default function NewPresentationModal({
     try {
       await onCreate(title.trim());
       onClose();
-      clearState(); // Очищаем состояние после успешного создания
-    } catch (error) {
-      // Обработка ошибки, если нужно
-      console.error('Failed to create presentation:', error);
+      clearState();
+    } catch {
+      addNotification('Failed to create presentation', 'error');
     } finally {
       setLoading(false);
     }

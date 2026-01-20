@@ -1,4 +1,3 @@
-// src/services/components/EditPresentationModal.tsx
 'use client';
 import React from 'react';
 import { usePresentationModal } from '../hooks/usePresentationModal';
@@ -20,7 +19,7 @@ export default function EditPresentationModal({
   presentationId,
   currentTitle,
 }: EditPresentationModalProps) {
-  const { hasValidationErrors } = useNotifications();
+  const { hasValidationErrors, addNotification } = useNotifications();
 
   const {
     title,
@@ -42,23 +41,20 @@ export default function EditPresentationModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Если название не изменилось - просто закрываем
     if (!isChanged) {
       onClose();
       return;
     }
 
-    // Проверяем валидность
     if (!validation.isValid) return;
 
     setLoading(true);
     try {
       await onUpdate(presentationId, title.trim());
       onClose();
-      clearState(); // Очищаем состояние после успешного обновления
-    } catch (error) {
-      // Обработка ошибки, если нужно
-      console.error('Failed to update presentation:', error);
+      clearState();
+    } catch {
+      addNotification('Failed to update presentation', 'error');
     } finally {
       setLoading(false);
     }

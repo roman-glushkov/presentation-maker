@@ -112,7 +112,7 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   const handleDelete = useCallback(() => {
     if (menu.targetType === 'slide') {
       if (currentSlideId) {
-        console.log('Delete slide');
+        // Delete slide functionality would go here
       }
     } else if (selectedElementIds.length > 0) {
       ElementActions.deleteElements(selectedElementIds, dispatch);

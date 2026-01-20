@@ -15,7 +15,6 @@ interface UsePresentationModalOptions {
 }
 
 interface UsePresentationModalReturn {
-  // Состояния
   title: string;
   setTitle: (title: string) => void;
   loading: boolean;
@@ -24,7 +23,6 @@ interface UsePresentationModalReturn {
   touched: boolean;
   setTouched: (touched: boolean) => void;
 
-  // Валидация
   titleError: string | undefined;
   isChanged: boolean;
   validation: {
@@ -33,12 +31,10 @@ interface UsePresentationModalReturn {
     message?: string;
   };
 
-  // Обработчики
   handleTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBlur: () => void;
   clearState: () => void;
 
-  // Утилиты
   generateDefaultTitle: (existingTitles: string[]) => string;
 }
 
@@ -48,13 +44,11 @@ export function usePresentationModal({
   presentationId,
   isOpen,
 }: UsePresentationModalOptions): UsePresentationModalReturn {
-  // Состояния
   const [title, setTitle] = useState(initialTitle);
   const [loading, setLoading] = useState(false);
   const [existingTitles, setExistingTitles] = useState<string[]>([]);
   const [touched, setTouched] = useState(false);
 
-  // Хуки
   const {
     addValidationMessage,
     removeValidationMessage,
@@ -62,7 +56,6 @@ export function usePresentationModal({
     getValidationMessage,
   } = useNotifications();
 
-  // Генерация дефолтного названия
   const generateDefaultTitle = useCallback((titles: string[]): string => {
     const baseName = 'моя презентация';
     let maxNumber = 0;
@@ -81,7 +74,6 @@ export function usePresentationModal({
     return `Моя презентация ${maxNumber + 1}`;
   }, []);
 
-  // Загрузка существующих названий
   useEffect(() => {
     if (!isOpen) return;
 
@@ -90,7 +82,6 @@ export function usePresentationModal({
         const currentUser = await account.get<AppwriteUser>();
         const presentations = await PresentationService.getUserPresentations(currentUser.$id);
 
-        // Фильтрация в зависимости от режима
         const filteredPresentations = presentations.filter((p) => {
           if (mode === 'edit' && presentationId) {
             return (p.id || p.$id) !== presentationId;
@@ -104,13 +95,12 @@ export function usePresentationModal({
 
         setExistingTitles(titles);
 
-        // Автогенерация названия для режима создания
         if (mode === 'create') {
           const defaultTitle = generateDefaultTitle(titles);
           setTitle(defaultTitle);
         }
-      } catch (error) {
-        console.error('Failed to load presentations:', error);
+      } catch {
+        addValidationMessage('presentations', 'Failed to load presentations', 'error');
         setExistingTitles([]);
       }
     };
@@ -118,16 +108,21 @@ export function usePresentationModal({
     loadExistingTitles();
     clearValidationMessages();
     setTouched(false);
-  }, [isOpen, mode, presentationId, clearValidationMessages, generateDefaultTitle]);
+  }, [
+    isOpen,
+    mode,
+    presentationId,
+    clearValidationMessages,
+    generateDefaultTitle,
+    addValidationMessage,
+  ]);
 
-  // Валидация при изменении title
   useEffect(() => {
     if (!touched) return;
 
     const trimmedTitle = title.trim();
     removeValidationMessage('title');
 
-    // Для редактирования: если не изменилось - не валидируем
     if (mode === 'edit' && trimmedTitle.toLowerCase() === initialTitle.toLowerCase()) {
       return;
     }
@@ -147,7 +142,6 @@ export function usePresentationModal({
     removeValidationMessage,
   ]);
 
-  // Обработчики
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
@@ -165,14 +159,12 @@ export function usePresentationModal({
     clearValidationMessages();
   };
 
-  // Вычисляемые значения
   const trimmedTitle = title.trim();
   const titleError = getValidationMessage('title');
   const isChanged = trimmedTitle.toLowerCase() !== initialTitle.toLowerCase();
   const validation = validatePresentationTitle(title, existingTitles);
 
   return {
-    // Состояния
     title,
     setTitle,
     loading,
@@ -181,17 +173,14 @@ export function usePresentationModal({
     touched,
     setTouched,
 
-    // Валидация
     titleError,
     isChanged,
     validation,
 
-    // Обработчики
     handleTitleChange,
     handleBlur,
     clearState,
 
-    // Утилиты
     generateDefaultTitle,
   };
 }

@@ -1,4 +1,3 @@
-//хук используют регистр и логинация, он помогает упростить те кода
 import { useEffect } from 'react';
 import { getFieldValidationMessage } from '../notifications';
 import { useNotifications } from './useNotifications';
@@ -25,14 +24,12 @@ export function useFieldValidation({ fields, touchedFields, notifications }: Par
   useEffect(() => {
     fields.forEach(({ name, value }) => {
       if (!touchedFields.has(name) || !value) {
-        //проверка что пользователь что-то поменял в инпуте
         return;
       }
 
-      const error = getFieldValidationMessage(name, value); //получаем сообщение об ошибке
+      const error = getFieldValidationMessage(name, value);
 
       if (error) {
-        //показываем или скрываем ошибку
         addValidationMessage(name, error, 'error');
       } else {
         removeValidationMessage(name);

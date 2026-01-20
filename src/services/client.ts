@@ -14,20 +14,6 @@ export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 export const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
 export const STORAGE_BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID;
 
-if (import.meta.env.DEV) {
-  const required = [
-    'VITE_APPWRITE_ENDPOINT',
-    'VITE_APPWRITE_PROJECT_ID',
-    'VITE_APPWRITE_DATABASE_ID',
-    'VITE_APPWRITE_COLLECTION_ID',
-    'VITE_APPWRITE_BUCKET_ID',
-  ];
-
-  const missing = required.filter((key) => !import.meta.env[key]);
-  if (missing.length > 0) {
-    console.error('❌ Missing .env variables:', missing);
-  }
-}
 //прописываются типы для презентации
 export interface AppwriteUser {
   $id: string;
