@@ -18,23 +18,3 @@ export const getSlideBackgroundStyle = (slide: Slide): React.CSSProperties => {
       return { backgroundColor: '#ffffff' };
   }
 };
-
-export const getScaledSlideBackgroundStyle = (
-  slide: Slide,
-  scale: number = 1
-): React.CSSProperties => {
-  const baseStyle = getSlideBackgroundStyle(slide);
-
-  if (scale === 1) return baseStyle;
-
-  const scaledStyle = { ...baseStyle };
-
-  if (scaledStyle.backgroundSize && typeof scaledStyle.backgroundSize === 'string') {
-    if (scaledStyle.backgroundSize.includes('px')) {
-      const size = parseFloat(scaledStyle.backgroundSize);
-      scaledStyle.backgroundSize = `${size * scale}px`;
-    }
-  }
-
-  return scaledStyle;
-};

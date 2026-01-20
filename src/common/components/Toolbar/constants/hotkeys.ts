@@ -1,7 +1,7 @@
 export interface HotkeyItem {
   keys: string[];
   description: string;
-  category: 'general' | 'slides' | 'workspace' | 'workspace' | 'slides';
+  category: 'slides' | 'workspace';
 }
 
 export const hotkeysConfig: HotkeyItem[] = [

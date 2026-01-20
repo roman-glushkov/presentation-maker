@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { handleAction } from '../../../../store/editorSlice';
 import { setActiveTextOption, toggleGrid } from '../../../../store/toolbarSlice';
-import { NOTIFICATION_TIMEOUT } from '../../../../services/notifications';
+import { NOTIFICATION_TIMEOUT, IMAGE_NOTIFICATIONS } from '../../../../services/notifications';
 import { GROUPS, GroupButton, GroupKey } from '../constants/config';
 import { useNotifications } from '../../../../services/hooks/useNotifications';
 import { RootState } from '../../../../store';
@@ -103,6 +103,18 @@ export default function ToolbarGroup() {
   }, [activeTextOption, showUrlInput, dispatch, setShowUrlInput]);
 
   const handleButtonClick = (action: string) => {
+    console.log('currentSlideId:', currentSlideId); // ← Добавить
+    console.log('action:', action); // ← Добавить
+
+    if (action === 'ADD_IMAGE' && !currentSlideId) {
+      console.log('Показываю уведомление!');
+      addNotification(
+        IMAGE_NOTIFICATIONS.ERROR.NO_SLIDE_SELECTED,
+        'error',
+        NOTIFICATION_TIMEOUT.ERROR
+      );
+      return;
+    }
     if (!isButtonAvailable(selectionType, action)) {
       const reason = getButtonDisabledReason(selectionType, action);
       addNotification(

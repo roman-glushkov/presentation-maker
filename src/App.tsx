@@ -6,6 +6,8 @@ import PresentationList from './services/components/PresentationList';
 import EditorLayout from './services/auth/EditorLayout';
 import AuthWrapper from './services/auth/AuthWrapper';
 import Player from './services/auth/Player';
+import { NotificationProvider } from './services/hooks/useNotifications';
+import { NotificationContainer } from './common/shared/NotificationContainer';
 import './services/styles/AuthStyles.css';
 import './common/view/styles.css';
 
@@ -26,19 +28,24 @@ function ProtectedRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/*"
-          element={
-            <AuthWrapper>
-              <ProtectedRoutes />
-            </AuthWrapper>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <NotificationProvider>
+      <BrowserRouter>
+        {/* Глобальный контейнер для всех уведомлений */}
+        <NotificationContainer />
+
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/*"
+            element={
+              <AuthWrapper>
+                <ProtectedRoutes />
+              </AuthWrapper>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </NotificationProvider>
   );
 }

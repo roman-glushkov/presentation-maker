@@ -83,7 +83,8 @@ export function useImageActions({ currentSlideId, dispatch, addNotification }: P
         NOTIFICATION_TIMEOUT.SUCCESS
       );
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Не удалось загрузить изображение';
+      const message =
+        error instanceof Error ? error.message : IMAGE_NOTIFICATIONS.ERROR.UPLOAD_FAILED;
 
       addNotification(
         `${IMAGE_NOTIFICATIONS.ERROR.UPLOAD_FAILED}: ${message}`,

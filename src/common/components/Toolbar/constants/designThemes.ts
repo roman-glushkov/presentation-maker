@@ -15,7 +15,7 @@ export interface DesignTheme {
   name: string;
   backgroundImage?: string;
   isLocked: boolean;
-  backgroundSize?: 'cover' | 'contain' | 'auto';
+  backgroundSize?: 'cover';
   backgroundPosition?: string;
   backgroundColor?: string;
 }

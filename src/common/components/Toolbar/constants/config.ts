@@ -17,7 +17,6 @@ export interface GroupButton {
   action: string;
   previewImage?: string;
   toggleable?: boolean;
-  active?: boolean;
 }
 
 export const GROUPS: Record<GroupKey, GroupButton[]> = {
