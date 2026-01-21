@@ -3,8 +3,7 @@ import { ImageElement as ImageElementType } from '../../store/types/presentation
 
 export const getImageStyles = (element: ImageElementType) => {
   const dynamicContainerStyle: React.CSSProperties = {
-    boxShadow: element.shadow ? `0 4px ${element.shadow.blur}px ${element.shadow.color}` : 'none',
-    borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
+    overflow: 'visible',
   };
 
   const imageStyle: React.CSSProperties = {
@@ -13,6 +12,7 @@ export const getImageStyles = (element: ImageElementType) => {
     height: '100%',
     objectFit: 'fill',
     borderRadius: element.smoothing ? `${element.smoothing}px` : '0',
+    boxShadow: element.shadow ? `0 2px ${element.shadow.blur}px 0 ${element.shadow.color}` : 'none',
   };
 
   const containerClass = 'image-container';
