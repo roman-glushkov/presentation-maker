@@ -35,7 +35,6 @@ export interface EditorState {
     past: EditorSnapshot[];
     future: EditorSnapshot[];
     maxItems: number;
-
     transactionDepth: number;
     transactionInitial?: EditorSnapshot | null;
     transactionAction?: string | null;

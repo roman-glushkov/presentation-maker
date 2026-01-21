@@ -24,7 +24,7 @@ export const PRESENTATION_LIST_NOTIFICATIONS = {
 
   ERROR: {
     RENAME_FAILED: 'Не удалось изменить название презентации',
-    DELETE_FAILED: '❌ Не удалось удалить презентацию',
+    DELETE_FAILED: 'Не удалось удалить презентацию',
     EXPORT_FAILED: 'Не удалось экспортировать презентацию в PDF',
     PRESENTATION_NOT_FOUND: 'Презентация не найдена',
   },
@@ -39,64 +39,47 @@ export const REGISTER_NOTIFICATIONS = {
     CREATING_SESSION: 'Создаём сессию...',
     REGISTRATION_SUCCESS: 'Регистрация завершена успешно!',
     WELCOME: 'Добро пожаловать в SlideCraft!',
-    LOGOUT_SUCCESS: 'Вы успешно вышли из системы',
   },
   ERROR: {
     GENERIC: 'Произошла ошибка при регистрации. Попробуйте еще раз.',
     NETWORK: 'Проблемы с соединением. Проверьте интернет',
     USER_EXISTS: 'Пользователь с таким email уже существует',
     INVALID_CREDENTIALS: 'Некорректные данные. Проверьте все поля',
-    INVALID_EMAIL: 'Некорректный email адрес',
     WEAK_PASSWORD: 'Пароль не соответствует требованиям',
-    LOGOUT_FAILED: 'Ошибка при выходе из системы',
   },
 } as const;
 
 export type RegisterErrorType = keyof typeof REGISTER_NOTIFICATIONS.ERROR;
 
 export const LOGIN_NOTIFICATIONS = {
-  INFO: {
-    LOGGING_IN: 'Выполняем вход...',
-  },
   SUCCESS: {
     LOGIN_SUCCESS: 'Вход выполнен успешно!',
-    WELCOME_BACK: 'С возвращением в SlideCraft!',
   },
   ERROR: {
     INVALID_CREDENTIALS: 'Неверный email или пароль',
-    USER_NOT_FOUND: 'Пользователь не найден',
-    UNAUTHORIZED: 'Неавторизованный доступ. Проверьте учетные данные',
-    USER_NOT_VERIFIED: 'Email не подтвержден. Проверьте почту',
   },
 } as const;
 
 export const GENERAL_NOTIFICATIONS = {
   SUCCESS: {
     SAVED: 'Презентация успешно сохранена',
-    LOGOUT_SUCCESS: 'Вы успешно вышли из системы',
   },
   ERROR: {
     SAVE_FAILED: 'Ошибка при сохранении презентации',
-    LOGOUT_FAILED: 'Ошибка при выходе из системы',
   },
 } as const;
 
 export const IMAGE_NOTIFICATIONS = {
   ERROR: {
     NOT_AN_IMAGE: 'Файл не является изображением',
-    TOO_LARGE: 'Размер файла больше 10MB',
     NO_SLIDE_SELECTED: 'Выберите слайд для добавления изображения',
     UPLOAD_FAILED: 'Ошибка при загрузке изображения',
-    DIMENSIONS_FAILED: 'Не удалось определить размеры изображения',
-    DELETE_FAILED: 'Ошибка при удалении изображения',
   },
   SUCCESS: {
     UPLOADED: 'Изображение успешно загружено',
-    DELETED: 'Изображение удалено',
   },
   INFO: {
     UPLOADING: 'Загружаем изображение...',
-    DELETING: 'Удаляем изображение...',
   },
 } as const;
 
@@ -109,7 +92,6 @@ export const PRESENTATION_NOTIFICATIONS = {
     },
     CREATED: '🎉 Презентация успешно создана',
     PRESENTATION_LOADED: (title: string) => `📂 Презентация "${title}" загружена`,
-    UPDATED: 'Презентация успешно обновлена',
   },
 
   INFO: {
@@ -119,20 +101,7 @@ export const PRESENTATION_NOTIFICATIONS = {
   },
 
   ERROR: {
-    LOAD_FAILED: '❌ Не удалось загрузить презентации',
-    CREATE_FAILED: '❌ Не удалось создать презентацию',
-    UPDATE_FAILED: '❌ Не удалось обновить презентацию',
-    DELETE_FAILED: '❌ Не удалось удалить презентацию',
+    LOAD_FAILED: 'Не удалось загрузить презентации',
+    CREATE_FAILED: 'Не удалось создать презентацию',
   },
-
-  WARNING: {
-    VALIDATION_FAILED: 'Обнаружены поврежденные презентации. Они были скрыты из списка.',
-  },
-} as const;
-
-export const APPWRITE_ERRORS = {
-  400: 'Некорректные данные',
-  409: 'Пользователь уже существует',
-  401: 'Неавторизованный доступ',
-  500: 'Внутренняя ошибка сервера',
 } as const;
