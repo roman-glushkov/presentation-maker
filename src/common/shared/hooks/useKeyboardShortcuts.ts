@@ -56,7 +56,15 @@ export function useKeyboardShortcuts({
       if (isCtrl && e.code === 'KeyV' && !isEditingTextElement()) {
         e.preventDefault();
         handledEvent._keyboard_shortcut_handled = true;
-        ElementActions.paste([], dispatch);
+
+        if (hasSelectedSlides) {
+          const clipboardData = sessionStorage.getItem('slidesClipboard');
+          const slideIds = clipboardData ? JSON.parse(clipboardData) : selectedSlideIds;
+          const slideId = slideIds[slideIds.length - 1];
+          if (slideId) dispatch(duplicateSlide(slideId));
+        } else {
+          ElementActions.paste([], dispatch);
+        }
         return;
       }
 
@@ -70,7 +78,7 @@ export function useKeyboardShortcuts({
 
       if (hasSelectedSlides) {
         handleSlidesKeys(e, isCtrl);
-        if (isCtrl && ['KeyC', 'KeyV', 'KeyD'].includes(e.code)) {
+        if (isCtrl && ['KeyC', 'KeyD'].includes(e.code)) {
           handledEvent._keyboard_shortcut_handled = true;
         }
         return;
@@ -127,15 +135,6 @@ export function useKeyboardShortcuts({
             e.preventDefault();
             sessionStorage.setItem('slidesClipboard', JSON.stringify(selectedSlideIds));
             break;
-
-          case 'KeyV': {
-            e.preventDefault();
-            const clipboardData = sessionStorage.getItem('slidesClipboard');
-            const slideIds = clipboardData ? JSON.parse(clipboardData) : selectedSlideIds;
-            const slideId = slideIds[slideIds.length - 1];
-            if (slideId) dispatch(duplicateSlide(slideId));
-            break;
-          }
 
           case 'KeyD': {
             e.preventDefault();
