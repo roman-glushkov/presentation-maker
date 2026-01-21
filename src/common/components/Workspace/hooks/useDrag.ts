@@ -17,8 +17,14 @@ function getSlideContainerScale(): number {
   const slideContainer = document.querySelector('.slide-container');
   if (slideContainer) {
     const computedStyle = window.getComputedStyle(slideContainer);
-    const matrix = new DOMMatrix(computedStyle.transform);
-    return matrix.a || 1;
+    if (computedStyle.transform && computedStyle.transform !== 'none') {
+      try {
+        const matrix = new DOMMatrix(computedStyle.transform);
+        return ((matrix.a || 1) + (matrix.d || 1)) / 2;
+      } catch {
+        return 1;
+      }
+    }
   }
   return 1;
 }
@@ -88,10 +94,8 @@ export default function useDrag({
         if (!dragStateRef.current) return;
 
         const currentScale = getSlideContainerScale();
-        const scale = currentScale / dragStateRef.current.startScale;
-
-        let dx = (ev.clientX - dragStateRef.current.startX) / scale;
-        let dy = (ev.clientY - dragStateRef.current.startY) / scale;
+        let dx = (ev.clientX - dragStateRef.current.startX) / currentScale;
+        let dy = (ev.clientY - dragStateRef.current.startY) / currentScale;
 
         if (gridVisible) {
           dx = snapToGrid(dx);

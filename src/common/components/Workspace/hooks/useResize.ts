@@ -15,8 +15,14 @@ function getSlideContainerScale(): number {
   const slideContainer = document.querySelector('.slide-container');
   if (slideContainer) {
     const computedStyle = window.getComputedStyle(slideContainer);
-    const matrix = new DOMMatrix(computedStyle.transform);
-    return matrix.a || 1;
+    if (computedStyle.transform && computedStyle.transform !== 'none') {
+      try {
+        const matrix = new DOMMatrix(computedStyle.transform);
+        return ((matrix.a || 1) + (matrix.d || 1)) / 2;
+      } catch {
+        return 1;
+      }
+    }
   }
   return 1;
 }
