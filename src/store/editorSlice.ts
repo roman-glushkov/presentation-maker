@@ -354,7 +354,15 @@ export const editorSlice = createSlice({
 
       pushToPast(state, 'editor/duplicateElements');
 
-      const elementsToDuplicate = currentSlide.elements.filter((el) => elementIds.includes(el.id));
+      const elementsToDuplicate: SlideElement[] = [];
+      for (const slide of state.presentation.slides) {
+        for (const elementId of elementIds) {
+          const element = slide.elements.find((el) => el.id === elementId);
+          if (element) {
+            elementsToDuplicate.push({ ...element });
+          }
+        }
+      }
 
       const newElements: SlideElement[] = elementsToDuplicate.map((el, index) => {
         const newId = `element-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`;

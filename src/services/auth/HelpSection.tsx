@@ -1,4 +1,3 @@
-//компонент, который создает оболчку для хелп модуля
 import React from 'react';
 import '../styles/HelpModal.css';
 

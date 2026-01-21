@@ -1,4 +1,3 @@
-//главный элемент связывающий аппрайт и мои презентации
 import { databases, DATABASE_ID, COLLECTION_ID, ID, DatabaseDocument } from '../client';
 import { Query } from 'appwrite';
 import { Presentation, Slide } from '../../store/types/presentation';
@@ -24,14 +23,12 @@ export interface StoredPresentation extends SavedPresentation {
 
 export class PresentationService {
   static async savePresentation(
-    // сохранение презентации
     presentation: Presentation,
     userId: string,
     userName: string,
     presentationId?: string
   ): Promise<StoredPresentation> {
     const data = {
-      //пишем что обязательно должно быть у презнтации
       title: presentation.title || 'Без названия',
       slides: JSON.stringify(presentation.slides || []),
       currentSlideId: presentation.currentSlideId || '',
@@ -52,7 +49,6 @@ export class PresentationService {
   }
 
   static async getUserPresentations(userId: string): Promise<StoredPresentation[]> {
-    //добавляем к пользователю свою презентацию
     const { documents } = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
       Query.equal('ownerId', userId),
       Query.orderDesc('$updatedAt'),
@@ -77,7 +73,6 @@ export class PresentationService {
       }
 
       presentations.push({
-        //все типы самой презентации
         $id: doc.$id,
         $createdAt: doc.$createdAt,
         $updatedAt: doc.$updatedAt,

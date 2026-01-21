@@ -1,4 +1,3 @@
-//Файл, который создает верхний тулбар с кнопками(ундо редо выход сохранить слайд шоу)
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { account } from '../client';
@@ -16,7 +15,6 @@ interface AuthWrapperProps {
 }
 
 export default function AuthWrapper({ children }: AuthWrapperProps) {
-  //прописываем все константыы
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -36,7 +34,6 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   const { addNotification } = useNotifications();
 
   useEffect(() => {
-    //проверка на правильность номера
     const checkAuth = async () => {
       try {
         await account.get();
@@ -50,7 +47,6 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
     checkAuth();
   }, []);
-  //кнопка сохранения
   const handleSaveClick = async () => {
     if (!saveNow) return;
     try {
@@ -60,18 +56,15 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       addNotification(GENERAL_NOTIFICATIONS.ERROR.SAVE_FAILED, 'error', NOTIFICATION_TIMEOUT.ERROR);
     }
   };
-  //кнопка плеера
   const handlePlayClick = () => {
     if (!presentation) return;
 
     const targetPath = presentationId ? `/player/${presentationId}` : '/player';
     navigate(targetPath, { state: { presentation } });
   };
-  //если нажата кнопка справки
   const handleHelpClick = () => {
     setIsHelpOpen(true);
   };
-  //окно с логотипом загрузка
   const renderLoadingScreen = () => (
     <div className="presentation-loading-container">
       <div className="presentation-loading-content">
@@ -87,7 +80,6 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       </div>
     </div>
   );
-  //рендеринг вехрнего тулбара
   const renderToolbarButton = (
     onClick: () => void,
     icon: string,
@@ -114,7 +106,6 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   const showToolbar = location.pathname.startsWith('/editor');
-  //ну а тут уже просто расписаны все кнопки
   return (
     <>
       {showToolbar && (

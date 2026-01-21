@@ -96,8 +96,8 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   }, [selectedElementIds]);
 
   const handlePaste = useCallback(() => {
-    ElementActions.paste(selectedElementIds, dispatch);
-  }, [dispatch, selectedElementIds]);
+    ElementActions.paste([], dispatch);
+  }, [dispatch]);
 
   const handleDuplicate = useCallback(() => {
     if (menu.targetType === 'slide') {
@@ -110,14 +110,10 @@ export default function useWorkspaceContextMenu(): ContextMenuHandlers {
   }, [dispatch, selectedElementIds, menu.targetType, currentSlideId]);
 
   const handleDelete = useCallback(() => {
-    if (menu.targetType === 'slide') {
-      if (currentSlideId) {
-        // Delete slide functionality would go here
-      }
-    } else if (selectedElementIds.length > 0) {
+    if (menu.targetType !== 'slide' && selectedElementIds.length > 0) {
       ElementActions.deleteElements(selectedElementIds, dispatch);
     }
-  }, [dispatch, selectedElementIds, menu.targetType, currentSlideId]);
+  }, [dispatch, selectedElementIds, menu.targetType]);
 
   const handleBringToFront = useCallback(() => {
     if (selectedElementIds.length > 0) {

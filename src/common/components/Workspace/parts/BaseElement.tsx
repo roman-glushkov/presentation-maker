@@ -38,6 +38,7 @@ export function BaseElement({
     return slide?.elements.find((el) => el.id === elementId);
   });
 
+  const gridVisible = useSelector((state: RootState) => state.toolbar.gridVisible);
   const isSelected = selectedElementIds.includes(elementId);
 
   const startDrag = useDrag({
@@ -45,6 +46,7 @@ export function BaseElement({
     setSelElId: () => {},
     bringToFront: () => {},
     updateSlide: (updater) => dispatch(updateSlide(updater)),
+    gridVisible,
   });
 
   const startResize = useResize({

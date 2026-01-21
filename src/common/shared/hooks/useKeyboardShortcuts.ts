@@ -28,10 +28,54 @@ export function useKeyboardShortcuts({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const handledEvent = e as KeyboardEvent & { _keyboard_shortcut_handled?: boolean };
+      if (handledEvent._keyboard_shortcut_handled) return;
+
       if (preview || isTextInputFocused()) return;
 
       const isCtrl = e.ctrlKey || e.metaKey;
       const isShift = e.shiftKey;
+
+      if (isCtrl && !isShift && e.code === 'KeyZ' && !isEditingTextElement()) {
+        e.preventDefault();
+        handledEvent._keyboard_shortcut_handled = true;
+        dispatch(undo());
+        return;
+      }
+
+      if ((isCtrl && e.code === 'KeyY') || (isCtrl && isShift && e.code === 'KeyZ')) {
+        e.preventDefault();
+        handledEvent._keyboard_shortcut_handled = true;
+        dispatch(redo());
+        return;
+      }
+
+      const hasSelectedElements = selectedElementIds.length > 0;
+      const hasSelectedSlides = selectedSlideIds.length > 0;
+
+      if (isCtrl && e.code === 'KeyV' && !isEditingTextElement()) {
+        e.preventDefault();
+        handledEvent._keyboard_shortcut_handled = true;
+        ElementActions.paste([], dispatch);
+        return;
+      }
+
+      if (hasSelectedElements && !isEditingTextElement()) {
+        handleElementKeys(e, isCtrl);
+        if (isCtrl && ['KeyC', 'KeyD'].includes(e.code)) {
+          handledEvent._keyboard_shortcut_handled = true;
+        }
+        return;
+      }
+
+      if (hasSelectedSlides) {
+        handleSlidesKeys(e, isCtrl);
+        if (isCtrl && ['KeyC', 'KeyV', 'KeyD'].includes(e.code)) {
+          handledEvent._keyboard_shortcut_handled = true;
+        }
+        return;
+      }
+
       if (enableNavigation && !isEditingTextElement()) {
         switch (e.key) {
           case 'ArrowUp':
@@ -46,40 +90,26 @@ export function useKeyboardShortcuts({
             return;
         }
       }
-      if (isCtrl && !isShift && e.code === 'KeyZ' && !isEditingTextElement()) {
-        e.preventDefault();
-        dispatch(undo());
-        return;
-      }
-      if ((isCtrl && e.code === 'KeyY') || (isCtrl && isShift && e.code === 'KeyZ')) {
-        e.preventDefault();
-        dispatch(redo());
-        return;
-      }
-      switch (context) {
-        case 'workspace':
-          handleWorkspaceKeys(e, isCtrl);
-          break;
-        case 'slides':
-          handleSlidesKeys(e, isCtrl);
-          break;
-      }
     };
 
-    const handleWorkspaceKeys = (e: KeyboardEvent, isCtrl: boolean) => {
-      if (isCtrl && selectedElementIds.length > 0) {
-        const keyActions = {
-          KeyC: () => ElementActions.copy(selectedElementIds),
-          KeyV: () => ElementActions.paste(selectedElementIds, dispatch),
-          KeyD: () => ElementActions.duplicate(selectedElementIds, dispatch),
-        };
-
-        const action = keyActions[e.code as keyof typeof keyActions];
-        if (action) {
-          e.preventDefault();
-          action();
+    const handleElementKeys = (e: KeyboardEvent, isCtrl: boolean) => {
+      if (isCtrl) {
+        switch (e.code) {
+          case 'KeyC':
+            if (selectedElementIds.length > 0) {
+              e.preventDefault();
+              ElementActions.copy(selectedElementIds);
+            }
+            break;
+          case 'KeyD':
+            if (selectedElementIds.length > 0) {
+              e.preventDefault();
+              ElementActions.duplicate(selectedElementIds, dispatch);
+            }
+            break;
         }
       }
+
       if (
         (e.key === 'Delete' || e.key === 'Backspace') &&
         !isCtrl &&
@@ -95,39 +125,28 @@ export function useKeyboardShortcuts({
         switch (e.code) {
           case 'KeyC':
             e.preventDefault();
-            if (selectedSlideIds.length === 0) return;
             sessionStorage.setItem('slidesClipboard', JSON.stringify(selectedSlideIds));
             break;
+
           case 'KeyV': {
             e.preventDefault();
             const clipboardData = sessionStorage.getItem('slidesClipboard');
-            let slideIdToDuplicate;
-
-            if (clipboardData) {
-              const slideIds = JSON.parse(clipboardData);
-              slideIdToDuplicate = slideIds[slideIds.length - 1];
-            } else {
-              slideIdToDuplicate = selectedSlideIds[selectedSlideIds.length - 1];
-            }
-            if (slideIdToDuplicate) {
-              dispatch(duplicateSlide(slideIdToDuplicate));
-            }
+            const slideIds = clipboardData ? JSON.parse(clipboardData) : selectedSlideIds;
+            const slideId = slideIds[slideIds.length - 1];
+            if (slideId) dispatch(duplicateSlide(slideId));
             break;
           }
+
           case 'KeyD': {
             e.preventDefault();
-            const lastSelectedId = selectedSlideIds[selectedSlideIds.length - 1];
-            if (lastSelectedId) {
-              dispatch(duplicateSlide(lastSelectedId));
-            }
+            const slideId = selectedSlideIds[selectedSlideIds.length - 1];
+            if (slideId) dispatch(duplicateSlide(slideId));
             break;
           }
         }
       } else if (e.key === 'Delete' && selectedSlideIds.length > 0) {
         e.preventDefault();
-        selectedSlideIds.forEach((slideId: string) => {
-          dispatch(removeSlide(slideId));
-        });
+        selectedSlideIds.forEach((slideId) => dispatch(removeSlide(slideId)));
       }
     };
 

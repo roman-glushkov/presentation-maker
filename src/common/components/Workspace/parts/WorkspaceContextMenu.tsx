@@ -281,6 +281,20 @@ export default function WorkspaceContextMenu({
           </button>
         )}
 
+        {targetType === 'slide' && (
+          <>
+            <button
+              onClick={() => {
+                onPaste();
+                onClose();
+              }}
+              className="context-menu-item"
+            >
+              <span className="menu-icon">📋</span> Вставить
+            </button>
+          </>
+        )}
+
         {showTextColor && (
           <button onClick={(e) => handleColorPickerOpen('text', e)} className="context-menu-item">
             <div
