@@ -24,6 +24,11 @@ import '../styles/PresentationList.css';
 
 export default function PresentationList() {
   const navigate = useNavigate();
+
+  // ← ГОСТЬ: определяем гостя один раз при монтировании компонента.
+  // Флаг ставится на странице логина и живёт в localStorage до выхода.
+  const isGuest = localStorage.getItem('isGuest') === 'true';
+
   const [presentations, setPresentations] = useState<StoredPresentation[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AccountUser | null>(null);
@@ -41,12 +46,27 @@ export default function PresentationList() {
   const { addNotification } = useNotifications();
   const { exportToPdf } = usePdfExport();
 
+  // ← ГОСТЬ: для гостя не дёргаем account.get() — у него нет сессии.
+  // Сразу выключаем loading, чтобы не висел вечный «Загрузка…».
   useEffect(() => {
+    if (isGuest) {
+      setLoading(false);
+      return;
+    }
+
     account
       .get<AccountUser>()
       .then(setUser)
       .catch(() => setUser(null));
-  }, []);
+  }, [isGuest]);
+
+  // ← ГОСТЬ: подгружаем демо-презентацию в Redux, чтобы гость сразу
+  // мог открыть редактор или плеер без обращения к Appwrite.
+  useEffect(() => {
+    if (isGuest) {
+      dispatch(loadDemoPresentation());
+    }
+  }, [isGuest, dispatch]);
 
   const loadPresentations = useCallback(async () => {
     if (!user) return;
@@ -89,6 +109,36 @@ export default function PresentationList() {
   }, [user, loadPresentations]);
 
   const handleCreatePresentation = async (title: string) => {
+    // ← ГОСТЬ: создаём презентацию локально, без сохранения в Appwrite.
+    // Используем loadExistingPresentation, чтобы сохранить имя, введённое
+    // пользователем в модалке.
+    if (isGuest) {
+      const newSlideId = `slide-${Date.now()}`;
+      const titleSlide = {
+        ...slideTitle,
+        id: newSlideId,
+      };
+
+      titleSlide.elements = titleSlide.elements.map((el) => ({
+        ...el,
+        id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      }));
+
+      const presentation: Presentation = {
+        title: title || 'Новая презентация',
+        slides: [titleSlide],
+        currentSlideId: newSlideId,
+        selectedSlideIds: [newSlideId],
+      };
+
+      dispatch(setPresentationId(undefined));
+      dispatch(loadExistingPresentation(presentation));
+      setShowNewPresentationModal(false);
+      navigate('/editor');
+      return;
+    }
+
+    // ↓↓↓ Дальше — ваш оригинальный код для реального пользователя ↓↓↓
     setCreatingNew(true);
     try {
       const newSlideId = `slide-${Date.now()}`;
@@ -298,7 +348,9 @@ export default function PresentationList() {
     }
   };
 
-  if (!user)
+  // ← ГОСТЬ: блокируем только реально неавторизованных (не гостей).
+  // Гость проходит дальше и видит интерфейс списка.
+  if (!user && !isGuest)
     return (
       <div className="presentation-list-container--empty">
         Войдите, чтобы видеть ваши презентации
@@ -311,10 +363,20 @@ export default function PresentationList() {
         <div className="presentation-list-header">
           <h2 className="presentation-list-title">Мои презентации</h2>
           <div className="presentation-list-user-info">
-            <span className="presentation-list-user-name">{user.name || user.email}</span>
+            {/* ← ГОСТЬ: для гостя показываем «🎭 Гость», иначе — имя/почту юзера */}
+            <span className="presentation-list-user-name">
+              {isGuest ? '🎭 Гость' : user?.name || user?.email}
+            </span>
             <button
               className="presentation-list-logout-button"
               onClick={async () => {
+                // ← ГОСТЬ: для гостя просто снимаем флаг и уходим на логин.
+                // Для реального юзера — удаляем сессию Appwrite.
+                if (isGuest) {
+                  localStorage.removeItem('isGuest');
+                  window.location.href = '/login';
+                  return;
+                }
                 await account.deleteSession('current');
                 window.location.href = '/login';
               }}
@@ -333,7 +395,7 @@ export default function PresentationList() {
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
               </svg>
-              Выйти
+              {isGuest ? 'Войти' : 'Выйти'}
             </button>
           </div>
         </div>
@@ -436,9 +498,14 @@ export default function PresentationList() {
           </>
         )}
 
+        {/* ← ГОСТЬ: разный текст для пустого состояния */}
         {!loading && presentations.length === 0 && (
           <div className="presentation-list-container--empty">
-            <p>{PRESENTATION_NOTIFICATIONS.INFO.NO_PRESENTATIONS}</p>
+            <p>
+              {isGuest
+                ? '🎭 Гостевой режим. Демо-презентация уже загружена — откройте редактор или создайте новую.'
+                : PRESENTATION_NOTIFICATIONS.INFO.NO_PRESENTATIONS}
+            </p>
           </div>
         )}
 

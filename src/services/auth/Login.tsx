@@ -95,6 +95,7 @@ export default function Login() {
 
     try {
       await account.createEmailPasswordSession(email.trim(), password);
+      localStorage.removeItem('isGuest');
 
       addNotification(
         LOGIN_NOTIFICATIONS.SUCCESS.LOGIN_SUCCESS,
@@ -126,6 +127,12 @@ export default function Login() {
   const handleSwitchToRegister = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate('/register');
+  };
+
+  const handleGuestLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    localStorage.setItem('isGuest', 'true');
+    navigate('/presentations');
   };
 
   const emailError = getValidationMessage('email');
@@ -264,6 +271,18 @@ export default function Login() {
                 ) : (
                   'Продолжить создание'
                 )}
+              </button>
+              <div className="presentation-divider">
+                <span>или</span>
+              </div>
+
+              <button
+                type="button"
+                className="presentation-auth-button presentation-auth-button-secondary"
+                onClick={handleGuestLogin}
+                disabled={loading}
+              >
+                Попробовать без регистрации
               </button>
             </form>
 

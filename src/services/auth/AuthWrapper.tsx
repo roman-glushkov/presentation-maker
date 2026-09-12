@@ -35,6 +35,13 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
+      // ⚡ Гость — не дёргаем Appwrite, пускаем сразу
+      if (localStorage.getItem('isGuest') === 'true') {
+        setIsAuthenticated(true);
+        setAuthChecked(true);
+        return;
+      }
+
       try {
         await account.get();
         setIsAuthenticated(true);
@@ -64,6 +71,11 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   };
   const handleHelpClick = () => {
     setIsHelpOpen(true);
+  };
+
+  const handleExitGuest = () => {
+    localStorage.removeItem('isGuest');
+    navigate('/login', { replace: true });
   };
   const renderLoadingScreen = () => (
     <div className="presentation-loading-container">
@@ -148,6 +160,16 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
           </div>
 
           <div className="toolbar-right">
+            {localStorage.getItem('isGuest') === 'true' && (
+              <button
+                className="toolbar-button"
+                onClick={handleExitGuest}
+                title="Выйти из гостевого режима"
+              >
+                <span className="toolbar-icon">👤</span>
+                <span style={{ marginLeft: 6 }}>Войти</span>
+              </button>
+            )}
             {renderToolbarButton(handleHelpClick, '❓', 'Справка по горячим клавишам')}
           </div>
         </div>
